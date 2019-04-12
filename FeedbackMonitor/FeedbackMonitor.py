@@ -129,13 +129,13 @@ def runprogram():
 		nosendedlist = q_run(connD, querry)
 		return (nosendedlist)
 	def NoFdbRem():
-		querry = """ select rem.id, dev.name, rem.raport_number, main.name
+		querry = """ select rem.id, dev.name, rem.raport_number, main.name,main.id
 	from remarks as rem
 	left join feedbacks as fdb on rem.id = fdb.id and rem.raport_number = fdb.raport_number
 	left join devices as dev on rem.id = dev.id
 	left join main as main on dev.parent = main.id
 	where rem.sended = True and fdb.feedback is null and dev.name is not null
-	group by  rem.id , dev.name, rem.raport_number,main.name,rem.name  order by main.name,rem.raport_number,rem.name  """
+	group by  rem.id , dev.name, rem.raport_number,main.name,rem.name,main.id  order by main.name,rem.raport_number,rem.name """
 		nofdblist = q_run(connD, querry)	
 		return (nofdblist)
 	def FdbFlagLeft():
