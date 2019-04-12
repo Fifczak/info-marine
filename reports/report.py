@@ -84,7 +84,7 @@ def makereport(connD,rn_):
 ##########################################
 
 
-username = 'XXX'
+username = 'asdasdasd'
 password = 'XXX'
 host = '192.168.8.125'
 connD = [username,password,host]
