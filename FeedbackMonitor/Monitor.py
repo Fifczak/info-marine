@@ -33,73 +33,7 @@ def q_run(connD, querry):
 	conn.commit()
 	cur.close()	
 
-# def Login(): TRZEBA ZROBIĆ LOGOWANIE
-	# class LogApplication(Frame):
-		# def __init__(self,master):
-			# super(LogApplication, self).__init__(master)#Set __init__ to the master class
-			# self.grid()
-			# self.create_main()#Creates function
-		# def create_main(self):
-			# self.title = Label(self, text="Info Datasheet")#TITLE 
-			# self.title.grid(row=0, column=2)
-			# self.user_entry_label = Label(self, text="Username: ")#USERNAME LABEL
-			# self.user_entry_label.grid(row=1, column=1)
-			# self.user_entry = Entry(self, text="Username: ")  #USERNAME ENTRY BOX
-			# self.user_entry.grid(row=1, column=2)
-			# self.pass_entry_label = Label(self, text="Password: ")#PASSWORD LABEL
-			# self.pass_entry_label.grid(row=2, column=1)
-			# self.pass_entry = Entry(self, show="*")    #PASSWORD ENTRY BOX
-			# self.pass_entry.grid(row=2, column=2)
-			# try:
-				# with open('log.csv') as csvfile:
-					# openfile = csv.reader(csvfile, delimiter=' ')
-					# p = -1
-					# for lines in openfile:
-						# p += 1
-						# if p == 0:
-							# self.user_entry.insert(0,str(lines[0]))
-						# if p == 1:
-							# self.pass_entry.insert(0,str(lines[0]))
-			# except:
-				# pass
-			# self.var = IntVar()
-			# self.checksave = Checkbutton(self, text="Remember", variable=self.var)      
-			# self.checksave.grid(row=3, column=2)
-			# self.sign_in_butt = Button(self, text="Sign In",command = self.logging_in)#SIGN IN BUTTON
-			# self.sign_in_butt.grid(row=5, column=2)
-		# def logging_in(self):
-			# user_get = self.user_entry.get()#Retrieve Username
-			# pass_get = self.pass_entry.get()#Retrieve Password
-			# if bool(app.var.get()) == True:
-				# config = Path('log.csv')
-				# with open('log.csv', 'w', newline='') as csvfile:
-					# filewriter = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
-					# filewriter.writerow([user_get])
-					# filewriter.writerow([pass_get])
-			# connD = [user_get,pass_get,host]
-			# querry = "SELECT id from main limit 1"
-			# usercheck = ''
-			# print(connD)
-			# print(querry)
-			# try:
-			# usercheck =  q_run(connD,querry)
-				
-			# except:
-				# pass
-			# if usercheck:
-				# root.destroy()
-				# print(usercheck[0])	
-				# querry = "select name,id from main where parent =1 order by name"
-				# ownerlist = q_run(connD, querry)
-				# querry = "select name,id,parent from main where parent <> 1 order by name"
-				# shiplist = q_run(connD, querry)
-				# ShipsApplication()
-	# root = Tk()
-	# root.title("Login")
-	# root.geometry("200x120")
-	# app = LogApplication(root)#The frame is inside the widgit
-	# root.mainloop()#Keeps the window open/running
-
+#
 def ClDNoRem():
 		def countLimit(standard,value):
 					limSrt ='NOPE'

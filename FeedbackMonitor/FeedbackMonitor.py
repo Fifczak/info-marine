@@ -7,7 +7,7 @@ from tkinter import *
 def runprogram():
 	username = 'filipb'
 	password = '@infomarine'
-	host = '192.168.8.125'
+	host = 'localhost'
 	connD = [username,password,host]
 	def q_run(connD, querry):
 		username = connD[0]
@@ -28,27 +28,28 @@ def runprogram():
 			pass
 		conn.commit()
 		cur.close()		
+
 	def ClDNoRem():
-		def countLimit(standard,value):
-					backstat ='NOPE'
-					for limNo in limits:
-						if str(limNo[0]) == str(standard):
-							if value <= float(limNo[3]): #IF LIM1
-								limSrt = str(limNo[2])
+		def countLimit(standard, value):
+			limSrt = 'NOPE'
+			for limNo in limits:
+				if str(limNo[0]) == str(standard):
+					if value <= float(limNo[3]):  # IF LIM1
+						limSrt = str(limNo[2])
+						break
+					else:
+						if value <= float(limNo[5]):  # IF LIM2
+							limSrt = str(limNo[4])
+							break
+						else:
+							if value <= float(limNo[7]):  # IF LIM3
+								limSrt = str(limNo[6])
 								break
 							else:
-								if value <=float(limNo[5]): #IF LIM2
-									limSrt = str(limNo[4])
-									break
-								else:
-									if value <=float(limNo[7]): #IF LIM3
-										limSrt = str(limNo[6])
-										break
-									else:
-										limSrt = str(limNo[8])
-										backstat = 'OK'
-										break
-					return backstat
+								limSrt = str(limNo[8])
+								break
+			return limSrt
+
 		querry = """select standard,
 								limit_1_value,limit_1_name,
 								limit_2_value,limit_2_name, 
@@ -56,34 +57,73 @@ def runprogram():
 								limit_4_value,limit_4_name,
 							envflag
 						from standards"""
-		limits = q_run(connD,querry)
+		limits = q_run(connD, querry)
+
 		querry = """select 
-						 ml.id, ml.raport_number, max(ml.value) as RMS, dev.norm, main.name,dev.name
-						from measurements_low as ml
-						 left join devices as dev on ml.id = dev.id
-						 left join main as main on ml.parent = main.id
-						 where ml.type = 'RMS' and raport_number is not null and raport_number <> 'Archive' and raport_number <> '' and dev.norm is not null
-						 group by ml.id, ml.raport_number,dev.norm, main.name,dev.name order by raport_number DESC"""
+							 ml.id, ml.raport_number, max(ml.value) as RMS, dev.norm, main.name,dev.name,dev.parent,main.id
+							from measurements_low as ml
+							 left join devices as dev on ml.id = dev.id and dev.parent = ml.parent
+							 left join main as main on ml.parent = main.id
+							 where ml.type = 'RMS' and raport_number is not null and raport_number <> 'Archive' and raport_number <> '' and dev.norm is not null and (ml.point !~ 'A') and ml.date >= '2018-01-01'
+							 group by ml.id, ml.raport_number,dev.norm, main.name,dev.name,dev.parent,main.id order by raport_number DESC"""
+
 		measurements = q_run(connD, querry)
-		
-		querry = "select rem.raport_number,rem.id,main.name,dev.name from remarks as rem left join devices as dev on rem.id = dev.id left join main as main on dev.parent = main.id group by rem.raport_number,rem.id,main.name,dev.name order by main.name, raport_number, id"
+		querry = "select rem.raport_number,rem.id,main.name,dev.name,dev.parent,main.id from remarks as rem left join devices as dev on rem.id = dev.id left join main as main on dev.parent = main.id group by rem.raport_number,rem.id,main.name,dev.name,dev.parent,main.id order by main.name, raport_number, rem.id"
+
+		##LISTA STATKOW NO CBM - TO IGNORE####
+
+		forbiden = list()
+		forbiden.append(52)
+		forbiden.append(56)
+		forbiden.append(57)
+		forbiden.append(86)
+		forbiden.append(87)
+		forbiden.append(95)
+		forbiden.append(111)
+		forbiden.append(123)
+		forbiden.append(131)
+		forbiden.append(132)
+		forbiden.append(137)
+		forbiden.append(140)
+		forbiden.append(141)
+		forbiden.append(147)
+		forbiden.append(156)
+		forbiden.append(168)
+		forbiden.append(171)
+		forbiden.append(173)
+		forbiden.append(179)
+		forbiden.append(185)
+		forbiden.append(189)
+		forbiden.append(193)
+		forbiden.append(200)
+		forbiden.append(202)
+		forbiden.append(203)
+		forbiden.append(204)
+		forbiden.append(205)
 		remarksraportstemp = q_run(connD, querry)
-		RemExistList =list()
+		RemExistList = list()
 		for line in remarksraportstemp:
-			RemExistList.append(str(str(line[2]).strip() + '###' + str(line[0]).strip()+'###'+str(line[1]).strip()+'###'+str(line[3]).strip()))
+			RemExistList.append(str(
+				str(line[5]).strip() + '#' + str(line[2]).strip() + '##' + str(line[0]).strip() + '###' + str(
+					line[1]).strip() + '####' + str(line[3]).strip()))
 		p = -1
 		reportlist1 = list()
 		for line in measurements:
 			p += 1
-			rn = countLimit(line[3],line[2])
-			if str(rn) == 'OK':
-				strip = str(str(line[4]).strip() +'###'+ str(line[1]).strip()+'###'+str(line[0]).strip()+'###'+str(line[5]).strip())
-				if not strip in reportlist1:
-					reportlist1.append(strip)
-		replist = list(set(reportlist1)-set(RemExistList))
-		##replist =  [item for item in reportlist1 if item not in RemExistList]
-		replist.sort()
-		return (replist)
+			lim = countLimit(line[3], line[2])
+
+			if line[6] not in forbiden:
+				if str(lim) == 'Cl. D' or str(lim) == 'V. III':
+					# print(str(line[1]) + ' ' + str(line[5]) + ' ' + str(lim) + ' ' + str(line[3]) + ' ' + str(line[2]) )
+					strip = str(
+						str(line[7]).strip() + '#' + str(line[4]).strip() + '##' + str(line[1]).strip() + '###' + str(
+							line[0]).strip() + '####' + str(line[5]).strip())
+					if not strip in reportlist1:
+						reportlist1.append(strip)
+
+		replist = [item for item in reportlist1 if item not in RemExistList]
+
+		return (str(len(replist)))
 	def unknowstateremarks():
 		querry = "select id,raport_number from remarks where sended is null order by raport_number, id"
 		nosendedlist = q_run(connD, querry)
@@ -94,8 +134,8 @@ def runprogram():
 	left join feedbacks as fdb on rem.id = fdb.id and rem.raport_number = fdb.raport_number
 	left join devices as dev on rem.id = dev.id
 	left join main as main on dev.parent = main.id
-	where rem.sended = True and fdb.feedback is null
-	group by  rem.id , dev.name, rem.raport_number,main.name order by rem.raport_number """
+	where rem.sended = True and fdb.feedback is null and dev.name is not null
+	group by  rem.id , dev.name, rem.raport_number,main.name,rem.name  order by main.name,rem.raport_number,rem.name  """
 		nofdblist = q_run(connD, querry)	
 		return (nofdblist)
 	def FdbFlagLeft():
@@ -117,7 +157,7 @@ def runprogram():
 				file.write(str(l))
 				file.write('\n')
 	def details3():	
-		with open('Sent remarks without feedbacks.csv', 'w', newline='') as file:
+		with open('C:\Overmind\Sent remarks without feedbacks.csv', 'w', newline='') as file:
 			for l in r3:
 				file.write(str(l))
 				file.write('\n')
@@ -148,7 +188,7 @@ def runprogram():
 	r3 = NoFdbRem()
 	r4 = FdbFlagLeft()
 	r5 = CostFlagLeft()
-	labelr1 = tk.Label(MonitorWindow, text  = len(r1))
+	labelr1 = tk.Label(MonitorWindow, text  = r1)
 	labelr2 = tk.Label(MonitorWindow, text  = len(r2))
 	labelr3 = tk.Label(MonitorWindow, text  = len(r3))
 	labelr4 = tk.Label(MonitorWindow, text  = len(r4))

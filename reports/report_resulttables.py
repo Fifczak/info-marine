@@ -111,16 +111,21 @@ def	drawtable_IM(document,measlist,connD,report_number):#):
 	sortlistQ = q_run(connD,querry)
 	trueMeasList = list()
 	activeIdList = list()
+	idlist = list()
 	drivenByList = list()
 	for sort in sortlistQ:
 		for meas in measlist:
 			if (sort[1]).isdigit == False:
 				trueMeasList.append('header')
-				drivenByList.append(meas.drivenby)
+				drivenByList.append(997)
+				idlist.append(997)
 			if str(sort[1])==str(meas.id):
 				trueMeasList.append(meas)
 				activeIdList.append(str(meas.id))
+				print(meas.drivenby)
 				drivenByList.append(meas.drivenby)
+				idlist.append(meas.id)
+
 	counter = 0
 	counterCharts = 0
 	i=-1
@@ -144,7 +149,7 @@ def	drawtable_IM(document,measlist,connD,report_number):#):
 					else:
 						break
 	
-	rowscount = (counter*2) - counterCharts
+	rowscount = (counter*2) - counterCharts +100
 	resulttable = document.add_table(rows=rowscount+1, cols=7)
 	resulttable.style = 'Table Grid'
 	
@@ -193,8 +198,8 @@ def	drawtable_IM(document,measlist,connD,report_number):#):
 				pass
 		else:	######## POMIARY
 			p=-1
-			
-			drivenByList.append('0') # zeby nie bylo bledu na koncu petli
+			print(list(idlist))
+			#drivenByList.append('0') # zeby nie bylo bledu na koncu petli
 			for xx in trueMeasList:
 				p+=1
 				if str(measStrip[1]) == str(xx.id):
@@ -231,9 +236,9 @@ def	drawtable_IM(document,measlist,connD,report_number):#):
 						except:
 							pass
 					
-					
-					if str(xx.drivenby) == '0' and str(drivenByList[p+1]) == str(xx.id):
-						xcord += 1 
+					#print(str(drivenByList[p+1]),str(idlist[p]))
+					if str(drivenByList[p+1]) == str(xx.id):
+						xcord += 1
 					else:
 						xcord += 2
 					break
