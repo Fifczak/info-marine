@@ -1,0 +1,185 @@
+import psycopg2
+import csv
+import tkinter as tk
+import tkinter.ttk as ttk
+from tkinter import *
+
+def runprogram():
+	username = 'filipb'
+	password = '@infomarine'
+	host = '192.168.8.125'
+	connD = [username,password,host]
+	def q_run(connD, querry):
+		username = connD[0]
+		password = connD[1]
+		host = connD[2]
+		kport = "5432"
+		kdb = "postgres"
+		#cs = ' host="localhost",database="postgres", user= "postgres" , password="info" '
+		cs = "dbname=%s user=%s password=%s host=%s port=%s"%(kdb,username,password,host,kport)
+		conn = None
+		conn = psycopg2.connect(str(cs))
+		cur = conn.cursor()
+		cur.execute(querry)
+		try:
+			result = cur.fetchall()
+			return result
+		except:
+			pass
+		conn.commit()
+		cur.close()		
+	def ClDNoRem():
+		def countLimit(standard,value):
+					backstat ='NOPE'
+					for limNo in limits:
+						if str(limNo[0]) == str(standard):
+							if value <= float(limNo[3]): #IF LIM1
+								limSrt = str(limNo[2])
+								break
+							else:
+								if value <=float(limNo[5]): #IF LIM2
+									limSrt = str(limNo[4])
+									break
+								else:
+									if value <=float(limNo[7]): #IF LIM3
+										limSrt = str(limNo[6])
+										break
+									else:
+										limSrt = str(limNo[8])
+										backstat = 'OK'
+										break
+					return backstat
+		querry = """select standard,
+								limit_1_value,limit_1_name,
+								limit_2_value,limit_2_name, 
+								limit_3_value,limit_3_name,
+								limit_4_value,limit_4_name,
+							envflag
+						from standards"""
+		limits = q_run(connD,querry)
+		querry = """select 
+						 ml.id, ml.raport_number, max(ml.value) as RMS, dev.norm, main.name,dev.name
+						from measurements_low as ml
+						 left join devices as dev on ml.id = dev.id
+						 left join main as main on ml.parent = main.id
+						 where ml.type = 'RMS' and raport_number is not null and raport_number <> 'Archive' and raport_number <> '' and dev.norm is not null
+						 group by ml.id, ml.raport_number,dev.norm, main.name,dev.name order by raport_number DESC"""
+		measurements = q_run(connD, querry)
+		
+		querry = "select rem.raport_number,rem.id,main.name,dev.name from remarks as rem left join devices as dev on rem.id = dev.id left join main as main on dev.parent = main.id group by rem.raport_number,rem.id,main.name,dev.name order by main.name, raport_number, id"
+		remarksraportstemp = q_run(connD, querry)
+		RemExistList =list()
+		for line in remarksraportstemp:
+			RemExistList.append(str(str(line[2]).strip() + '###' + str(line[0]).strip()+'###'+str(line[1]).strip()+'###'+str(line[3]).strip()))
+		p = -1
+		reportlist1 = list()
+		for line in measurements:
+			p += 1
+			rn = countLimit(line[3],line[2])
+			if str(rn) == 'OK':
+				strip = str(str(line[4]).strip() +'###'+ str(line[1]).strip()+'###'+str(line[0]).strip()+'###'+str(line[5]).strip())
+				if not strip in reportlist1:
+					reportlist1.append(strip)
+		replist = list(set(reportlist1)-set(RemExistList))
+		##replist =  [item for item in reportlist1 if item not in RemExistList]
+		replist.sort()
+		return (replist)
+	def unknowstateremarks():
+		querry = "select id,raport_number from remarks where sended is null order by raport_number, id"
+		nosendedlist = q_run(connD, querry)
+		return (nosendedlist)
+	def NoFdbRem():
+		querry = """ select rem.id, dev.name, rem.raport_number, main.name
+	from remarks as rem
+	left join feedbacks as fdb on rem.id = fdb.id and rem.raport_number = fdb.raport_number
+	left join devices as dev on rem.id = dev.id
+	left join main as main on dev.parent = main.id
+	where rem.sended = True and fdb.feedback is null
+	group by  rem.id , dev.name, rem.raport_number,main.name order by rem.raport_number """
+		nofdblist = q_run(connD, querry)	
+		return (nofdblist)
+	def FdbFlagLeft():
+		querry = "select id,raport_number from feedbacks where fdbflag is null "
+		fdbflagleft = q_run(connD, querry)	
+		return (fdbflagleft)	
+	def CostFlagLeft():
+		querry = "select id,raport_number from feedbacks where costflag IS Null and fdbflag is not null and fdbflag<> 7 and fdbflag<> 8 and fdbflag<> 9"
+		costflagleft = q_run(connD, querry)	
+		return (costflagleft)	
+	def details1():	
+		with open('Class D no remark.csv', 'w', newline='') as file:
+			for l in r1:
+				file.write(l)
+				file.write('\n')
+	def details2():	
+		with open('Remarks with unknow stats.csv', 'w', newline='') as file:
+			for l in r2:
+				file.write(str(l))
+				file.write('\n')
+	def details3():	
+		with open('Sent remarks without feedbacks.csv', 'w', newline='') as file:
+			for l in r3:
+				file.write(str(l))
+				file.write('\n')
+	def details4():	
+		with open('Feedback no fdbflag.csv', 'w', newline='') as file:
+			for l in r4:
+				file.write(str(l))
+				file.write('\n')
+	def details5():	
+		with open('Feedback no costflag.csv', 'w', newline='') as file:
+			for l in r5:
+				file.write(str(l))
+				file.write('\n')
+
+	MonitorWindow = tk.Tk()
+	MonitorWindow.title("Feedback Monitor")
+
+
+
+	label1 = tk.Label(MonitorWindow, text  = 'Class D without remarks(reports): ')
+	label2 = tk.Label(MonitorWindow, text  = 'Remarks with unknow state: ')
+	label3 = tk.Label(MonitorWindow, text  = 'Sent remarks without feedbacks: ')
+	label4 = tk.Label(MonitorWindow, text  = 'Feedback flag left: ')
+	label5 = tk.Label(MonitorWindow, text  = 'Cost flag left: ')
+
+	r1 = ClDNoRem()
+	r2 = unknowstateremarks()
+	r3 = NoFdbRem()
+	r4 = FdbFlagLeft()
+	r5 = CostFlagLeft()
+	labelr1 = tk.Label(MonitorWindow, text  = len(r1))
+	labelr2 = tk.Label(MonitorWindow, text  = len(r2))
+	labelr3 = tk.Label(MonitorWindow, text  = len(r3))
+	labelr4 = tk.Label(MonitorWindow, text  = len(r4))
+	labelr5 = tk.Label(MonitorWindow, text  = len(r5))
+
+
+	button1 = tk.Button(MonitorWindow, text = 'Details',command = details1)
+	button2 = tk.Button(MonitorWindow, text = 'Details',command = details2)
+	button3 = tk.Button(MonitorWindow, text = 'Details',command = details3)
+	button4 = tk.Button(MonitorWindow, text = 'Details',command = details4)
+	button5 = tk.Button(MonitorWindow, text = 'Details',command = details5)
+
+
+
+	label1.grid(row=0,column=0)
+	label2.grid(row=1,column=0)
+	label3.grid(row=2,column=0)
+	label4.grid(row=3,column=0)
+	label5.grid(row=4,column=0)
+	labelr1.grid(row=0,column=1)
+	labelr2.grid(row=1,column=1)
+	labelr3.grid(row=2,column=1)
+	labelr4.grid(row=3,column=1)
+	labelr5.grid(row=4,column=1)
+	button1.grid(row=0,column=2)
+	button2.grid(row=1,column=2)
+	button3.grid(row=2,column=2)
+	button4.grid(row=3,column=2)
+	button5.grid(row=4,column=2)
+
+
+	MonitorWindow.mainloop()
+	
+runprogram()
