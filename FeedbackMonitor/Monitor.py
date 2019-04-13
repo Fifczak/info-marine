@@ -6,7 +6,7 @@ import tkinter.ttk as ttk
 from pathlib import Path
 import psycopg2
 import csv
-host = '192.168.8.125'
+host = 'localhost'
 username = 'filipb'
 password =  '@infomarine'
 connD = [username,password,host]
@@ -300,7 +300,7 @@ def ShipsApplication(ClDNoRemList):
 
 
 
-ClDNoRemList = ClDNoRem()
+#ClDNoRemList = ClDNoRem()
 
 #print(list(ClDNoRemList))
-ShipsApplication(ClDNoRemList)
+ShipsApplication(ClDNoRem())

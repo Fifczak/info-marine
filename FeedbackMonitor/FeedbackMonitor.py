@@ -1,3 +1,5 @@
+#from Monitor import *
+from RemarksWithoutFeedbacksMonitor import *
 import psycopg2
 import csv
 import tkinter as tk
@@ -146,11 +148,8 @@ def runprogram():
 		querry = "select id,raport_number from feedbacks where costflag IS Null and fdbflag is not null and fdbflag<> 7 and fdbflag<> 8 and fdbflag<> 9"
 		costflagleft = q_run(connD, querry)	
 		return (costflagleft)	
-	def details1():	
-		with open('Class D no remark.csv', 'w', newline='') as file:
-			for l in r1:
-				file.write(l)
-				file.write('\n')
+	def details1():
+		Monitor.ShipsApplication(ClDNoRem())
 	def details2():	
 		with open('Remarks with unknow stats.csv', 'w', newline='') as file:
 			for l in r2:

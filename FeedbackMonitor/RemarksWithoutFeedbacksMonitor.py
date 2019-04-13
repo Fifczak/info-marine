@@ -35,7 +35,7 @@ def q_run(connD, querry):
 
 
 #
-def RemNoFdB():
+def nofdblistF():
 
 
     querry = """ select rem.id, dev.name, rem.raport_number, main.name,main.id,rem.remark
@@ -62,7 +62,7 @@ def RemNoFdB():
     return list(nofdblist)
 
 
-def ShipsApplication(RemNoFdB):
+def ShipsApplication(nofdblist):
     def LoadRaportList(shipid):
         class frame_rem:
             def __init__(self, measCframe, devname, rn, id, parent,remarkstr):
@@ -76,25 +76,53 @@ def ShipsApplication(RemNoFdB):
                 self.name.pack(side=LEFT)
                 self.remarkfield.pack(side=LEFT)
                 self.textfield.pack(side=LEFT)
+                self.var = tk.IntVar()
+                self.check = ttk.Checkbutton(measCframe, text='Not sent', variable = self.var)
+                self.check.pack(side=LEFT)
+                self.var2 = tk.IntVar()
+                self.check2 = ttk.Checkbutton(measCframe, text='No remark', variable = self.var2)
+                self.check2.pack(side=LEFT)
+
+
+
                 measCframe.pack(side=TOP, fill=tk.BOTH, expand=True)
 
         def selectreport(evt):
             def upload():
                 for line in remlist:
                     if line.textfield.get("1.0", END).strip() != '':
-                        querry = "select date from measurements_low where id = " + str(
-                            line.id) + " and raport_number = '" + str(line.rn) + "' limit 1"
-                        print(querry)
-                        measdate = str(q_run(connD, querry)[0][0])
 
-                        querry = "INSERT INTO FEEDBACKS(id,raport_number,feedback,parent,documentdate) VALUES (" + str(
-                            line.id) + ",'" + str(line.rn) + "','" + str(
-                            (line.textfield.get("1.0", END)).strip()) + "'," + str(line.parent) + ",'" + str(
-                            measdate) + "')"
+                        try:
+                            querry = "select date from measurements_low where id = " + str(
+                                line.id) + " and raport_number = '" + str(line.rn) + "' limit 1"
 
-                        what = q_run(connD, querry)
+                            measdate = str(q_run(connD, querry)[0][0])
+
+                            querry = "INSERT INTO FEEDBACKS(id,raport_number,feedback,parent,documentdate) VALUES (" + str(
+                                line.id) + ",'" + str(line.rn) + "','" + str(
+                                (line.textfield.get("1.0", END)).strip()) + "'," + str(line.parent) + ",'" + str(
+                                measdate) + "')"
+
+                            q_run(connD, querry)
+                        except:
+                            querry = "INSERT INTO FEEDBACKS(id,raport_number,feedback,parent) VALUES (" + str(
+                                line.id) + ",'" + str(line.rn) + "','" + str(
+                                (line.textfield.get("1.0", END)).strip()) + "'," + str(line.parent) +  ")"
+                            q_run(connD, querry)
+
+                    if line.var.get() == 1:
+                        querry = "UPDATE remarks SET sended = False where id = '" +str(line.id)+"' and raport_number = '" +str(line.rn)+ "'"
+                        q_run(connD, querry)
+
+                    if line.var2.get() == 1:
+                        querry = "DELETE FROM remarks WHERE id = '" + str(
+                            line.id) + "' and raport_number = '" + str(line.rn) + "'"
+                        q_run(connD, querry)
+
+
+
                 root2.destroy()
-                ShipsApplication(RemNoFdB)
+                ShipsApplication(nofdblistF())
 
             w = evt.widget
             index = int(w.curselection()[0])
@@ -104,7 +132,7 @@ def ShipsApplication(RemNoFdB):
             ###
             devices = list()
             chList = list()
-            for line in RemNoFdB:
+            for line in nofdblist:
                 if str(line[2]).strip() == str(nrrap):
                     if line[1] not in chList:
                         chList.append(line[1])
@@ -130,8 +158,8 @@ def ShipsApplication(RemNoFdB):
                 remlist.append(X)
 
         RapList = list()
-        for line in RemNoFdB:
-            if str(line[1]).strip() == str(shipid).strip():
+        for line in nofdblist:
+            if str(line[4]).strip() == str(shipid).strip():
                 if str(line[2]) not in RapList:
                     RapList.append(line[2])
 
@@ -152,10 +180,10 @@ def ShipsApplication(RemNoFdB):
 
         shList = list()
         tryList = list()
-        for line in RemNoFdB:
+        for line in nofdblist:
             if str(line[3]) not in tryList:
                 tryList.append(str(line[3]))
-                strip = [line[3], line[1]]
+                strip = [line[3], line[4]]
                 shList.append(strip)
         shList.sort()
         for line in shList:
@@ -166,7 +194,7 @@ def ShipsApplication(RemNoFdB):
     root2.title("Remarks")
 
     Shiplist = tk.Listbox(root2)
-    Shiplist.config(width=15)
+    Shiplist.config(width=20)
     Shiplist.pack(side=LEFT, anchor=N)
 
     Raportlist = tk.Listbox(root2)
@@ -182,4 +210,4 @@ def ShipsApplication(RemNoFdB):
 
 
 
-ShipsApplication(RemNoFdB())
+ShipsApplication(nofdblistF())
