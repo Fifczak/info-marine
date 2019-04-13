@@ -4,7 +4,7 @@ import tkinter.ttk as ttk
 from tkinter import *
 username = 'filipb'
 password = '@infomarine'
-host1 = '192.168.8.125'
+host1 = 'localhost'
 host2 = 'localhost'
 connBASE = [username,password,host1]
 connTARGET = [username,password,host2]
@@ -116,7 +116,81 @@ def migratestruct():
 	countfdb_flags = tk.Label(pbars,textvariable = fdb_flagsVar).grid(row=10, column=1)
 	fdb_flagsProgress_bar = ttk.Progressbar(pbars,orient = 'horizontal',lengt = 300, mode = 'determinate')
 
-	
+
+
+
+
+	#feedbacks
+	labfeedbacks = tk.Label(pbars, text = "feedbacks").grid(row=11, column=0)
+	feedbacksVar = StringVar()
+	feedbacksVar.set('0')
+	countfeedbacks = tk.Label(pbars,textvariable = feedbacksVar).grid(row=11, column=1)
+	feedbacksProgress_bar = ttk.Progressbar(pbars,orient = 'horizontal',lengt = 300, mode = 'determinate')
+
+
+	#harmonogra
+	labharmonogra = tk.Label(pbars, text = "harmonogra").grid(row=12, column=0)
+	countharmonogra = tk.Label(pbars,text= "RĘCZNIE").grid(row=12, column=1)
+
+
+
+
+	#main
+	labmain = tk.Label(pbars, text = "main").grid(row=13, column=0)
+	mainVar = StringVar()
+	mainVar.set('0')
+	countmain = tk.Label(pbars,textvariable = mainVar).grid(row=13, column=1)
+	mainProgress_bar = ttk.Progressbar(pbars,orient = 'horizontal',lengt = 300, mode = 'determinate')
+
+
+	# #main_models
+	# labmain_models = tk.Label(pbars, text = "main_models").grid(row=14, column=0)
+	# main_modelsVar = StringVar()
+	# main_modelsVar.set('0')
+	# countmain_models = tk.Label(pbars,textvariable = main_modelsVar).grid(row=14, column=1)
+	# main_modelsProgress_bar = ttk.Progressbar(pbars,orient = 'horizontal',lengt = 300, mode = 'determinate')
+	#
+	#
+	#mcdata
+	labmcdata = tk.Label(pbars, text = "mcdata").grid(row=15, column=0)
+	mcdataVar = StringVar()
+	mcdataVar.set('0')
+	countmcdata = tk.Label(pbars,textvariable = mcdataVar).grid(row=15, column=1)
+	mcdataProgress_bar = ttk.Progressbar(pbars,orient = 'horizontal',lengt = 300, mode = 'determinate')
+	#
+	#
+	# #meascharts
+	# labmeascharts = tk.Label(pbars, text = "meascharts").grid(row=16, column=0)
+	# measchartsVar = StringVar()
+	# measchartsVar.set('0')
+	# countmeascharts = tk.Label(pbars,textvariable = measchartsVar).grid(row=16, column=1)
+	# measchartsProgress_bar = ttk.Progressbar(pbars,orient = 'horizontal',lengt = 300, mode = 'determinate')
+	#
+	#
+	# #measurements_low
+	# labmeasurements_low = tk.Label(pbars, text = "measurements_low").grid(row=17, column=0)
+	# measurements_lowVar = StringVar()
+	# measurements_lowVar.set('0')
+	# countmeasurements_low = tk.Label(pbars,textvariable = measurements_lowVar).grid(row=17, column=1)
+	# measurements_lowProgress_bar = ttk.Progressbar(pbars,orient = 'horizontal',lengt = 300, mode = 'determinate')
+	#
+	# #points
+	# labpoints = tk.Label(pbars, text = "points").grid(row=18, column=0)
+	# pointsVar = StringVar()
+	# pointsVar.set('0')
+	# countpoints = tk.Label(pbars,textvariable = pointsVar).grid(row=18, column=1)
+	# pointsProgress_bar = ttk.Progressbar(pbars,orient = 'horizontal',lengt = 300, mode = 'determinate')
+	#
+	#
+	#remarks
+	labremarks = tk.Label(pbars, text = "remarks").grid(row=19, column=0)
+	remarksVar = StringVar()
+	remarksVar.set('0')
+	countremarks = tk.Label(pbars,textvariable = remarksVar).grid(row=19, column=1)
+	remarksProgress_bar = ttk.Progressbar(pbars,orient = 'horizontal',lengt = 300, mode = 'determinate')
+
+
+
 	class bearings(object): 
 		def __init__(self):
 			self.id = list()
@@ -261,8 +335,7 @@ def migratestruct():
 					querryUP = "insert into costcases(lp,costflag,typ,kwrange,price,low,high) values(" + str(self.lp[c]) + ","+ str(self.costflag[c]) + ",'"+ str(self.typ[c]) + "',"+ str(self.kwrange[c]) + ","+ str(self.price[c]) + "," + str(self.low[c]) + "," + str(self.high[c])+ ")"
 					q_run(connTARGET,querryUP)
 			getVals(self)
-	
-	class costflags(object): 
+	class costflags(object):
 		def __init__(self):
 			self.lp = list()
 			self.flagstr = list()
@@ -284,8 +357,7 @@ def migratestruct():
 					querryUP = "insert into costflags(lp,flagstr) values(" + str(self.lp[c]) + ",'"+ str(self.flagstr[c]) + "')"
 					q_run(connTARGET,querryUP)
 			getVals(self)
-	
-	class crosstable(object): 
+	class crosstable(object):
 		def __init__(self):
 			self.parent = list()
 			self.nameindevice = list()
@@ -309,8 +381,7 @@ def migratestruct():
 					querryUP = "insert into crosstable(parent,nameindevice,id) values(" + str(self.parent[c]) + ",'"+ str(self.nameindevice[c]) + "'," + str(self.id[c]) + ")"
 					q_run(connTARGET,querryUP)
 			getVals(self)
-			
-	class devices(object): 
+	class devices(object):
 		def __init__(self):
 			self.id = list()
 			self.parent = list()
@@ -382,8 +453,7 @@ def migratestruct():
 					querryUP = "insert into devices(id,parent,name,model,type,points,kw,rpm,pms,info,norm,drivenby,meas_condition,cm)values("+ str(self.id[c]) + "," + str(self.parent[c]) + "," + str(self.name[c]) + "," + str(self.model[c]) + "," + str(self.type[c]) + ","+ str(self.points[c]) + "," + str(self.kw[c]) + "," + str(self.rpm[c]) + "," + str(self.pms[c]) + "," + str(self.info[c]) + "," + str(self.norm[c]) + "," + str(self.drivenby[c]) + "," + str(self.meas_condition[c]) + "," + str(self.cm[c]) + ")"
 					q_run(connTARGET,querryUP)
 			getVals(self)
-			
-	class ds_structure(object): 
+	class ds_structure(object):
 		def __init__(self):
 			self.parent = list()
 			self.sort = list()
@@ -407,9 +477,7 @@ def migratestruct():
 					querryUP = "insert into ds_structure(parent,sort,id) values(" + str(self.parent[c]) + ",'"+ str(self.sort[c]) + "','" + str(self.id[c]) + "')"
 					q_run(connTARGET,querryUP)
 			getVals(self)		
-			
-
-	class equipment(object): 
+	class equipment(object):
 		def __init__(self):
 			self.lp = list()
 			self.device = list()
@@ -437,9 +505,7 @@ def migratestruct():
 					querryUP = "insert into equipment(lp,device,serialno,caldue,manudate) values(" + str(self.lp[c]) + ",'"+ str(self.device[c]) + "','" + str(self.serialno[c]) + "','" + str(self.caldue[c]) +"','" + str(self.manudate[c]) + "')"
 					q_run(connTARGET,querryUP)
 			getVals(self)	
-
-
-	class fdbflags(object): 
+	class fdbflags(object):
 		def __init__(self):
 			self.lp = list()
 			self.flagstr = list()
@@ -462,7 +528,158 @@ def migratestruct():
 					q_run(connTARGET,querryUP)
 			getVals(self)
 
-			
+	class feedbacks(object):
+		def __init__(self):
+			self.parent = list()
+			self.id = list()
+			self.feedback = list()
+			self.documentdate = list()
+			self.fdbflag = list()
+			self.costflag = list()
+			self.raport_number = list()
+			self.price = list()
+			self.low = list()
+			self.high = list()
+			def getVals(self):
+				c = -1
+				querryGET = "select parent,id,feedback,documentdate,fdbflag,costflag, raport_number, price, low, high from feedbacks where id is not null and parent is not null"
+				table = q_run(connBASE, querryGET)
+				feedbacksProgress_bar['maximum'] = len(table)
+				feedbacksProgress_bar.grid(row=11, column=2)
+				for line in table:
+					c += 1
+					feedbacksVar.set(str(c + 1) + ' / ' + str(len(table)))
+					feedbacksProgress_bar['value'] = c + 1
+					feedbacksProgress_bar.update()
+					self.parent.append(line[0])
+					self.id.append(line[1])
+					if str(line[2]) == 'None':self.feedback.append('Null')
+					else: self.feedback.append("'" + str(line[2]) + "'")
+					if str(line[3]) == 'None':self.documentdate.append('Null')
+					else: self.documentdate.append("'" + str(line[3]) + "'")
+					if str(line[4]) == 'None':self.fdbflag.append('Null')
+					else: self.fdbflag.append(str(line[4]))
+					if str(line[5]) == 'None':self.costflag.append('Null')
+					else: self.costflag.append(str(line[5]))
+					if str(line[6]) == 'None':self.raport_number.append('Null')
+					else: self.raport_number.append("'" + str(line[6]) + "'")
+					if str(line[7]) == 'None': self.price.append('Null')
+					else: self.price.append("ARRAY" + str(line[7]))
+					if str(line[8]) == 'None': self.low.append('Null')
+					else: self.low.append("ARRAY" + str(line[8]))
+					if str(line[9]) == 'None': self.high.append('Null')
+					else: self.high.append("ARRAY" + str(line[9]))
+					querryUP = "insert into feedbacks(parent,id,feedback,documentdate,fdbflag,costflag, raport_number, price, low, high) values("+ str(self.parent[c]) + "," + str(self.id[c]) + "," + str(self.feedback[c])+ "," + str(self.documentdate[c])+ "," + str(self.fdbflag[c])+ "," +str(self.costflag[c])+ "," +str(self.raport_number[c])+ "," +str(self.price[c])+ "," +str(self.low[c])+"," +str(self.high[c])+ ")"
+					q_run(connTARGET, querryUP)
+			getVals(self)
+
+
+	class main(object): ### DOKONCZYC
+		def __init__(self):
+			self.id = list()
+			self.paren = list()
+			self.name = list()
+			self.color = list()
+			self.reporttype = list()
+			self.lastupdate = list()
+			self.ovnercolor = list()
+			self.sendinfo = list()
+			def getVals(self):
+				c = -1
+				querryGET = "select parent,id,mcremark,documentdate,raport_number from mcdata where id is not null and parent is not null"
+				table = q_run(connBASE, querryGET)
+				mcdataProgress_bar['maximum'] = len(table)
+				mcdataProgress_bar.grid(row=15, column=2)
+				for line in table:
+					c += 1
+					mcdataVar.set(str(c + 1) + ' / ' + str(len(table)))
+					mcdataProgress_bar['value'] = c + 1
+					mcdataProgress_bar.update()
+					self.parent.append(line[0])
+					self.id.append(line[1])
+					if str(line[2]) == 'None':self.mcremark.append('Null')
+					else: self.mcremark.append("'" + (str(line[2])).replace("'"," ") + "'")
+					if str(line[3]) == 'None':self.documentdate.append('Null')
+					else: self.documentdate.append("'" + str(line[3]) + "'")
+					if str(line[4]) == 'None':self.raport_number.append('Null')
+					else: self.raport_number.append("'" + str(line[4]) + "'")
+					querryUP = "insert into mcdata(parent,id,mcremark,documentdate,raport_number) values("+ str(self.parent[c]) + "," + str(self.id[c]) + "," + str(self.mcremark[c])+ "," + str(self.documentdate[c])+ "," + str(self.raport_number[c]) + ")"
+					q_run(connTARGET, querryUP)
+			getVals(self)
+
+
+
+
+	class mcdata(object):
+		def __init__(self):
+			self.parent = list()
+			self.id = list()
+			self.mcremark = list()
+			self.documentdate = list()
+			self.raport_number = list()
+			def getVals(self):
+				c = -1
+				querryGET = "select parent,id,mcremark,documentdate,raport_number from mcdata where id is not null and parent is not null"
+				table = q_run(connBASE, querryGET)
+				mcdataProgress_bar['maximum'] = len(table)
+				mcdataProgress_bar.grid(row=15, column=2)
+				for line in table:
+					c += 1
+					mcdataVar.set(str(c + 1) + ' / ' + str(len(table)))
+					mcdataProgress_bar['value'] = c + 1
+					mcdataProgress_bar.update()
+					self.parent.append(line[0])
+					self.id.append(line[1])
+					if str(line[2]) == 'None':self.mcremark.append('Null')
+					else: self.mcremark.append("'" + (str(line[2])).replace("'"," ") + "'")
+					if str(line[3]) == 'None':self.documentdate.append('Null')
+					else: self.documentdate.append("'" + str(line[3]) + "'")
+					if str(line[4]) == 'None':self.raport_number.append('Null')
+					else: self.raport_number.append("'" + str(line[4]) + "'")
+					querryUP = "insert into mcdata(parent,id,mcremark,documentdate,raport_number) values("+ str(self.parent[c]) + "," + str(self.id[c]) + "," + str(self.mcremark[c])+ "," + str(self.documentdate[c])+ "," + str(self.raport_number[c]) + ")"
+					q_run(connTARGET, querryUP)
+			getVals(self)
+
+
+
+
+
+	class remarks(object):
+		def __init__(self):
+			self.parent = list()
+			self.id = list()
+			self.remark = list()
+			self.documentdate = list()
+			self.raport_number = list()
+			self.sended = list()
+			def getVals(self):
+				c = -1
+				querryGET = "select parent,id,remark,documentdate, raport_number, sended from remarks where id is not null and parent is not null"
+				table = q_run(connBASE, querryGET)
+				remarksProgress_bar['maximum'] = len(table)
+				remarksProgress_bar.grid(row=19, column=2)
+				for line in table:
+					c += 1
+					remarksVar.set(str(c + 1) + ' / ' + str(len(table)))
+					remarksProgress_bar['value'] = c + 1
+					remarksProgress_bar.update()
+					self.parent.append(line[0])
+					self.id.append(line[1])
+					if str(line[2]) == 'None':self.remark.append('Null')
+					else: self.remark.append("'" + str(line[2]) + "'")
+					if str(line[3]) == 'None':self.documentdate.append('Null')
+					else: self.documentdate.append("'" + str(line[3]) + "'")
+					if str(line[4]) == 'None':self.raport_number.append('Null')
+					else: self.raport_number.append("'" + str(line[4]) + "'")
+					if str(line[5]) == 'None': self.sended.append('Null')
+					else: self.sended.append(str(line[5]))
+
+					querryUP = "insert into remarks(parent,id,remark,documentdate,raport_number, sended) values("+ str(self.parent[c]) + "," + str(self.id[c]) + "," + str(self.remark[c])+ "," + str(self.documentdate[c])+ "," + str(self.raport_number[c])+ "," +str(self.sended[c])+ ")"
+					q_run(connTARGET, querryUP)
+			getVals(self)
+
+
+
 	#bearings()
 	#bearings_add()
 	#bearings_freq()
@@ -471,12 +688,23 @@ def migratestruct():
 	#costflags()
 	#crosstable()
 	#devices()
-	ds_structure()
+	#ds_structure()
 	#equipment()
-	
-	
-	### FDBFLAGS DO PRZETESTOWANIA - DS STRUCT TEZ
-	
+	#fdbflags()
+	#feedbacks()
+	#harmonogram przeniesc recznie - za duzo kolumn a za mało danych zeby było warto sie bawic
+	main()
+
+	#mcdata() #stestowac jeszcze raz - zmiana apostrofu na spacje
+
+
+
+	#remarks()
+
+
+
+	### KOMBAJNVER WSTAWIC RECZNIE ! ! ! !
+	print("WSTAWIC RECZNIE KOMBAJNVER")
 	
 	
 	pbars.mainloop()
