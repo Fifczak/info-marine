@@ -1,0 +1,698 @@
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO public;
+
+
+
+
+
+
+
+CREATE TABLE public.bearings (
+    id bigint,
+    point character varying(20),
+    bearing character varying(60),
+    seal character varying(10),
+    additional character varying(10),
+    greasing boolean
+);
+
+CREATE TABLE public.bearings_add (
+    add character varying(20)
+);
+
+
+CREATE TABLE public.bearings_freq (
+    bearing character varying(20),
+    bpfo character varying(20),
+    bpfi character varying(20),
+    ftf character varying(20),
+    bsf character varying(20),
+    env boolean
+);
+
+
+CREATE TABLE public.bearings_seals (
+    seal character varying(20)
+);
+
+
+CREATE TABLE public.costcases (
+    lp integer NOT NULL,
+    costflag integer,
+    typ text,
+    kwrange integer[],
+    price text[],
+    low text[],
+    high text[]
+);
+
+
+CREATE SEQUENCE public.costcases_lp_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.costcases_lp_seq OWNED BY public.costcases.lp;
+
+
+
+CREATE TABLE public.costflags (
+    lp integer NOT NULL,
+    flagstr text
+);
+
+
+CREATE SEQUENCE public.costflags_lp_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.costflags_lp_seq OWNED BY public.costflags.lp;
+
+
+CREATE TABLE public.crosstable (
+    parent bigint,
+    nameindevice character varying(120),
+    id bigint NOT NULL
+);
+
+
+CREATE SEQUENCE public.crosstable_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+
+ALTER SEQUENCE public.crosstable_id_seq OWNED BY public.crosstable.id;
+
+
+
+CREATE TABLE public.devices (
+    id bigint NOT NULL,
+    parent bigint,
+    name character varying(100),
+    model character varying(100),
+    type character varying(100),
+    points integer,
+    kw character varying(20),
+    rpm character varying(50),
+    pms character varying(20),
+    info character varying(300),
+    norm character varying(50),
+    drivenby bigint,
+    meas_condition character varying(100),
+    cm boolean
+);
+
+
+CREATE SEQUENCE public.devices_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.devices_id_seq OWNED BY public.devices.id;
+
+
+
+CREATE TABLE public.ds_structure (
+    parent bigint,
+    sort character varying(20),
+    id character varying(60)
+);
+
+CREATE TABLE public.equipment (
+    lp integer NOT NULL,
+    device text,
+    serialno text,
+    caldue date,
+    manudate text
+);
+
+
+
+CREATE SEQUENCE public.equipment_lp_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.equipment_lp_seq OWNED BY public.equipment.lp;
+
+
+CREATE TABLE public.fdbflags (
+    lp integer NOT NULL,
+    flagstr text
+);
+
+
+CREATE SEQUENCE public.fdbflags_lp_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.fdbflags_lp_seq OWNED BY public.fdbflags.lp;
+
+
+
+CREATE TABLE public.feedbacks (
+    parent bigint,
+    name character varying(100),
+    feedback character varying(1000),
+    measdate date,
+    documentdate date,
+    fdbflag integer,
+    raport_number character varying(30),
+    id bigint,
+    costflag integer,
+    price text[],
+    low text[],
+    high text[]
+);
+
+
+
+CREATE TABLE public.harmonogram (
+    lp integer NOT NULL,
+    shipid integer,
+    report_number text,
+    pomiar boolean,
+    pomiar_kto text,
+    pomiar_start timestamp without time zone,
+    pomiar_koniec timestamp without time zone,
+    struct boolean,
+    struct_kto text,
+    struct_start timestamp without time zone,
+    struct_koniec timestamp without time zone,
+    struct_ch boolean[],
+    datasheet boolean,
+    datasheet_kto text,
+    datasheet_start timestamp without time zone,
+    datasheet_koniec timestamp without time zone,
+    datasheet_ch boolean[],
+    report boolean,
+    report_kto text,
+    report_start timestamp without time zone,
+    report_koniec timestamp without time zone,
+    report_ch boolean[],
+    analysis boolean,
+    analysis_kto text,
+    analysis_start timestamp without time zone,
+    analysis_koniec timestamp without time zone,
+    analysis_ch boolean[],
+    send_raport boolean,
+    send_raport_kto text,
+    send_raport_start timestamp without time zone,
+    send_raport_koniec timestamp without time zone,
+    remarks boolean,
+    remarks_kto text,
+    remarks_start timestamp without time zone,
+    remarks_koniec timestamp without time zone,
+    feedbacks boolean,
+    feedbacks_kto text,
+    feedbacks_start timestamp without time zone,
+    feedbacks_koniec timestamp without time zone,
+    accept boolean,
+    accept_kto text,
+    accept_start timestamp without time zone,
+    accept_koniec timestamp without time zone,
+    place text,
+    priority boolean,
+    fdbrem boolean,
+    fdbrem_kto text,
+    fdbrem_start timestamp without time zone,
+    fdbrem_koniec timestamp without time zone,
+    fdbrem2 boolean,
+    fdbrem2_kto text,
+    fdbrem2_start timestamp without time zone,
+    fdbrem2_koniec timestamp without time zone,
+    struct_pauseb boolean,
+    struct_pauses text[],
+    datasheet_pauseb boolean,
+    datasheet_pauses text[],
+    report_pauseb boolean,
+    report_pauses text[],
+    analysis_pauseb boolean,
+    analysis_pauses text[],
+    accept_pauseb boolean,
+    accept_pauses text[],
+    send_raport_pauseb boolean,
+    send_raport_pauses text[],
+    remarks_pauseb boolean,
+    remarks_pauses text[],
+    feedbacks_pauseb boolean,
+    feedbacks_pauses text[],
+    fdbrem_pauseb boolean,
+    fdbrem_pauses text[],
+    fdbrem2_pauseb boolean,
+    fdbrem2_pauses text[],
+    pause_start timestamp without time zone,
+    dev_in integer,
+    dev_ch integer,
+    dev_rep integer
+);
+
+
+
+CREATE SEQUENCE public.harmonogram_lp_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+
+ALTER SEQUENCE public.harmonogram_lp_seq OWNED BY public.harmonogram.lp;
+
+
+CREATE TABLE public.kombajn_temp (
+    login character varying(100),
+    company character varying(100),
+    ship character varying(100),
+    imo character varying(100),
+    shipid character varying(100),
+    raport character varying(100)
+);
+
+
+
+CREATE TABLE public.kombajnver (
+    ver character varying(10)
+);
+
+CREATE TABLE public.main (
+    id bigint NOT NULL,
+    parent bigint,
+    name character varying(100),
+    color integer,
+    reporttype character varying(2),
+    lastupdate date,
+    ownercolor bigint,
+    sendinfo text
+);
+
+
+CREATE SEQUENCE public.main_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.main_id_seq OWNED BY public.main.id;
+
+
+
+CREATE TABLE public.main_models (
+    id bigint NOT NULL,
+    parent bigint,
+    name character varying(100),
+    type character varying(100)
+);
+
+CREATE SEQUENCE public.main_models_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+
+ALTER SEQUENCE public.main_models_id_seq OWNED BY public.main_models.id;
+
+
+CREATE TABLE public.mcdata (
+    parent bigint,
+    name character varying(100),
+    mcremark character varying(1000),
+    measdate date,
+    documentdate date,
+    id bigint,
+    raport_number character varying(25)
+);
+
+
+
+CREATE TABLE public.meascharts (
+    lp bigint NOT NULL,
+    shipid bigint,
+    id bigint,
+    point text,
+    report_number text,
+    date date,
+    domain text,
+    type text,
+    unit text,
+    chart text
+);
+
+
+
+CREATE SEQUENCE public.meascharts_lp_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+
+ALTER SEQUENCE public.meascharts_lp_seq OWNED BY public.meascharts.lp;
+
+
+CREATE TABLE public.measurements (
+    parent bigint,
+    id bigint,
+    point character varying(20),
+    report_number character varying(20),
+    date date,
+    domain character varying(3),
+    type character varying(3),
+    unit character varying(10),
+    chart oid
+);
+
+
+
+CREATE TABLE public.measurements_low (
+    parent bigint,
+    name character varying(100),
+    point character varying(30),
+    type character varying(20),
+    unit character varying(10),
+    date date,
+    value real,
+    raport_number text,
+    id bigint
+);
+
+
+CREATE TABLE public.points (
+    id bigint,
+    point character varying(30),
+    sort integer,
+    visible boolean
+);
+
+
+
+CREATE TABLE public.remarks (
+    parent bigint,
+    name character varying(100),
+    remark character varying(1000),
+    measdate date,
+    documentdate date,
+    raport_number character varying(25),
+    sended boolean,
+    id bigint
+);
+
+
+CREATE TABLE public.reminder (
+    parent bigint,
+    raport_number character varying(20),
+    device character varying(100),
+    send_date date,
+    request_date date,
+    status integer,
+    remcom character varying(500),
+    im_comment character varying(500),
+    id bigint
+);
+
+
+CREATE TABLE public.reportfiles (
+    lp integer NOT NULL,
+    reportno text,
+    pdffile oid
+);
+
+
+CREATE SEQUENCE public.reportfiles_lp_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+
+ALTER SEQUENCE public.reportfiles_lp_seq OWNED BY public.reportfiles.lp;
+
+
+CREATE TABLE public.reports (
+    shipid bigint,
+    raport_number character varying(100),
+    raport_date date,
+    person character varying(20),
+    color boolean,
+    dev_in integer,
+    dev_ch integer,
+    dev_rep integer,
+    w_s timestamp without time zone,
+    w_e timestamp without time zone,
+    person_report text,
+    ch_report boolean[]
+);
+
+
+CREATE TABLE public.sendto (
+    shipid integer,
+    mailto text[],
+    mailcc text[],
+    lp integer NOT NULL,
+    aliasto text[],
+    aliascc text[]
+);
+
+
+
+CREATE SEQUENCE public.sendto_lp_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.sendto_lp_seq OWNED BY public.sendto.lp;
+
+
+
+CREATE TABLE public.shipsdata (
+    name character varying(100),
+    shiptype character varying(100),
+    lenght numeric,
+    bradth numeric,
+    shmarvib character varying(100),
+    dateofmanufacture numeric,
+    measrange character varying(100),
+    error character varying(100),
+    imo character varying(20),
+    serialnumber character varying(20),
+    shipid integer,
+    equipment integer
+);
+
+
+
+CREATE TABLE public.standards (
+    standard character varying(300),
+    limit_1_name character varying(30),
+    limit_1_value numeric,
+    limit_2_name character varying(30),
+    limit_2_value numeric,
+    limit_3_name character varying(30),
+    limit_3_value numeric,
+    limit_4_name character varying(30),
+    limit_4_value numeric,
+    informations character varying(300),
+    envflag integer
+);
+
+
+
+CREATE TABLE public.tasks (
+    lp integer NOT NULL,
+    priority boolean,
+    info text,
+    task boolean,
+    task_kto text,
+    task_start timestamp without time zone,
+    task_koniec timestamp without time zone,
+    task_pauseb boolean,
+    task_pauses text[],
+    task_pause_start timestamp without time zone
+);
+
+
+CREATE SEQUENCE public.tasks_lp_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.tasks_lp_seq OWNED BY public.tasks.lp;
+
+
+CREATE TABLE public.todo (
+    lp integer NOT NULL,
+    doday date,
+    dowho text,
+    dostr text
+);
+
+
+
+CREATE SEQUENCE public.todo_lp_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.todo_lp_seq OWNED BY public.todo.lp;
+
+
+CREATE TABLE public.users (
+    login character varying(20),
+    full_name character(50),
+    analyzer boolean,
+    feedbacks boolean,
+    reminder boolean,
+    deviceupdater boolean,
+    ini character varying(5),
+    master boolean,
+    majoradd boolean,
+    uploader boolean,
+    selector boolean,
+    todo boolean,
+    charter boolean,
+    mailer boolean
+);
+
+ALTER TABLE ONLY public.costcases ALTER COLUMN lp SET DEFAULT nextval('public.costcases_lp_seq'::regclass);
+
+
+--
+-- Name: costflags lp; Type: DEFAULT; Schema: public; Owner: filipb
+--
+
+ALTER TABLE ONLY public.costflags ALTER COLUMN lp SET DEFAULT nextval('public.costflags_lp_seq'::regclass);
+
+
+--
+-- Name: crosstable id; Type: DEFAULT; Schema: public; Owner: filipb
+--
+
+ALTER TABLE ONLY public.crosstable ALTER COLUMN id SET DEFAULT nextval('public.crosstable_id_seq'::regclass);
+
+
+--
+-- Name: devices id; Type: DEFAULT; Schema: public; Owner: filipb
+--
+
+ALTER TABLE ONLY public.devices ALTER COLUMN id SET DEFAULT nextval('public.devices_id_seq'::regclass);
+
+
+--
+-- Name: equipment lp; Type: DEFAULT; Schema: public; Owner: filipb
+--
+
+ALTER TABLE ONLY public.equipment ALTER COLUMN lp SET DEFAULT nextval('public.equipment_lp_seq'::regclass);
+
+
+--
+-- Name: fdbflags lp; Type: DEFAULT; Schema: public; Owner: filipb
+--
+
+ALTER TABLE ONLY public.fdbflags ALTER COLUMN lp SET DEFAULT nextval('public.fdbflags_lp_seq'::regclass);
+
+
+--
+-- Name: harmonogram lp; Type: DEFAULT; Schema: public; Owner: filipb
+--
+
+ALTER TABLE ONLY public.harmonogram ALTER COLUMN lp SET DEFAULT nextval('public.harmonogram_lp_seq'::regclass);
+
+
+--
+-- Name: main id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.main ALTER COLUMN id SET DEFAULT nextval('public.main_id_seq'::regclass);
+
+
+--
+-- Name: main_models id; Type: DEFAULT; Schema: public; Owner: filipb
+--
+
+ALTER TABLE ONLY public.main_models ALTER COLUMN id SET DEFAULT nextval('public.main_models_id_seq'::regclass);
+
+
+--
+-- Name: meascharts lp; Type: DEFAULT; Schema: public; Owner: filipb
+--
+
+ALTER TABLE ONLY public.meascharts ALTER COLUMN lp SET DEFAULT nextval('public.meascharts_lp_seq'::regclass);
+
+
+--
+-- Name: reportfiles lp; Type: DEFAULT; Schema: public; Owner: filipb
+--
+
+ALTER TABLE ONLY public.reportfiles ALTER COLUMN lp SET DEFAULT nextval('public.reportfiles_lp_seq'::regclass);
+
+
+--
+-- Name: sendto lp; Type: DEFAULT; Schema: public; Owner: filipb
+--
+
+ALTER TABLE ONLY public.sendto ALTER COLUMN lp SET DEFAULT nextval('public.sendto_lp_seq'::regclass);
+
+
+--
+-- Name: tasks lp; Type: DEFAULT; Schema: public; Owner: filipb
+--
+
+ALTER TABLE ONLY public.tasks ALTER COLUMN lp SET DEFAULT nextval('public.tasks_lp_seq'::regclass);
+
+
+--
+-- Name: todo lp; Type: DEFAULT; Schema: public; Owner: filipb
+--
+
+ALTER TABLE ONLY public.todo ALTER COLUMN lp SET DEFAULT nextval('public.todo_lp_seq'::regclass);
+
+
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- PostgreSQL database dump complete
+--
+

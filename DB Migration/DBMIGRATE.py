@@ -28,7 +28,15 @@ def q_run(connD, querry):
 		pass
 	conn.commit()
 	cur.close()	
+def createtables():
+	querry = """"
 	
+	
+	
+	
+	
+	"""
+
 	
 def migratestruct():
 	pbars = tk.Tk()
@@ -217,25 +225,13 @@ def migratestruct():
 	countstandards = tk.Label(pbars,textvariable = standardsVar).grid(row=23, column=1)
 	standardsProgress_bar = ttk.Progressbar(pbars,orient = 'horizontal',lengt = 300, mode = 'determinate')
 	
-	 #tasks
-	labtasks = tk.Label(pbars, text = "tasks").grid(row=24, column=0)
-	tasksVar = StringVar()
-	tasksVar.set('0')
-	counttasks = tk.Label(pbars,textvariable = tasksVar).grid(row=24, column=1)
-	tasksProgress_bar = ttk.Progressbar(pbars,orient = 'horizontal',lengt = 300, mode = 'determinate')
-	
-	 #todo
-	labtodo = tk.Label(pbars, text = "todo").grid(row=25, column=0)
-	todoVar = StringVar()
-	todoVar.set('0')
-	counttodo = tk.Label(pbars,textvariable = todoVar).grid(row=25, column=1)
-	todoProgress_bar = ttk.Progressbar(pbars,orient = 'horizontal',lengt = 300, mode = 'determinate')
+
 	
 	 #users
-	labusers = tk.Label(pbars, text = "users").grid(row=26, column=0)
+	labusers = tk.Label(pbars, text = "users").grid(row=24, column=0)
 	usersVar = StringVar()
 	usersVar.set('0')
-	countusers = tk.Label(pbars,textvariable = usersVar).grid(row=26, column=1)
+	countusers = tk.Label(pbars,textvariable = usersVar).grid(row=24, column=1)
 	usersProgress_bar = ttk.Progressbar(pbars,orient = 'horizontal',lengt = 300, mode = 'determinate')
 
 
@@ -841,7 +837,8 @@ def migratestruct():
 					pointsProgress_bar['value'] = c + 1
 					pointsProgress_bar.update()
 					self.id.append(line[0])
-					self.point.append(line[1])
+					if str(line[1]) == 'None':self.point.append('Null')
+					else:self.point.append("'" + str(line[1]) + "'")
 					if str(line[2]) == 'None':self.sort.append('Null')
 					else: self.sort.append("'" + str(line[2]) + "'")
 					if str(line[3]) == 'None':self.visible.append('Null')
@@ -908,7 +905,8 @@ def migratestruct():
 					reminderProgress_bar['value'] = c + 1
 					reminderProgress_bar.update()
 					self.parent.append(line[0])
-					self.raport_number.append(line[1])
+					if str(line[1]) == 'None':self.raport_number.append('Null')
+					else: self.raport_number.append("'" + str(line[1]) + "'")
 					if str(line[2]) == 'None':self.send_date.append('Null')
 					else: self.send_date.append("'" + str(line[2]) + "'")
 					if str(line[3]) == 'None':self.request_date.append('Null')
@@ -923,8 +921,8 @@ def migratestruct():
 					else: self.id.append("'" + str(line[7]) + "'")
 
 					querryUP = "insert into reminder(parent, raport_number,send_date,request_date,status,remcom,im_comment,Id) values("\
-							   + str(self.parent[c]) + "," + str(self.raport_number[c]) + "," + str(self.send_date[c])+ "," + str(self.request_date[c]) \
-							   + str(self.remcom[c]) + "," + str(self.im_comment[c]) + "," + str(self.Id[c]) + ")"
+							   + str(self.parent[c]) + "," + str(self.raport_number[c]) + "," + str(self.send_date[c])+ "," + str(self.request_date[c])+"," \
+							   + str(self.status[c]) + "," + str(self.remcom[c]) + "," + str(self.im_comment[c]) + "," + str(self.id[c]) + ")"
 					q_run(connTARGET, querryUP)
 
 
@@ -943,7 +941,7 @@ def migratestruct():
 
 			def getVals(self):
 				c = -1
-				querryGET = "select shipid, raport_number, raport_date, person, color from reports where ship is not null"
+				querryGET = "select shipid, raport_number, raport_date, person, color from reports where shipid is not null"
 				table = q_run(connBASE, querryGET)
 				reportsProgress_bar['maximum'] = len(table)
 				reportsProgress_bar.grid(row=21, column=2)
@@ -953,7 +951,8 @@ def migratestruct():
 					reportsProgress_bar['value'] = c + 1
 					reportsProgress_bar.update()
 					self.shipid.append(line[0])
-					self.raport_number.append(line[1])
+					if str(line[1]) == 'None':self.raport_number.append('Null')
+					else: self.raport_number.append("'" + str(line[1]) + "'")
 					if str(line[2]) == 'None':self.raport_date.append('Null')
 					else: self.raport_date.append("'" + str(line[2]) + "'")
 					if str(line[3]) == 'None':self.person.append('Null')
@@ -963,48 +962,13 @@ def migratestruct():
 
 					querryUP = "insert into reports(shipid, raport_number,raport_date,person,color) values("\
 							   + str(self.shipid[c]) + "," + str(self.raport_number[c]) + "," + str(self.raport_date[c])+ "," + str(self.person[c]) \
-							   + str(self.color[c]) + ")"
+							   +"," + str(self.color[c]) + ")"
 					q_run(connTARGET, querryUP)
 
 
 			getVals(self)
 
-	class reports(object):
-		def __init__(self):
-			self.shipid = list()
-			self.raport_number = list()
-			self.raport_date = list()
-			self.person = list()
-			self.color = list()
 
-
-			def getVals(self):
-				c = -1
-				querryGET = "select shipid, raport_number, raport_date, person, color from reports where ship is not null"
-				table = q_run(connBASE, querryGET)
-				reportsProgress_bar['maximum'] = len(table)
-				reportsProgress_bar.grid(row=21, column=2)
-				for line in table:
-					c += 1
-					reportsVar.set(str(c + 1) + ' / ' + str(len(table)))
-					reportsProgress_bar['value'] = c + 1
-					reportsProgress_bar.update()
-					self.shipid.append(line[0])
-					self.raport_number.append(line[1])
-					if str(line[2]) == 'None':self.raport_date.append('Null')
-					else: self.raport_date.append("'" + str(line[2]) + "'")
-					if str(line[3]) == 'None':self.person.append('Null')
-					else: self.person.append("'" + str(line[3]) + "'")
-					if str(line[4]) == 'None':self.color.append('Null')
-					else: self.color.append("'" + str(line[4]) + "'")
-
-					querryUP = "insert into reports(shipid, raport_number,raport_date,person,color) values("\
-							   + str(self.shipid[c]) + "," + str(self.raport_number[c]) + "," + str(self.raport_date[c])+ "," + str(self.person[c]) \
-							   + str(self.color[c]) + ")"
-					q_run(connTARGET, querryUP)
-
-
-			getVals(self)
 
 	class shipsdata(object):
 		def __init__(self):
@@ -1031,8 +995,10 @@ def migratestruct():
 					shipsdataVar.set(str(c + 1) + ' / ' + str(len(table)))
 					shipsdataProgress_bar['value'] = c + 1
 					shipsdataProgress_bar.update()
-					self.name.append(line[0])
-					self.shiptype.append(line[1])
+					if str(line[0]) == 'None':self.name.append('Null')
+					else: self.name.append("'" + str(line[0]) + "'")
+					if str(line[1]) == 'None':self.shiptype.append('Null')
+					else: self.shiptype.append("'" + str(line[1]) + "'")
 					if str(line[2]) == 'None':self.lenght.append('Null')
 					else: self.lenght.append("'" + str(line[2]) + "'")
 					if str(line[3]) == 'None':self.bradth.append('Null')
@@ -1056,8 +1022,8 @@ def migratestruct():
 
 					querryUP = "insert into shipsdata(name,shiptype,lenght,bradth,shmarvib,dateofmanufacture,measrange,error,imo,serialnumber,shipid,equipment) values("\
 							   + str(self.name[c]) + "," + str(self.shiptype[c]) + "," + str(self.lenght[c])+ "," + str(self.bradth[c]) \
-							   + str(self.shmarvib[c]) + "," + str(self.dateofmanufacture[c]) + "," + str(self.measrange[c])+ "," + str(self.error[c]) \
-							   + str(self.imo[c]) + "," + str(self.serialnumber[c]) + "," + str(self.shipid[c])+ "," + str(self.equipment[c]) \
+							   + "," + str(self.shmarvib[c]) + "," + str(self.dateofmanufacture[c]) + "," + str(self.measrange[c])+ "," + str(self.error[c]) \
+							   + "," + str(self.imo[c]) + "," + str(self.serialnumber[c]) + "," + str(self.shipid[c])+ "," + str(self.equipment[c]) \
 							   + ")"
 					q_run(connTARGET, querryUP)
 
@@ -1080,7 +1046,7 @@ def migratestruct():
 			self.envflag = list()
 			def getVals(self):
 				c = -1
-				querryGET = "select standard, limit_1_name, limit_2_value, limit_3_name, limit_3_value, limit_4_name, limit_4_value, informations, envflag from standards"
+				querryGET = "select standard, limit_1_name,limit_1_value,limit_2_name, limit_2_value, limit_3_name, limit_3_value, limit_4_name, limit_4_value, informations, envflag from standards"
 				table = q_run(connBASE, querryGET)
 				standardsProgress_bar['maximum'] = len(table)
 				standardsProgress_bar.grid(row=23, column=2)
@@ -1102,14 +1068,81 @@ def migratestruct():
 					self.envflag.append(line[10])
 
 
-					querryUP = "insert into standards(standard, limit_1_name, limit_2_value, limit_3_name, limit_3_value, limit_4_name, limit_4_value, informations, envflag) values("\
+					querryUP = "insert into standards(standard, limit_1_name, limit_2_value, limit_3_name, limit_3_value, limit_4_name, limit_4_value, informations, envflag) values('"\
 							   + str(self.standard[c]) + "','" + str(self.limit_1_name[c]) + "','" + str(self.limit_2_value[c])+ "','" + str(self.limit_3_name[c]) \
-							   + str(self.limit_3_value[c]) + "','" + str(self.limit_4_name[c]) + "','" + str(self.limit_4_value[c])+ "','" + str(self.informations[c]) \
-							   + str(self.envflag[c]) + "')"
+							   +  "','" + str(self.limit_3_value[c]) + "','" + str(self.limit_4_name[c]) + "','" + str(self.limit_4_value[c])+ "','" + str(self.informations[c]) \
+							   +  "','" + str(self.envflag[c]) + "')"
 					q_run(connTARGET, querryUP)
 
 
 			getVals(self)
+
+	class users(object):
+		def __init__(self):
+			self.login = list()
+			self.full_name = list()
+			self.analyzer = list()
+			self.feedbacks = list()
+			self.reminder = list()
+			self.deviceupdater = list()
+			self.ini = list()
+			self.master = list()
+			self.majoradd = list()
+			self.uploader = list()
+			self.selector = list()
+			self.todo = list()
+			self.charter = list()
+			self.mailer = list()
+
+			def getVals(self):
+				c = -1
+				querryGET = "select login, full_name, analyzer, feedbacks, reminder, deviceupdater, ini, master, majoradd, uploader, selector, todo, charter, mailer from users"
+				table = q_run(connBASE, querryGET)
+				usersProgress_bar['maximum'] = len(table)
+				usersProgress_bar.grid(row=24, column=2)
+				for line in table:
+					c += 1
+					usersVar.set(str(c + 1) + ' / ' + str(len(table)))
+					usersProgress_bar['value'] = c + 1
+					usersProgress_bar.update()
+					self.login.append(line[0])
+					self.full_name.append(line[1])
+					self.ini.append(line[6])
+					if str(line[2]) == 'None':self.analyzer.append('False')
+					else: self.analyzer.append(str(line[2]))
+					if str(line[3]) == 'None':self.feedbacks.append('False')
+					else: self.feedbacks.append(str(line[3]))
+					if str(line[4]) == 'None':self.reminder.append('False')
+					else: self.reminder.append(str(line[4]))
+					if str(line[5]) == 'None':self.deviceupdater.append('False')
+					else: self.deviceupdater.append(str(line[5]))
+					if str(line[7]) == 'None':self.master.append('False')
+					else: self.master.append(str(line[7]))
+					if str(line[8]) == 'None':self.majoradd.append('False')
+					else: self.majoradd.append(str(line[8]))
+					if str(line[9]) == 'None':self.uploader.append('False')
+					else: self.uploader.append(str(line[9]))
+					if str(line[10]) == 'None':self.selector.append('False')
+					else: self.selector.append(str(line[10]))
+					if str(line[11]) == 'None':self.todo.append('False')
+					else: self.todo.append(str(line[11]))
+					if str(line[12]) == 'None':self.charter.append('False')
+					else: self.charter.append(str(line[12]))
+					if str(line[13]) == 'None':self.mailer.append('False')
+					else: self.mailer.append(str(line[13]))
+
+
+
+					querryUP = "insert into users(login, full_name, analyzer, feedbacks, reminder, deviceupdater, ini, master, majoradd, uploader, selector, todo, charter, mailer) values('"\
+							   + str(self.login[c]) + "','" + str(self.full_name[c]) + "','" + str(self.analyzer[c])+ "','" + str(self.feedbacks[c]) \
+							   + "','" + str(self.reminder[c]) + "','" + str(self.deviceupdater[c]) + "','" + str(self.ini[c])+ "','" + str(self.master[c]) \
+							   + "','" + str(self.majoradd[c]) + "','" + str(self.uploader[c]) + "','" + str(self.selector[c]) + "','" + str(self.todo[c]) \
+							   + "','" + str(self.charter[c]) + "','" + str(self.mailer[c]) + "')"
+					q_run(connTARGET, querryUP)
+
+
+			getVals(self)
+
 
 
 
@@ -1131,26 +1164,19 @@ def migratestruct():
 	#mcdata() #stestowac jeszcze raz - zmiana apostrofu na spacje
 	#meascharts()
 	#measurements_low()
-
 	#remarks()
-	points()
-	print('points done')
-	reminder()
-	print('points reminder')
-	reports()
-	print('points reports')
-	shipsdata()
-	print('points shipsdata')
-	standards()
-	print('points standards')
-	dbmigrate()
-	print('points dbmigrate')
+	#points() #PRZETESTOWANE CZESCIOWO - ZAMULILO STRASZNIE W TRAKCIE
+	#reminder()
+	#reports()
+	#shipsdata()
+	#standards()
+	#users()
 
-	### KOMBAJNVER WSTAWIC RECZNIE ! ! ! !
 	print("WSTAWIC RECZNIE KOMBAJNVER")
 	
 	
 	pbars.mainloop()
 
 	
-migratestruct()
+#migratestruct()
+createtables()
