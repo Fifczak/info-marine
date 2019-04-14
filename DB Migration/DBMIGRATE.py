@@ -1146,31 +1146,47 @@ def migratestruct():
 
 
 
-	#bearings()
-	#bearings_add()
-	#bearings_freq()
-	#bearings_seals()
-	#costcases()
-	#costflags()
-	#crosstable()
-	#devices()
-	#ds_structure()
-	#equipment()
-	#fdbflags()
-	#feedbacks()
+
+
+	main()
+	shipsdata()
+	users()
+	ds_structure()
+	devices()
+
+	remarks()
+	feedbacks()
+	costcases()
+	costflags()
+	crosstable()
+	points() #PRZETESTOWANE CZESCIOWO - ZAMULILO STRASZNIE W TRAKCIE
+
+	standards()
+
+	bearings()
+	bearings_add()
+	bearings_freq()
+	bearings_seals()
+
+
+
+	equipment()
+	fdbflags()
+
 	#harmonogram przeniesc recznie - za duzo kolumn a za mało danych zeby było warto sie bawic
-	#main()
-	#main_models()
-	#mcdata() #stestowac jeszcze raz - zmiana apostrofu na spacje
-	#meascharts()
-	#measurements_low()
-	#remarks()
-	#points() #PRZETESTOWANE CZESCIOWO - ZAMULILO STRASZNIE W TRAKCIE
-	#reminder()
-	#reports()
-	#shipsdata()
-	#standards()
-	#users()
+
+	main_models()
+
+	meascharts()
+	measurements_low()
+
+
+	reminder()
+	reports()
+
+
+	mcdata()  # stestowac jeszcze raz - zmiana apostrofu na spacje
+
 
 	print("WSTAWIC RECZNIE KOMBAJNVER")
 	
