@@ -133,8 +133,6 @@ def migratestruct():
 	countharmonogra = tk.Label(pbars,text= "RĘCZNIE").grid(row=12, column=1)
 
 
-
-
 	#main
 	labmain = tk.Label(pbars, text = "main").grid(row=13, column=0)
 	mainVar = StringVar()
@@ -143,36 +141,36 @@ def migratestruct():
 	mainProgress_bar = ttk.Progressbar(pbars,orient = 'horizontal',lengt = 300, mode = 'determinate')
 
 
-	# #main_models
-	# labmain_models = tk.Label(pbars, text = "main_models").grid(row=14, column=0)
-	# main_modelsVar = StringVar()
-	# main_modelsVar.set('0')
-	# countmain_models = tk.Label(pbars,textvariable = main_modelsVar).grid(row=14, column=1)
-	# main_modelsProgress_bar = ttk.Progressbar(pbars,orient = 'horizontal',lengt = 300, mode = 'determinate')
-	#
-	#
+	#main_models
+	labmain_models = tk.Label(pbars, text = "main_models").grid(row=14, column=0)
+	main_modelsVar = StringVar()
+	main_modelsVar.set('0')
+	countmain_models = tk.Label(pbars,textvariable = main_modelsVar).grid(row=14, column=1)
+	main_modelsProgress_bar = ttk.Progressbar(pbars,orient = 'horizontal',lengt = 300, mode = 'determinate')
+
+
 	#mcdata
 	labmcdata = tk.Label(pbars, text = "mcdata").grid(row=15, column=0)
 	mcdataVar = StringVar()
 	mcdataVar.set('0')
 	countmcdata = tk.Label(pbars,textvariable = mcdataVar).grid(row=15, column=1)
 	mcdataProgress_bar = ttk.Progressbar(pbars,orient = 'horizontal',lengt = 300, mode = 'determinate')
+
+
+	#meascharts
+	labmeascharts = tk.Label(pbars, text = "meascharts").grid(row=16, column=0)
+	measchartsVar = StringVar()
+	measchartsVar.set('0')
+	countmeascharts = tk.Label(pbars,textvariable = measchartsVar).grid(row=16, column=1)
+	measchartsProgress_bar = ttk.Progressbar(pbars,orient = 'horizontal',lengt = 300, mode = 'determinate')
 	#
 	#
-	# #meascharts
-	# labmeascharts = tk.Label(pbars, text = "meascharts").grid(row=16, column=0)
-	# measchartsVar = StringVar()
-	# measchartsVar.set('0')
-	# countmeascharts = tk.Label(pbars,textvariable = measchartsVar).grid(row=16, column=1)
-	# measchartsProgress_bar = ttk.Progressbar(pbars,orient = 'horizontal',lengt = 300, mode = 'determinate')
-	#
-	#
-	# #measurements_low
-	# labmeasurements_low = tk.Label(pbars, text = "measurements_low").grid(row=17, column=0)
-	# measurements_lowVar = StringVar()
-	# measurements_lowVar.set('0')
-	# countmeasurements_low = tk.Label(pbars,textvariable = measurements_lowVar).grid(row=17, column=1)
-	# measurements_lowProgress_bar = ttk.Progressbar(pbars,orient = 'horizontal',lengt = 300, mode = 'determinate')
+	#measurements_low
+	labmeasurements_low = tk.Label(pbars, text = "measurements_low").grid(row=17, column=0)
+	measurements_lowVar = StringVar()
+	measurements_lowVar.set('0')
+	countmeasurements_low = tk.Label(pbars,textvariable = measurements_lowVar).grid(row=17, column=1)
+	measurements_lowProgress_bar = ttk.Progressbar(pbars,orient = 'horizontal',lengt = 300, mode = 'determinate')
 	#
 	# #points
 	# labpoints = tk.Label(pbars, text = "points").grid(row=18, column=0)
@@ -182,7 +180,7 @@ def migratestruct():
 	# pointsProgress_bar = ttk.Progressbar(pbars,orient = 'horizontal',lengt = 300, mode = 'determinate')
 	#
 	#
-	#remarks
+	 #remarks
 	labremarks = tk.Label(pbars, text = "remarks").grid(row=19, column=0)
 	remarksVar = StringVar()
 	remarksVar.set('0')
@@ -574,39 +572,77 @@ def migratestruct():
 			getVals(self)
 
 
-	class main(object): ### DOKONCZYC
+	class main(object):
 		def __init__(self):
 			self.id = list()
-			self.paren = list()
+			self.parent= list()
 			self.name = list()
 			self.color = list()
 			self.reporttype = list()
 			self.lastupdate = list()
-			self.ovnercolor = list()
+			self.ownercolor = list()
 			self.sendinfo = list()
 			def getVals(self):
 				c = -1
-				querryGET = "select parent,id,mcremark,documentdate,raport_number from mcdata where id is not null and parent is not null"
+				querryGET = "select id, parent, name, color, reporttype, lastupdate, ownercolor, sendinfo from main"
 				table = q_run(connBASE, querryGET)
-				mcdataProgress_bar['maximum'] = len(table)
-				mcdataProgress_bar.grid(row=15, column=2)
+				mainProgress_bar['maximum'] = len(table)
+				mainProgress_bar.grid(row=13, column=2)
 				for line in table:
 					c += 1
-					mcdataVar.set(str(c + 1) + ' / ' + str(len(table)))
-					mcdataProgress_bar['value'] = c + 1
-					mcdataProgress_bar.update()
-					self.parent.append(line[0])
-					self.id.append(line[1])
-					if str(line[2]) == 'None':self.mcremark.append('Null')
-					else: self.mcremark.append("'" + (str(line[2])).replace("'"," ") + "'")
-					if str(line[3]) == 'None':self.documentdate.append('Null')
-					else: self.documentdate.append("'" + str(line[3]) + "'")
-					if str(line[4]) == 'None':self.raport_number.append('Null')
-					else: self.raport_number.append("'" + str(line[4]) + "'")
-					querryUP = "insert into mcdata(parent,id,mcremark,documentdate,raport_number) values("+ str(self.parent[c]) + "," + str(self.id[c]) + "," + str(self.mcremark[c])+ "," + str(self.documentdate[c])+ "," + str(self.raport_number[c]) + ")"
+					mainVar.set(str(c + 1) + ' / ' + str(len(table)))
+					mainProgress_bar['value'] = c + 1
+					mainProgress_bar.update()
+					self.id.append(line[0])
+					if str(line[1]) == 'None':self.parent.append('Null')
+					else: self.parent.append(str(line[1]))
+					if str(line[2]) == 'None':self.name.append('Null')
+					else: self.name.append("'" + str(line[2]) + "'")
+					if str(line[3]) == 'None':self.color.append('Null')
+					else: self.color.append("'" + str(line[3]) + "'")
+					if str(line[4]) == 'None':self.reporttype.append('Null')
+					else: self.reporttype.append("'" + str(line[4]) + "'")
+					if str(line[5]) == 'None':self.lastupdate.append('Null')
+					else: self.lastupdate.append("'" + str(line[5]) + "'")
+					if str(line[6]) == 'None':self.ownercolor.append('Null')
+					else: self.ownercolor.append("'" + str(line[6]) + "'")
+					if str(line[7]) == 'None':self.sendinfo.append('Null')
+					else: self.sendinfo.append("'" + str(line[7]) + "'")
+
+
+					querryUP = "insert into main(id,parent,name,color,reporttype,lastupdate,ownercolor,sendinfo) values("+ str(self.id[c]) + "," + str(self.parent[c]) + "," + str(self.name[c])+ "," + str(self.color[c])+ "," + str(self.reporttype[c]) + "," + str(self.lastupdate[c])+","+ str(self.ownercolor[c])+","+ str(self.sendinfo[c])+")"
 					q_run(connTARGET, querryUP)
 			getVals(self)
 
+	class main_models(object):
+		def __init__(self):
+			self.id = list()
+			self.parent= list()
+			self.name = list()
+			self.type = list()
+
+			def getVals(self):
+				c = -1
+				querryGET = "select id, parent, name, type from main_models"
+				table = q_run(connBASE, querryGET)
+				main_modelsProgress_bar['maximum'] = len(table)
+				main_modelsProgress_bar.grid(row=14, column=2)
+				for line in table:
+					c += 1
+					main_modelsVar.set(str(c + 1) + ' / ' + str(len(table)))
+					main_modelsProgress_bar['value'] = c + 1
+					main_modelsProgress_bar.update()
+					self.id.append(line[0])
+					if str(line[1]) == 'None':self.parent.append('Null')
+					else: self.parent.append(str(line[1]))
+					if str(line[2]) == 'None':self.name.append('Null')
+					else: self.name.append("'" + str(line[2]) + "'")
+					if str(line[3]) == 'None':self.type.append('Null')
+					else: self.type.append("'" + str(line[3]) + "'")
+
+					querryUP = "insert into main_models(id,parent,name,type) values("+ str(self.id[c]) + "," + str(self.parent[c]) + "," + str(self.name[c])+ "," + str(self.type[c])+")"
+					q_run(connTARGET, querryUP)
+			getVals(self)
 
 
 
@@ -640,7 +676,102 @@ def migratestruct():
 					q_run(connTARGET, querryUP)
 			getVals(self)
 
+	class meascharts(object):
+		def __init__(self):
+			self.lp = list()
+			self.shipid= list()
+			self.id = list()
+			self.point = list()
+			self.report_number = list()
+			self.date = list()
+			self.domain = list()
+			self.type = list()
+			self.unit = list()
+			self.chart = list()
 
+
+			def getVals(self):
+				c = -1
+				querryGET = "select lp, shipid, id, point, report_number, date, domain, type, unit, chart from meascharts"
+				table = q_run(connBASE, querryGET)
+				measchartsProgress_bar['maximum'] = len(table)
+				measchartsProgress_bar.grid(row=16, column=2)
+				for line in table:
+					c += 1
+					measchartsVar.set(str(c + 1) + ' / ' + str(len(table)))
+					measchartsProgress_bar['value'] = c + 1
+					measchartsProgress_bar.update()
+					self.lp.append(line[0])
+					if str(line[1]) == 'None':self.shipid.append('Null')
+					else: self.shipid.append(str(line[1]))
+					if str(line[2]) == 'None':self.id.append('Null')
+					else: self.id.append("'" + str(line[2]) + "'")
+					if str(line[3]) == 'None':self.point.append('Null')
+					else: self.point.append("'" + str(line[3]) + "'")
+					if str(line[4]) == 'None':self.report_number.append('Null')
+					else: self.report_number.append("'" +str(line[4]) + "'")
+					if str(line[5]) == 'None':self.date.append('Null')
+					else: self.date.append("'" + str(line[5]) + "'")
+					if str(line[6]) == 'None':self.domain.append('Null')
+					else: self.domain.append("'" + str(line[6]) + "'")
+					if str(line[7]) == 'None':self.type.append('Null')
+					else: self.type.append(str("'" +str(line[7]) + "'"))
+					if str(line[8]) == 'None':self.unit.append('Null')
+					else: self.unit.append("'" + str(line[8]) + "'")
+					if str(line[9]) == 'None':self.chart.append('Null')
+					else: self.chart.append("'" + str(line[9]) + "'")
+
+					querryUP = "insert into meascharts(lp, shipid, id, point, report_number, date, domain, type, unit, chart) values(" + str(self.lp[c]) + "," + str(self.shipid[c]) + "," + str(self.id[c])+ "," + str(self.point[c])+ "," + str(self.report_number[c]) + "," + str(self.date[c]) + "," + str(self.domain[c]) + "," + str(self.type[c]) +","+ str(self.unit[c]) + "," + str(self.chart[c]) + ")"
+					q_run(connTARGET, querryUP)
+			getVals(self)
+
+	class measurements_low(object):
+		def __init__(self):
+			self.parent= list()
+			self.id = list()
+			self.point = list()
+			self.raport_number = list()
+			self.date = list()
+			self.value = list()
+			self.type = list()
+			self.unit = list()
+
+
+			def getVals(self):
+				c = -1
+				querryGET = "select parent, id, point, raport_number, date, value, type, unit from measurements_low"
+				table = q_run(connBASE, querryGET)
+				measurements_lowProgress_bar['maximum'] = len(table)
+				measurements_lowProgress_bar.grid(row=17, column=2)
+				for line in table:
+					c += 1
+					measurements_lowVar.set(str(c + 1) + ' / ' + str(len(table)))
+					measurements_lowProgress_bar['value'] = c + 1
+					measurements_lowProgress_bar.update()
+					if str(line[0]) == 'None':self.parent.append('Null')
+					else: self.parent.append("'" + str(line[0]) + "'")
+					if str(line[1]) == 'None':self.id.append('Null')
+					else: self.id.append("'" + str(line[1]) + "'")
+					if str(line[2]) == 'None':self.point.append('Null')
+					else: self.point.append("'" + str(line[2]) + "'")
+					if str(line[3]) == 'None':self.raport_number.append('Null')
+					else: self.raport_number.append("'" +str(line[3]) + "'")
+					if str(line[4]) == 'None':self.date.append('Null')
+					else: self.date.append("'" + str(line[4]) + "'")
+					if str(line[5]) == 'None':self.value.append('Null')
+					else: self.value.append("'" + str(line[5]) + "'")
+					if str(line[6]) == 'None':self.type.append('Null')
+					else: self.type.append(str("'" +str(line[6]) + "'"))
+					if str(line[7]) == 'None':self.unit.append('Null')
+					else: self.unit.append("'" + str(line[7]) + "'")
+
+
+					querryUP = "insert into measurements_low(parent, id, point, raport_number, date, value, type, unit) values(" \
+							   + str(self.parent[c]) + "," + str(self.id[c])+ "," + str(self.point[c])+ "," \
+							   + str(self.raport_number[c]) + "," + str(self.date[c]) + "," + str(self.value[c]) + "," \
+							   + str(self.type[c]) +","+ str(self.unit[c]) + ")"
+					q_run(connTARGET, querryUP)
+			getVals(self)
 
 
 
@@ -693,11 +824,11 @@ def migratestruct():
 	#fdbflags()
 	#feedbacks()
 	#harmonogram przeniesc recznie - za duzo kolumn a za mało danych zeby było warto sie bawic
-	main()
-
+	#main()
+	#main_models()
 	#mcdata() #stestowac jeszcze raz - zmiana apostrofu na spacje
-
-
+	#meascharts()
+	measurements_low()
 
 	#remarks()
 

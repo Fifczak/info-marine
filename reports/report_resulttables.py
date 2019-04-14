@@ -122,7 +122,7 @@ def	drawtable_IM(document,measlist,connD,report_number):#):
 			if str(sort[1])==str(meas.id):
 				trueMeasList.append(meas)
 				activeIdList.append(str(meas.id))
-				print(meas.drivenby)
+
 				drivenByList.append(meas.drivenby)
 				idlist.append(meas.id)
 
@@ -198,7 +198,7 @@ def	drawtable_IM(document,measlist,connD,report_number):#):
 				pass
 		else:	######## POMIARY
 			p=-1
-			print(list(idlist))
+
 			#drivenByList.append('0') # zeby nie bylo bledu na koncu petli
 			for xx in trueMeasList:
 				p+=1
@@ -236,7 +236,7 @@ def	drawtable_IM(document,measlist,connD,report_number):#):
 						except:
 							pass
 					
-					#print(str(drivenByList[p+1]),str(idlist[p]))
+					print(str(drivenByList[p+1]),str(idlist[p]))
 					if str(drivenByList[p+1]) == str(xx.id):
 						xcord += 1
 					else:
@@ -320,7 +320,6 @@ def	drawtable_STOCZNIA_REMONTOWA(document,measlist,connD,report_number):#):trzeb
 					continue
 				if measStrip[0][-5:] != '00.00' and measStrip[0][-3:] == '.00' :
 					if str(sortlistQ[i+1][1]) in activeIdList:
-						print(measStrip[0])
 						r0 = ht.add_run(measStrip[1])
 						resulttable.cell(xcord+1,0).merge(resulttable.cell(xcord+1,6))
 						xcord += 1
