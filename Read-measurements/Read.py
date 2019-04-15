@@ -813,24 +813,13 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
         else:
             Window.mainloop()
 
-    # username = 'filipb'
-    # password = '@infomarine'
-    # host = '192.168.8.125'
-    # connD = [username,password,host]
-    # parent = 103 # aurora
-    # parent = 73 # hafnia america
-    # parent = 55 #neptuno platform
-    # parent = 35 #norddolphin
-    # parent = 61 #nordpenguin
-    # parent = 46 #Elizabeth russ
-    # rnumber = '2008-2019'
+
+
 
     measlist = []
     get_meas()
 
     window_crosstable()
 
-# 'Vibscanner'
-# 'Marvib'
-# 'ezThomas'
+
 
