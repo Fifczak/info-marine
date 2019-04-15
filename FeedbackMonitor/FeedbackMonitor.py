@@ -178,7 +178,7 @@ def runprogram():
 				file.write(str(l))
 				file.write('\n')
 	def details3():	
-		with open('C:\Overmind\Sent remarks without feedbacks.csv', 'w', newline='') as file:
+		with open('Sent remarks without feedbacks.csv', 'w', newline='') as file:
 			for l in r3:
 				file.write(str(l))
 				file.write('\n')

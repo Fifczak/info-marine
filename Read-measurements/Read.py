@@ -151,19 +151,21 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
             def get_measdomain(measno):
                 measdomain = list();
 
-                if parent == 103:
-                    if measno == '1004' or measno == '1007' or measno == '1025' or measno == '1059': measdomain.append(
-                        'FFT'), measdomain.append('Vel'), measdomain.append('[mm/s]')
-                    if measno == '1018' or measno == '1028' or measno == '1029':
+                if str(parent) == '103':
+                    if measno == '1004' or measno == '1007' or measno == '1025' or measno == '1059':
+                        measdomain.append(
+                            'FFT'), measdomain.append('Vel'), measdomain.append('[mm/s]')
+                    elif measno == '1018' or measno == '1028' or measno == '1029':
                         measdomain.append('FFT'), measdomain.append('Env'), measdomain.append('[m/s2]')
 
                     else:
                         measdomain.append('UNKNOWN'), measdomain.append('UNKNOWN'), measdomain.append('UNKNOWN')
 
-                if parent == 46:
-                    if measno == '1004' or measno == '1007' or measno == '1026' or measno == '1028': measdomain.append(
-                        'FFT'), measdomain.append('Vel'), measdomain.append('[mm/s]')
-                    if measno == '1023' or measno == '1025' or measno == '1027':
+                if str(parent) == '46':
+                    if measno == '1004' or measno == '1007' or measno == '1026' or measno == '1028':
+                        measdomain.append(
+                            'FFT'), measdomain.append('Vel'), measdomain.append('[mm/s]')
+                    elif measno == '1023' or measno == '1025' or measno == '1027':
                         measdomain.append('FFT'), measdomain.append('Env'), measdomain.append('[m/s2]')
 
                     else:
@@ -813,13 +815,25 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
         else:
             Window.mainloop()
 
+    # username = ''
+    # password = ''
+    # host = ''
+    # connD = [username, password, host]
+    # parent = 103  # aurora
 
-
+    # parent = 73 # hafnia america
+    # parent = 55 #neptuno platform
+    # parent = 35 #norddolphin
+    # parent = 61 #nordpenguin
+    # parent = 46 #Elizabeth russ
+    # rnumber = '2008-2019'
 
     measlist = []
     get_meas()
 
     window_crosstable()
 
-
+# 'Vibscanner'
+# 'Marvib'
+# 'ezThomas'
 
