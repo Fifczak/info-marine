@@ -16,6 +16,8 @@ def prepare_IM(connD,report_number): #RETURN MEASLIST
 			self.standard =''
 			self.date =''
 			self.drivenby=''
+			self.sort = ''
+			self.sort2 = ''
 	def loadData(connD):
 		def countLimit(standard,value):	
 			for limNo in limits:
@@ -101,6 +103,7 @@ def prepare_IM(connD,report_number): #RETURN MEASLIST
 				x.limit = countLimit(x.standard,x.maxval)
 				x.drivenby=line[7]
 				x.sort = line[8][:4]
+				x.sort2 = line[8][:1]
 				measlist.append(x)
 
 	loadData(connD)	
@@ -114,6 +117,7 @@ def	drawtable_IM(document,measlist,connD,report_number):#):
 	trueMeasList = list()
 	activeIdList = list()
 	activeSortList = list()
+	activeSortPList = list()
 	idlist = list()
 	drivenByList = list()
 	for sort in sortlistQ:
@@ -126,6 +130,7 @@ def	drawtable_IM(document,measlist,connD,report_number):#):
 				trueMeasList.append(meas)
 				activeIdList.append(str(meas.id))
 				activeSortList.append(str(meas.sort))
+				activeSortPList.append(str(meas.sort2))
 				drivenByList.append(meas.drivenby)
 				idlist.append(meas.id)
 
@@ -186,18 +191,17 @@ def	drawtable_IM(document,measlist,connD,report_number):#):
 			try:
 				ht= resulttable.cell(xcord+1,0).paragraphs[0]
 				if measStrip[0][-5:] == '00.00' and sortlistQ[i+1][0][-5:] != '00.00' and sortlistQ[i+1][0][-3:] == '.00':
-					xcord += 1
-					r0 = ht.add_run('PLACE')#measStrip[1])
-					resulttable.cell(xcord,0).merge(resulttable.cell(xcord,6))
-					
+					if str(measStrip[0][:1]) in activeSortPList:
+						xcord += 1
+						r0 = ht.add_run(measStrip[1])
+						resulttable.cell(xcord,0).merge(resulttable.cell(xcord,6))
+
 					continue
 				if measStrip[0][-5:] != '00.00' and measStrip[0][-3:] == '.00' :
-					# if str(sortlistQ[i+1][1]) in activeIdList:
-					#print(measStrip[0][:4])
-					print(activeSortList[:4])
-					xcord += 1
-					r0 = ht.add_run('GROUP')#measStrip[1])
-					resulttable.cell(xcord,0).merge(resulttable.cell(xcord,6))
+					if str(measStrip[0][:4]) in activeSortList:
+						xcord += 1
+						r0 = ht.add_run(measStrip[1])
+						resulttable.cell(xcord,0).merge(resulttable.cell(xcord,6))
 						
 					continue
 			except:
