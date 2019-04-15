@@ -1,5 +1,5 @@
-#from Monitor import *
-from RemarksWithoutFeedbacksMonitor import *
+import Monitor
+#from RemarksWithoutFeedbacksMonitor import *
 import psycopg2
 import csv
 import tkinter as tk
@@ -7,9 +7,9 @@ import tkinter.ttk as ttk
 from tkinter import *
 
 def runprogram():
-	username = 'filipb'
-	password = '@infomarine'
-	host = 'localhost'
+	username = 'gosiam'
+	password = 'infog'
+	host = '192.168.8.125'
 	connD = [username,password,host]
 	def q_run(connD, querry):
 		username = connD[0]
@@ -30,7 +30,6 @@ def runprogram():
 			pass
 		conn.commit()
 		cur.close()		
-
 	def ClDNoRem():
 		def countLimit(standard, value):
 			limSrt = 'NOPE'

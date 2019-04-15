@@ -303,4 +303,4 @@ def ShipsApplication(ClDNoRemList):
 #ClDNoRemList = ClDNoRem()
 
 #print(list(ClDNoRemList))
-ShipsApplication(ClDNoRem())
+#ShipsApplication(ClDNoRem())
