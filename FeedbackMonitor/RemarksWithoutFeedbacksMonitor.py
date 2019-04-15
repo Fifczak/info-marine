@@ -8,8 +8,8 @@ import psycopg2
 import csv
 
 host = '192.168.8.125'
-username = 'filipb'
-password = '@infomarine'
+username = 'gosiam '
+password = 'infog'
 connD = [username, password, host]
 
 
@@ -210,4 +210,3 @@ def ShipsApplication(nofdblist):
 
 
 
-ShipsApplication(nofdblistF())

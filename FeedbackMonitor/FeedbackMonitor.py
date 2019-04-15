@@ -1,5 +1,6 @@
 import Monitor
-#from RemarksWithoutFeedbacksMonitor import *
+import UnknowSentFlag
+import RemarksWithoutFeedbacksMonitor
 import psycopg2
 import csv
 import tkinter as tk
@@ -124,7 +125,25 @@ def runprogram():
 
 		replist = [item for item in reportlist1 if item not in RemExistList]
 
-		return (str(len(replist)))
+		noRemList = list()
+
+		for line in replist:
+			hash1 = line.find("#")
+			hash2 = line.find("##")
+			hash3 = line.find("###")
+			hash4 = line.find("####")
+			shipid = line[:hash1]
+			shipname = line[hash1 + 1:hash2]
+			rn = line[hash2 + 2:hash3]
+			devid = line[hash3 + 3:hash4]
+			devname = line[hash4 + 4:]
+
+			noRemStrip = [shipname, shipid, rn, devname, devid]
+			noRemList.append(noRemStrip)
+
+		return list(noRemList)
+
+
 	def unknowstateremarks():
 		querry = "select id,raport_number from remarks where sended is null order by raport_number, id"
 		nosendedlist = q_run(connD, querry)
@@ -148,7 +167,11 @@ def runprogram():
 		costflagleft = q_run(connD, querry)	
 		return (costflagleft)	
 	def details1():
-		Monitor.ShipsApplication(ClDNoRem())
+		with open('Cl D no remark.csv', 'w', newline='') as file:
+			for l in r1:
+				file.write(str(l))
+				file.write('\n')
+
 	def details2():	
 		with open('Remarks with unknow stats.csv', 'w', newline='') as file:
 			for l in r2:
@@ -170,12 +193,23 @@ def runprogram():
 				file.write(str(l))
 				file.write('\n')
 
+
+
+	def run1():
+		Monitor.ShipsApplication(r1)
+	def run2():
+		UnknowSentFlag.unknowremarks()
+	def run3():
+		RemarksWithoutFeedbacksMonitor.ShipsApplication(RemarksWithoutFeedbacksMonitor.nofdblistF())
+
+
+
 	MonitorWindow = tk.Tk()
 	MonitorWindow.title("Feedback Monitor")
 
 
 
-	label1 = tk.Label(MonitorWindow, text  = 'Class D without remarks(reports): ')
+	label1 = tk.Label(MonitorWindow, text  = 'Class D without remarks: ')
 	label2 = tk.Label(MonitorWindow, text  = 'Remarks with unknow state: ')
 	label3 = tk.Label(MonitorWindow, text  = 'Sent remarks without feedbacks: ')
 	label4 = tk.Label(MonitorWindow, text  = 'Feedback flag left: ')
@@ -186,7 +220,7 @@ def runprogram():
 	r3 = NoFdbRem()
 	r4 = FdbFlagLeft()
 	r5 = CostFlagLeft()
-	labelr1 = tk.Label(MonitorWindow, text  = r1)
+	labelr1 = tk.Label(MonitorWindow, text  = len(r1))
 	labelr2 = tk.Label(MonitorWindow, text  = len(r2))
 	labelr3 = tk.Label(MonitorWindow, text  = len(r3))
 	labelr4 = tk.Label(MonitorWindow, text  = len(r4))
@@ -199,7 +233,11 @@ def runprogram():
 	button4 = tk.Button(MonitorWindow, text = 'Details',command = details4)
 	button5 = tk.Button(MonitorWindow, text = 'Details',command = details5)
 
-
+	button1s = tk.Button(MonitorWindow, text = 'Run Software',command = run1)
+	button2s = tk.Button(MonitorWindow, text = 'Run Software',command = run2)
+	button3s = tk.Button(MonitorWindow, text = 'Run Software',command = run3)
+	label4s = tk.Label(MonitorWindow, text = 'Soft in Overmind')
+	label5s = tk.Label(MonitorWindow, text = 'Soft in Overmind')
 
 	label1.grid(row=0,column=0)
 	label2.grid(row=1,column=0)
@@ -216,7 +254,11 @@ def runprogram():
 	button3.grid(row=2,column=2)
 	button4.grid(row=3,column=2)
 	button5.grid(row=4,column=2)
-
+	button1s.grid(row=0,column=3)
+	button2s.grid(row=1,column=3)
+	button3s.grid(row=2,column=3)
+	label4s.grid(row=3,column=3)
+	label5s.grid(row=4,column=3)
 
 	MonitorWindow.mainloop()
 	
