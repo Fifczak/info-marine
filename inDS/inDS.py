@@ -42,15 +42,18 @@ def Login():
 			pass_entry_label.grid(row=2, column=1)
 			pass_entry = tk.Entry(root, show="*")    #PASSWORD ENTRY BOX
 			pass_entry.grid(row=2, column=2)
-			with open('log.csv') as csvfile:
-				openfile = csv.reader(csvfile, delimiter=' ')
-				p = -1
-				for lines in openfile:
-					p += 1
-					if p == 0:
-						user_entry.insert(0,str(lines[0]))
-					if p == 1:
-						pass_entry.insert(0,str(lines[0]))
+			try:
+				with open('log.csv', 'w', newline='') as csvfile:
+					openfile = csv.reader(csvfile, delimiter=' ')
+					p = -1
+					for lines in openfile:
+						p += 1
+						if p == 0:
+							user_entry.insert(0,str(lines[0]))
+						if p == 1:
+							pass_entry.insert(0,str(lines[0]))
+			except:
+				pass
 			var = IntVar()
 			checksave = tk.Checkbutton(root, text="Remember", variable=var)      
 			checksave.grid(row=3, column=2)

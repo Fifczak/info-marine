@@ -178,19 +178,20 @@ def	drawtable_IM(document,measlist,connD,report_number):#):
 	i=-1
 	for measStrip in sortlistQ: 
 		i += 1
+		print(measStrip[0])
 		if (measStrip[1]).isdigit() == False:######## NAGŁÓWKI
 			try:
 				ht= resulttable.cell(xcord+1,0).paragraphs[0]
 				if measStrip[0][-5:] == '00.00' and sortlistQ[i+1][0][-5:] != '00.00' and sortlistQ[i+1][0][-3:] == '.00':
 					xcord += 1
-					r0 = ht.add_run(measStrip[1])
+					r0 = ht.add_run('PLACE')#measStrip[1])
 					resulttable.cell(xcord,0).merge(resulttable.cell(xcord,6))
 					
 					continue
 				if measStrip[0][-5:] != '00.00' and measStrip[0][-3:] == '.00' :
 					if str(sortlistQ[i+1][1]) in activeIdList:
 						xcord += 1
-						r0 = ht.add_run(measStrip[1])
+						r0 = ht.add_run('GROUP')#measStrip[1])
 						resulttable.cell(xcord,0).merge(resulttable.cell(xcord,6))
 						
 						continue
@@ -198,7 +199,6 @@ def	drawtable_IM(document,measlist,connD,report_number):#):
 				pass
 		else:	######## POMIARY
 			p=-1
-
 			#drivenByList.append('0') # zeby nie bylo bledu na koncu petli
 			for xx in trueMeasList:
 				p+=1
@@ -236,13 +236,15 @@ def	drawtable_IM(document,measlist,connD,report_number):#):
 						except:
 							pass
 					
-					print(str(drivenByList[p+1]),str(idlist[p]))
-					if str(drivenByList[p+1]) == str(xx.id):
-						xcord += 1
-					else:
-						xcord += 2
-					break
 
+					try:
+						if str(drivenByList[p+1]) == str(xx.id):
+							xcord += 1
+						else:
+							xcord += 2
+						break
+					except:
+						break
 					
 def	drawtable_STOCZNIA_REMONTOWA(document,measlist,connD,report_number):#):trzeba troche ukrocic
 	querry = "Select parent from measurements_low where raport_number = '" + str(report_number) + "' limit 1"
