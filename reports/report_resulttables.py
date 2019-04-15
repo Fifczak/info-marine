@@ -2,7 +2,7 @@ import psycopg2
 import time
 from docx import Document
 from report_database import *
-def prepare_IM(connD,report_number):
+def prepare_IM(connD,report_number): #RETURN MEASLIST
 	measlist = list()
 	class meas(object):
 		def __init__(self):
@@ -75,7 +75,7 @@ def prepare_IM(connD,report_number):
 					from standards"""
 		limits = q_run(connD,querry)			
 		querry = """select 
-					 ml.id, ml.raport_number, dev.name,  max(ml.value) as RMS, ml2.max as Envelope, dev.norm ,ml.date, dev.drivenby
+					 ml.id, ml.raport_number, dev.name,  max(ml.value) as RMS, ml2.max as Envelope, dev.norm ,ml.date, dev.drivenby,dss.sort
 					from measurements_low as ml
 					left join (select 
 								 ml.id, ml.raport_number,  max(ml.value)
@@ -83,8 +83,9 @@ def prepare_IM(connD,report_number):
 								 where type = 'envelope P-K' and parent = """ + str(parent) + """
 								 group by id,raport_number order by raport_number DESC) as ml2 on ml.id = ml2.id and ml.raport_number = ml2.raport_number
 					 left join devices as dev on ml.id = dev.id
+					 left join(select cast (id as integer), sort from ds_structure where id ~E'^\\\d+$' ) as dss on ml.id = dss.id
 					 where ml.type = 'RMS' and ml.parent = """ + str(parent) + """
-					 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,ml.date,dev.drivenby order by raport_number DESC"""
+					 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,ml.date,dev.drivenby,dss.sort order by raport_number DESC"""
 		reportresults = q_run(connD, querry)
 		
 		for line in reportresults:
@@ -99,6 +100,7 @@ def prepare_IM(connD,report_number):
 				getTrend(x)
 				x.limit = countLimit(x.standard,x.maxval)
 				x.drivenby=line[7]
+				x.sort = line[8][:4]
 				measlist.append(x)
 
 	loadData(connD)	
@@ -111,6 +113,7 @@ def	drawtable_IM(document,measlist,connD,report_number):#):
 	sortlistQ = q_run(connD,querry)
 	trueMeasList = list()
 	activeIdList = list()
+	activeSortList = list()
 	idlist = list()
 	drivenByList = list()
 	for sort in sortlistQ:
@@ -122,7 +125,7 @@ def	drawtable_IM(document,measlist,connD,report_number):#):
 			if str(sort[1])==str(meas.id):
 				trueMeasList.append(meas)
 				activeIdList.append(str(meas.id))
-
+				activeSortList.append(str(meas.sort))
 				drivenByList.append(meas.drivenby)
 				idlist.append(meas.id)
 
@@ -178,7 +181,7 @@ def	drawtable_IM(document,measlist,connD,report_number):#):
 	i=-1
 	for measStrip in sortlistQ: 
 		i += 1
-		print(measStrip[0])
+
 		if (measStrip[1]).isdigit() == False:######## NAGŁÓWKI
 			try:
 				ht= resulttable.cell(xcord+1,0).paragraphs[0]
@@ -189,12 +192,14 @@ def	drawtable_IM(document,measlist,connD,report_number):#):
 					
 					continue
 				if measStrip[0][-5:] != '00.00' and measStrip[0][-3:] == '.00' :
-					if str(sortlistQ[i+1][1]) in activeIdList:
-						xcord += 1
-						r0 = ht.add_run('GROUP')#measStrip[1])
-						resulttable.cell(xcord,0).merge(resulttable.cell(xcord,6))
+					# if str(sortlistQ[i+1][1]) in activeIdList:
+					#print(measStrip[0][:4])
+					print(activeSortList[:4])
+					xcord += 1
+					r0 = ht.add_run('GROUP')#measStrip[1])
+					resulttable.cell(xcord,0).merge(resulttable.cell(xcord,6))
 						
-						continue
+					continue
 			except:
 				pass
 		else:	######## POMIARY
