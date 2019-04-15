@@ -84,8 +84,8 @@ def makereport(connD,rn_):
 ##########################################
 
 
-username = 'filipb'
-password = '@infomarine'
+username = 'testuser'
+password = 'info'
 host = 'localhost'
 connD = [username,password,host]
 makereport(connD,'1746U-2018')
