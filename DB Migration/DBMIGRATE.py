@@ -4,7 +4,7 @@ import tkinter.ttk as ttk
 from tkinter import *
 username = 'filipb'
 password = '@infomarine'
-host1 = 'localhost'
+host1 = '192.168.8.125'
 host2 = 'localhost'
 connBASE = [username,password,host1]
 connTARGET = [username,password,host2]
@@ -28,16 +28,14 @@ def q_run(connD, querry):
 		pass
 	conn.commit()
 	cur.close()	
-def createtables():
-	querry = """"
-	
-	
-	
-	
-	
-	"""
+def copyharmo():
+	querry = "select raport_number, shipid from reports where raport_number is not null and shipid is not null order by raport_number "
+	for line in q_run(connBASE, querry):
 
-	
+		querry = "INSERT INTO HARMONOGRAM(shipid,report_number,pomiar,struct,datasheet,report, analysis, send_raport,remarks,feedbacks,accept,fdbrem,fdbrem2) VALUES (" +str(line[1]) + ",'" + str(line[0]) + "',True,True,True,True,True,True,True,True,True,True,True)"
+		print(querry)
+		q_run(connBASE, querry)
+
 def migratestruct():
 	pbars = tk.Tk()
 	pbars.title("Move data")
@@ -1195,4 +1193,4 @@ def migratestruct():
 
 	
 #migratestruct()
-createtables()
+copyharmo()

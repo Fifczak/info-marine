@@ -5,7 +5,7 @@ from tkinter import messagebox
 from postgresquerrys import *
 parent = 31
 username = 'filipb'
-password = ###########NIE DZIAŁA < TRZEBA ZMIENIC DODAWANIE FLAGI VISIBLE W PUNKTACH, I nie force dodawanie id
+password = ' ' ###########NIE DZIAŁA < TRZEBA ZMIENIC DODAWANIE FLAGI VISIBLE W PUNKTACH, I nie force dodawanie id
 host = 'localhost'
 connD = [username,password,host]
 	
