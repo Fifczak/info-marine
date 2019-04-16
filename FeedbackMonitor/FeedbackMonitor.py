@@ -159,7 +159,7 @@ def runprogram():
 		nofdblist = q_run(connD, querry)	
 		return (nofdblist)
 	def FdbFlagLeft():
-		querry = "select id,raport_number from feedbacks where fdbflag is null "
+		querry = "select id,raport_number from feedbacks where fdbflag is null and parent not in(select id from main  where parent = 10) "
 		fdbflagleft = q_run(connD, querry)	
 		return (fdbflagleft)	
 	def CostFlagLeft():
