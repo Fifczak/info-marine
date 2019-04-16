@@ -68,6 +68,7 @@ def makereport(connD,rn_):
 		standard(document)
 	
 	P3 = document.add_paragraph('03. STANDARDS (put informations about standards here)')
+
 	P4 = document.add_paragraph('04. RESULTS (present results here)')
 	if resulttable == 1:
 		measlist = prepare_IM(connD,rn_)
