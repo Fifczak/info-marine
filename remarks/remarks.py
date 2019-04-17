@@ -7,7 +7,7 @@ from tkinter import messagebox
 import csv
 from tkinter.filedialog import askopenfilename
 from tkinter import Tk
-
+from tkcalendar import Calendar, DateEntry
 import matplotlib.pyplot as plt
 import numpy as num
 import tkinter as tkk
@@ -15,8 +15,6 @@ from tkinter import filedialog
 
 
 connD=['testuser','info','localhost']
-import tkinter as tk
-from tkinter import ttk
 
 class Scrollable(ttk.Frame):
     """
@@ -55,7 +53,6 @@ class Scrollable(ttk.Frame):
 
         self.update_idletasks()
         self.canvas.config(scrollregion=self.canvas.bbox(self.windows_item))
-
 
 def q_run(connD, querry):
 	username = connD[0]
@@ -139,23 +136,32 @@ def LogApplication(root):
 	makeWin()
 
 def remarks(connD):
-	class device:
-		def __init__(self):
-			self.lastraport = ''
-			self.requestdate = ''
-			self.lastraportdate =''
-
-	parent = 79
-	querry = "SELECT dss.id, CASE WHEN dss.id ~E'^\\\d+$' THEN	(select name from devices where cast(devices.id as text)\
-	  =  dss.id limit 1) ELSE (select id from ds_structure where id  =  dss.id limit 1) END as sortint, dss.sort FROM ds_structure\
-	   as dss where dss.parent = " + str(parent)
-	results = q_run(connD, querry)
 
 	querry = "select name,id from main where parent = 1 order by name"
 	resultr = q_run(connD, querry)
 
+	def datepick(ob):
+		if str(ob.var2.get()) == '0':
+				ob.dateLabel.configure(text='')
+		if str(ob.var2.get()) == '1':
+			def print_sel():
+				ob.requestdate =  str(cal.selection_get())
+				ob.dateLabel.configure(text=ob.requestdate)
+				root.destroy()
+			root = Tk()
+			root.title("Calendar")
+			#s = ttk.Style(root)
+			#s.theme_use('clam')
+			top = tk.Toplevel(root)
 
+			cal = Calendar(top,
+						   font="Arial 14", selectmode='day',
+						   cursor="hand1", year=2019, month=4, day=15)
+			cal.pack(fill="both", expand=True)
+			ttk.Button(top, text="ok", command=print_sel).pack()
+			root.mainloop()
 
+	#
 
 
 	def getships(evt):
@@ -178,9 +184,12 @@ def remarks(connD):
 		shipname = w.get(index)
 		makereports(shipname)
 
+
 	def makereports(shipname):
 		querry = "select raport_number from measurements_low where parent = (select id from main where name = '" + str(shipname) +"' limit 1) group by raport_number order by raport_number DESC"
 		reports = q_run(connD,querry)
+		querry = "(select id from main where name = '" + str(shipname) +"' limit 1)"
+		parent = str(q_run(connD,querry)[0][0])
 		Reportlistbox.delete(0,'end')
 
 		for line in reports:
@@ -197,6 +206,7 @@ def remarks(connD):
 			self.rn = rn
 			self.id = dev[1]
 			self.name = dev[0]
+			self.parent =dev[2]
 			self.nameLabel = tk.Label(measCframe,text= self.name)
 			self.nameLabel.pack(side = LEFT)
 			self.textfield = tk.Text(measCframe, width=50, height=2)
@@ -206,45 +216,91 @@ def remarks(connD):
 			self.check = ttk.Checkbutton(measCframe, text='Sent', variable=self.var)
 			self.check.pack(side=LEFT)
 			self.var2 = tk.IntVar(value=0)
-			self.check2 = ttk.Checkbutton(measCframe, text='Reminder', variable=self.var2)
+			self.check2 = ttk.Checkbutton(measCframe, text='Reminder', variable=self.var2,command = lambda remO = self: datepick(remO))
 			self.check2.pack(side=LEFT)
-			measCframe.grid()
+			measCframe.pack(side=TOP, fill=BOTH, expand=True)
+
+			self.dateLabel = tk.Label(measCframe,text= "")
+			self.dateLabel.pack(side = LEFT)
+
+			self.requestdate = ''
+			self.datevar = tk.StringVarVarvalue="2000-01-01"
+
+			#command = lambda ue=user_entry, pe=pass_entry: logging_in(ue, pe)
+
 	def putdevices(report):
-		querry = """select dev.name ,ml.id
+		def upload():
+			c=0
+			for line in remlist:
+				if line.textfield.get("1.0", END).strip() != '':
+					querry = "select date from measurements_low where id = " + str(
+						line.id) + " and raport_number = '" + str(line.rn) + "' limit 1"
+
+					measdate = str(q_run(connD, querry)[0][0])
+
+					if line.var.get() == 1: sendflag = 'True'
+					else: sendflag = 'False'
+					if line.var2.get() == 1: remflag = 'True'
+					else: remflag = 'False'
+					querry = "INSERT INTO REMARKS(id,raport_number,remark,parent,documentdate,sended,reminder) VALUES (" + str(
+						line.id) + ",'" + str(line.rn) + "','" + str(
+						(line.textfield.get("1.0", END)).strip()) + "'," + str(line.parent) + ",'" + str(
+						measdate) +"'," + str(sendflag) + "," + str(remflag) + ")"
+					q_run(connD, querry)
+
+
+					if remflag == 'True':
+						querry = "INSERT INTO REMINDER(parent,raport_number,request_date,remcom,id) VALUES (" + str(
+							line.parent) + ",'" + str(line.rn) + "','" + str(
+							line.requestdate) + "','" + str(line.textfield.get("1.0", END)).strip() + "'," + str(
+							line.id) + ")"
+						q_run(connD, querry)
+
+
+
+
+					c+=1
+			messagebox.showinfo("Title", 'Upload done: ' + str(c))
+
+		querry = """select dev.name ,ml.id,ml.parent
 			from measurements_low as ml 
 			left join (select parent,sort, cast(id as int) as id from ds_structure where id ~E'^\\\d+$') as dss on ml.id =dss.id
 			left join devices as dev on ml.id =dev.id
 			where ml.raport_number = '""" + str(report) + """' 
-				group by ml.id,dss.sort,dev.name
+				group by ml.id,dss.sort,dev.name,ml.parent
 				order by dss.sort"""
-
-
-		devices = q_run(connD, querry)
-
 		try:
-			for widget in measBframe.winfo_children():
+			for widget in MASTERmeasframe.winfo_children():
 				widget.destroy()
 		except:
 			pass
 
-		MASTERmeasframe.pack(side=TOP, anchor=S)
-		# measBframe.config(yscrollcommand=scrollbar.set)
-		measBframe.pack(side=TOP)
-		scrollable_body = Scrollable(measBframe, width=32)
+		MASTERmeasframe.pack(side=TOP, anchor=S, fill=BOTH)
 
 
-		UploadButton = Button(MASTERmeasframe, text='Upload and refresh')#, command=upload)
+
+		devices = q_run(connD, querry)
+		header = ttk.Frame(MASTERmeasframe)
+		body = ttk.Frame(MASTERmeasframe, width=1000,height = 1000)
+		header.pack()
+		body.pack(fill=BOTH)
+		UploadButton = Button(header, text='Upload and refresh', command=upload)
 		UploadButton.pack()
+		GetReportButton = Button(header, text='Get report')#, command=upload)
+		GetReportButton.pack()
+		ttk.Label(header, text="The header").pack()
+		scrollable_body = Scrollable(body, width=32)
 		remlist = list()
 		for i in devices:
-			measCframe = tk.Frame(measBframe, height=2, bd=1)
+			measCframe = tk.Frame(scrollable_body, height=2, width=32)
 			X = frame_reminder(measCframe,i,report)
 			remlist.append(X)
-
 		scrollable_body.update()
+
 	remarksWindow = tk.Tk()
 	remarksWindow.title("Reminder")
-
+	parent = 1
+	MASTERmeasframe = Frame(remarksWindow, width=600,height = 600)
 	Ownerlistbox = Listbox(remarksWindow)
 	Ownerlistbox.config(width=0)
 	Ownerlistbox.bind('<Double-Button>', getships)
@@ -254,12 +310,6 @@ def remarks(connD):
 	Reportlistbox = Listbox(remarksWindow)
 	Reportlistbox.config(width=0)
 	Reportlistbox.bind('<Double-Button>', getdevices)
-
-
-
-
-	MASTERmeasframe = Frame(remarksWindow, width=300, height=300)
-	measBframe = Canvas(MASTERmeasframe)  # ,yscrollcommand=rapmeasscrol.set,scrollregion=(0,0,500,500))
 
 
 
@@ -284,6 +334,6 @@ def remarks(connD):
 # root.geometry("200x120")
 # LogApplication(root)  # The frame is inside the widgit
 remarks(connD)
-#root.mainloop()
+
 #remindershow()
 

@@ -93,20 +93,16 @@ def ShipsApplication(nofdblist):
                     if line.textfield.get("1.0", END).strip() != '':
 
                         try:
-                            querry = "select date from measurements_low where id = " + str(
-                                line.id) + " and raport_number = '" + str(line.rn) + "' limit 1"
+                            querry = "select date from measurements_low where id = " + str( line.id) + " and raport_number = '" + str(line.rn) + "' limit 1"
 
                             measdate = str(q_run(connD, querry)[0][0])
 
-                            querry = "INSERT INTO FEEDBACKS(id,raport_number,feedback,parent,documentdate) VALUES (" + str(
-                                line.id) + ",'" + str(line.rn) + "','" + str(
-                                (line.textfield.get("1.0", END)).strip()) + "'," + str(line.parent) + ",'" + str(
-                                measdate) + "')"
+                            querry = "INSERT INTO FEEDBACKS(id,raport_number,feedback,parent,documentdate) VALUES (" + str( line.id) + ",'" + str(line.rn) + "','" + str(
+                                (line.textfield.get("1.0", END)).strip()) + "'," + str(line.parent) + ",'" + str(measdate) + "')"
 
                             q_run(connD, querry)
                         except:
-                            querry = "INSERT INTO FEEDBACKS(id,raport_number,feedback,parent) VALUES (" + str(
-                                line.id) + ",'" + str(line.rn) + "','" + str(
+                            querry = "INSERT INTO FEEDBACKS(id,raport_number,feedback,parent) VALUES (" + str(line.id) + ",'" + str(line.rn) + "','" + str(
                                 (line.textfield.get("1.0", END)).strip()) + "'," + str(line.parent) +  ")"
                             q_run(connD, querry)
 
@@ -115,8 +111,7 @@ def ShipsApplication(nofdblist):
                         q_run(connD, querry)
 
                     if line.var2.get() == 1:
-                        querry = "DELETE FROM remarks WHERE id = '" + str(
-                            line.id) + "' and raport_number = '" + str(line.rn) + "'"
+                        querry = "DELETE FROM remarks WHERE id = '" + str(line.id) + "' and raport_number = '" + str(line.rn) + "'"
                         q_run(connD, querry)
 
 
