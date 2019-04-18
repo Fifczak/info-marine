@@ -90,7 +90,7 @@ def ShipsApplication(nofdblist):
         def selectreport(evt):
             def upload():
                 for line in remlist:
-                    print(str(id))
+                    print(str(line.id))
                     if line.textfield.get("1.0", END).strip() != '':
 
                         try:

@@ -1154,8 +1154,7 @@ def migratestruct():
 	ds_structure()
 	devices()
 
-	remarks()
-	feedbacks()
+
 	costcases()
 	costflags()
 	crosstable()
@@ -1179,8 +1178,8 @@ def migratestruct():
 
 	meascharts()
 	measurements_low()
-
-
+	remarks()
+	feedbacks()
 	reminder()
 	reports()
 
@@ -1189,14 +1188,14 @@ def migratestruct():
 
 
 	print("WSTAWIC RECZNIE KOMBAJNVER")
-	
+	print("WSTAWIC RECZNIE HARMONOGRAM")
 	
 	pbars.mainloop()
 
 	
-#migratestruct()
+migratestruct()
 #copyharmo()
 
 
 
-q_run(connTARGET, 'select * from main')
+#q_run(connTARGET, 'select * from main')
