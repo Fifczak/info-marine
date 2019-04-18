@@ -193,10 +193,3 @@ def standard_PMS_limit(document):
 	r11.italic=True
 	r12=p1.add_run(' contains remarks and suggestions based on the analysis of vibration signal. This column can be taken as the final conclusion about machine condition. If cell is empty, it means that there is no existing problem or defect shown in vibration signal.')
 	p1.alignment=WD_ALIGN_PARAGRAPH.JUSTIFY
-
-
-
-
-
-
-
