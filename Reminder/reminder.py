@@ -14,7 +14,7 @@ import tkinter as tkk
 from tkinter import filedialog
 
 
-connD=['testuser','info','192.168.8.125']
+connD=['testuser','info','localhost']
 def q_run(connD, querry):
     username = connD[0]
     password = connD[1]
@@ -104,10 +104,10 @@ def remindershow():
             parent) + "group by id,raport_number order by id,raport_number desc"
         resultr = q_run(connD, querry)
 
-        querry ="select id,raport_number from reminder where status <> 2 and parent = " + str(parent)
+        querry ="select id,raport_number from reminder where status is null and parent = " + str(parent)
         remindertbl = q_run(connD, querry)
 
-
+        print(querry)
         p = 0
 
         for line in results:
@@ -126,6 +126,9 @@ def remindershow():
                         for line3 in remindertbl:   #SZUKANIE REMINDEROW
 
 
+                            if str(line3[0]) ==  str(line2[0]) and str(line3[1]) ==  str(line2[1]):
+                                print(line3[0])
+                                devlistbox.itemconfig(END, bg='Yellow')
 
                     else:
                         devlistbox.itemconfig(END, bg='Red')

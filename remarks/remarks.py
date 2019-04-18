@@ -14,7 +14,7 @@ import tkinter as tkk
 from tkinter import filedialog
 
 
-connD=['testuser','info','192.168.8.125']
+connD=['testuser','info','localhost']
 
 class Scrollable(ttk.Frame):
     """
