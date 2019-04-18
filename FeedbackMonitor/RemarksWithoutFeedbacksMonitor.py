@@ -64,6 +64,9 @@ def nofdblistF():
 
 def ShipsApplication(nofdblist):
     def LoadRaportList(shipid):
+        def test(ob):
+            print(ob.var2.get())
+
         class frame_rem:
             def __init__(self, measCframe, devname, rn, id, parent,remarkstr):
                 self.parent = parent
@@ -80,7 +83,7 @@ def ShipsApplication(nofdblist):
                 self.check = ttk.Checkbutton(measCframe, text='Not sent', variable = self.var)
                 self.check.pack(side=LEFT)
                 self.var2 = tk.IntVar()
-                self.check2 = ttk.Checkbutton(measCframe, text='No remark', variable = self.var2)
+                self.check2 = ttk.Checkbutton(measCframe, text='No remark', variable = self.var2,command = lambda remO = self: test(remO))
                 self.check2.pack(side=LEFT)
 
 
@@ -90,7 +93,6 @@ def ShipsApplication(nofdblist):
         def selectreport(evt):
             def upload():
                 for line in remlist:
-                    print(str(line.id))
                     if line.textfield.get("1.0", END).strip() != '':
 
                         try:
@@ -106,15 +108,15 @@ def ShipsApplication(nofdblist):
                             querry = "INSERT INTO FEEDBACKS(id,raport_number,feedback,parent) VALUES (" + str(line.id) + ",'" + str(line.rn) + "','" + str(
                                 (line.textfield.get("1.0", END)).strip()) + "'," + str(line.parent) +  ")"
                             q_run(connD, querry)
-                    print(str(line.var.get()))
+
                     if line.var.get() == 1:
                         querry = "UPDATE remarks SET sended = False where id = '" +str(line.id)+"' and raport_number = '" +str(line.rn)+ "'"
                         q_run(connD, querry)
-                    print(str(line.var2.get()))
+
                     if line.var2.get() == 1:
                         querry = "DELETE FROM remarks WHERE id = '" + str(line.id) + "' and raport_number = '" + str(line.rn) + "'"
                         q_run(connD, querry)
-                        print(querry)
+
 
 
                 root2.destroy()
@@ -206,3 +208,4 @@ def ShipsApplication(nofdblist):
 
 
 
+ShipsApplication(nofdblistF())
