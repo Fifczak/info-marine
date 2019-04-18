@@ -4,10 +4,12 @@ import tkinter.ttk as ttk
 from tkinter import *
 username = 'filipb'
 password = '@infomarine'
+username2 = 'dbadmin'
+password2 = '242QhpbS&9Fv'
 host1 = '192.168.8.125'
-host2 = 'localhost'
+host2 = '192.168.10.243'
 connBASE = [username,password,host1]
-connTARGET = [username,password,host2]
+connTARGET = [username2,password2,host2]
 
 def q_run(connD, querry):
 	username = connD[0]
@@ -1152,8 +1154,7 @@ def migratestruct():
 	ds_structure()
 	devices()
 
-	remarks()
-	feedbacks()
+
 	costcases()
 	costflags()
 	crosstable()
@@ -1177,8 +1178,8 @@ def migratestruct():
 
 	meascharts()
 	measurements_low()
-
-
+	remarks()
+	feedbacks()
 	reminder()
 	reports()
 
@@ -1187,10 +1188,14 @@ def migratestruct():
 
 
 	print("WSTAWIC RECZNIE KOMBAJNVER")
-	
+	print("WSTAWIC RECZNIE HARMONOGRAM")
 	
 	pbars.mainloop()
 
 	
-#migratestruct()
-copyharmo()
+migratestruct()
+#copyharmo()
+
+
+
+#q_run(connTARGET, 'select * from main')
