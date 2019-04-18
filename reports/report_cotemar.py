@@ -302,7 +302,7 @@ def resulttable(tn, host, username, password, tableno, id1, id2, rn):
 		result_text = str(result[j][0])
 		p=tableno.cell(2,1+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-		r=p.add_run(result_text)
+		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
 		r.font.size= Pt(11)
 		if maxcord == j:
@@ -342,7 +342,7 @@ def resulttable(tn, host, username, password, tableno, id1, id2, rn):
 		result_text = str(result[j][0])
 		p=tableno.cell(2,6+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-		r=p.add_run(result_text)
+		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
 		r.font.size= Pt(11)
 		if maxcord == j:
@@ -595,7 +595,7 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	l22.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	l22.paragraph_format.left_indent = Inches(0.25)
 	
-	t5 = document.add_paragraph('Following standards may applied for assessment:')
+	t5 = document.add_paragraph('Following standards are applied for assessment:')
 	t5.style = document.styles['text']
 	t5.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	
@@ -636,7 +636,7 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	table3.cell(2,0).add_paragraph('Range:','texthead')
 	table3.cell(2,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
-	table3.cell(2,1).add_paragraph('4-200 Hz','text')
+	table3.cell(2,1).add_paragraph('2-1000 Hz','text')
 	table3.cell(2,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
 	table3.cell(3,0).add_paragraph('Limit:','texthead')
@@ -670,7 +670,7 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	table4.cell(2,0).add_paragraph('Range:','texthead')
 	table4.cell(2,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
-	table4.cell(2,1).add_paragraph('4-1000 Hz','text')
+	table4.cell(2,1).add_paragraph('5-1000 Hz','text')
 	table4.cell(2,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
 	table4.cell(3,0).add_paragraph('Limit:','texthead')
@@ -741,14 +741,14 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	
 	document.add_paragraph()
 	
-	l25 = document.add_paragraph('2.4.	Measurement results')
+	l25 = document.add_paragraph('2.5.	Measurement results')
 	l25.style = document.styles['listlvl2']
 	l25.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	l25.paragraph_format.left_indent = Inches(0.25)
 	
 	document.add_paragraph()
-	
-	t12 = document.add_paragraph('Below table are presented FFT spectrum of Velocity the highest point of each electric motor and gear part.')
+	#tekst na podstawie 1963-2019
+	t12 = document.add_paragraph('In below tables are presented RMS velocity values for all measured points of electric motor and gear part. Additionally, FFT graphs for highest values on electric motor and gear part are included.')
 	t12.style = document.styles['text']
 	t12.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	
@@ -770,7 +770,7 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	
 		document.add_page_break()
 		document.add_paragraph()
-		table6 = document.add_table(rows=4, cols=9)	
+		table6 = document.add_table(rows=4, cols=9)
 		resulttable(j, host, username, password, table6, motors[j], thrusters[j], rn_)
 		chart = document.add_paragraph()
 		r = chart.add_run()

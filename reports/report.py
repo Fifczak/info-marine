@@ -68,7 +68,6 @@ def makereport(connD,rn_):
 		standard(document)
 	
 	P3 = document.add_paragraph('03. STANDARDS (put informations about standards here)')
-
 	P4 = document.add_paragraph('04. RESULTS (present results here)')
 	if resulttable == 1:
 		measlist = prepare_IM(connD,rn_)
@@ -85,8 +84,8 @@ def makereport(connD,rn_):
 ##########################################
 
 
-username = 'testuser'
-password = 'info'
+username = 'filipb'
+password = '@infomarine'
 host = 'localhost'
 connD = [username,password,host]
 makereport(connD,'1746U-2018')

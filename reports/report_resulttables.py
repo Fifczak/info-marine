@@ -228,13 +228,15 @@ def	drawtable_IM(document,measlist,connD,report_number):#):
 					ht = resulttable. cell(xcord+1,0).paragraphs[0]
 					r0 = ht.add_run(xx.name)
 					ht = resulttable. cell(xcord+1,1).paragraphs[0]
-					r0 = ht.add_run(str(xx.maxval))
+					#dodałem tu zamianę kropek na przecinki + zaokrąglenie do 3 miejsca po przecinku
+					txt_result=str(round(xx.maxval,3))
+					r0 = ht.add_run(txt_result.replace(".",","))
 					ht = resulttable. cell(xcord+1,2).paragraphs[0]
 					r0 = ht.add_run(str(xx.maxval2))
 					ht = resulttable. cell(xcord+1,3).paragraphs[0]
 					r0 = ht.add_run(str(xx.limit))
 					ht = resulttable. cell(xcord+1,4).paragraphs[0]
-					r0 = ht.add_run(str(xx.maxenv))			
+					r0 = ht.add_run(str(xx.maxenv))
 					ht = resulttable. cell(xcord+1,5).paragraphs[0]
 					if  str(xx.limit) == 'Cl. D':   #TEGO DLA CZYTELNOSCI LEPIEJ ZROBIC FUNKCJE
 						try:
