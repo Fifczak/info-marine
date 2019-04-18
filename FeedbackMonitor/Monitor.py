@@ -214,7 +214,7 @@ def ShipsApplication(ClDNoRemList):
 			
 			
 			try:
-				for widget in measBframe.winfo_children():
+				for widget in MASTERmeasframe.winfo_children():
 					widget.destroy()
 			except:
 				pass
@@ -226,7 +226,7 @@ def ShipsApplication(ClDNoRemList):
 			remlist = list()
 			backRemList = list()
 			for i in devices:
-				measCframe = tk.Frame(measBframe,height=2, bd=1, relief=SUNKEN)
+				measCframe = tk.Frame(MASTERmeasframe,height=2, bd=1, relief=SUNKEN)
 				X = frame_rem(measCframe,i[0],i[1],i[2],i[3])
 				#X = make_frame_rem(measCframe,i)
 				remlist.append(X)
@@ -287,8 +287,6 @@ def ShipsApplication(ClDNoRemList):
 	
 	
 	MASTERmeasframe = Frame(root2,width=300,height=300)
-	
-
 	measBframe = Canvas(MASTERmeasframe)#,yscrollcommand=rapmeasscrol.set,scrollregion=(0,0,500,500))
 	
 	

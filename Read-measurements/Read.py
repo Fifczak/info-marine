@@ -232,25 +232,81 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                 if line != " ":  # add other needed checks to skip titles
                     cols = line.split("\t")
                     if cols[0] == 'eDataIdMeaType':
-                        xcord += 1
-                        x = meas()
+                        if str(lines[p][:14]) == 'eDataIdMeaData':
+                            xcord += 1
+                            x = meas()
 
-                        if cols[1] == 'eMeaDisplacement':
-                            continue
-                        if cols[1] == 'eMeaVelocity':  ########### START RMS VELOCITY
+                            if cols[1] == 'eMeaDisplacement':
+                                continue
+                            if cols[1] == 'eMeaVelocity':  ########### START RMS VELOCITY
 
-                            iter += 1
-                            x.mode = 'Overall'
-                            x.unit = '[mm/s]'
-                            x.type = 'RMS'
-                            measflag = 1
-                            iterb = lines_line
-                            x.iterb = iterb
-                            while measflag == 1:
-                                iterb -= 1
-                                cols2 = lines[iterb].split("\t")
-                                if cols2[0] == 'eDataIdLocation' and cols2[1] == 'eTypePoint':
-                                    if is_empty(cols2[2]) == False:
+                                iter += 1
+                                x.mode = 'Overall'
+                                x.unit = '[mm/s]'
+                                x.type = 'RMS'
+                                measflag = 1
+                                iterb = lines_line
+                                x.iterb = iterb
+                                while measflag == 1:
+                                    iterb -= 1
+                                    cols2 = lines[iterb].split("\t")
+                                    if cols2[0] == 'eDataIdLocation' and cols2[1] == 'eTypePoint':
+                                        if is_empty(cols2[2]) == False:
+                                            x.point = cols2[2]
+                                            pointflag = 1
+                                            iterc = iterb
+                                            while pointflag == 1:
+                                                iterc -= 1
+                                                cols3 = lines[iterc].split("\t")
+                                                if cols3[0] == 'eDataIdLocation' and cols3[1] == 'eTypeMachine':
+                                                    x.routename = cols3[2]
+                                                    iterc = 0
+                                                    break
+                                            if iterc == 0:
+                                                measflag = 0
+                                    if iterb == 0:
+                                        measflag = 0
+                                measflag = 2
+                                iterb = lines_line
+                                x.iterc = iterb
+
+                                while measflag == 2:
+                                    iterb += 1
+                                    try:
+                                        cols2 = lines[iterb].split("\t")
+                                        if cols2[0] == 'Year':
+                                            if len(cols2[3]) == 1:
+                                                x.date = str(cols2[1] + '-0' + cols2[3] + '-' + cols2[5])
+                                            elif len(cols2[3]) == 2:
+                                                x.date = str(cols2[1] + '-' + cols2[3] + '-' + cols2[5])
+                                        if cols2[0] == 'RMS':
+                                            x.overall = round(float(cols2[1]), 3)
+                                            measflag = 0
+                                            measlist.append(
+                                                x)  ##########################################################################
+                                            break
+                                        if iterb == iter + 1000:
+                                            measflag = 0
+                                            break
+                                    except:
+                                        measflag = 0
+                                        break
+                            #############END RMS VELOCITY
+                            if cols[1] == 'eMeaAcceleration':
+                                iter += 1
+                                continue
+                            if cols[1] == 'eMeaBearingEnvelope':  ########### START PK ENV
+
+                                iter += 1
+                                x.mode = 'Overall'
+                                x.type = 'envelope P-K'
+                                x.unit = '[m/s2]'
+                                measflag = 1
+                                iterb = lines_line
+                                while measflag == 1:
+                                    iterb -= 1
+                                    cols2 = lines[iterb].split("\t")
+                                    if cols2[0] == 'eDataIdLocation' and cols2[1] == 'eTypePoint':
                                         x.point = cols2[2]
                                         pointflag = 1
                                         iterc = iterb
@@ -263,168 +319,113 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                                                 break
                                         if iterc == 0:
                                             measflag = 0
-                                if iterb == 0:
-                                    measflag = 0
-                            measflag = 2
-                            iterb = lines_line
-                            x.iterc = iterb
-
-                            while measflag == 2:
-                                iterb += 1
-                                try:
-                                    cols2 = lines[iterb].split("\t")
-                                    if cols2[0] == 'Year':
-                                        if len(cols2[3]) == 1:
-                                            x.date = str(cols2[1] + '-0' + cols2[3] + '-' + cols2[5])
-                                        elif len(cols2[3]) == 2:
-                                            x.date = str(cols2[1] + '-' + cols2[3] + '-' + cols2[5])
-                                    if cols2[0] == 'RMS':
-                                        x.overall = round(float(cols2[1]), 3)
+                                    if iterb == 0:
                                         measflag = 0
-                                        measlist.append(
-                                            x)  ##########################################################################
-                                        break
-                                    if iterb == iter + 1000:
-                                        measflag = 0
-                                        break
-                                except:
-                                    measflag = 0
-                                    break
-                        #############END RMS VELOCITY
-                        if cols[1] == 'eMeaAcceleration':
-                            iter += 1
-                            continue
-                        if cols[1] == 'eMeaBearingEnvelope':  ########### START PK ENV
+                                measflag = 2
+                                iterb = lines_line
+                                while measflag == 2:
+                                    try:
+                                        iterb += 1
+                                        cols2 = lines[iterb].split("\t")
+                                        if cols2[0] == 'Year':
 
-                            iter += 1
-                            x.mode = 'Overall'
-                            x.type = 'envelope P-K'
-                            x.unit = '[m/s2]'
-                            measflag = 1
-                            iterb = lines_line
-                            while measflag == 1:
-                                iterb -= 1
-                                cols2 = lines[iterb].split("\t")
-                                if cols2[0] == 'eDataIdLocation' and cols2[1] == 'eTypePoint':
-                                    x.point = cols2[2]
-                                    pointflag = 1
-                                    iterc = iterb
-                                    while pointflag == 1:
-                                        iterc -= 1
-                                        cols3 = lines[iterc].split("\t")
-                                        if cols3[0] == 'eDataIdLocation' and cols3[1] == 'eTypeMachine':
-                                            x.routename = cols3[2]
-                                            iterc = 0
+                                            if len(cols2[3]) == 1:
+                                                x.date = str(cols2[1] + '-0' + cols2[3] + '-' + cols2[5])
+                                            else:
+                                                x.date = str(cols2[1] + '-' + cols2[3] + '-' + cols2[5])
+                                        if cols2[0] == 'PK':
+                                            x.overall = round(float(cols2[1]), 3)
+                                            measlist.append(
+                                                x)  ##########################################################################
                                             break
-                                    if iterc == 0:
+                                        if iterb == iter + 1000:
+                                            measflag = 0
+                                    except:
                                         measflag = 0
-                                if iterb == 0:
-                                    measflag = 0
-                            measflag = 2
-                            iterb = lines_line
-                            while measflag == 2:
-                                try:
-                                    iterb += 1
+                                #############END PK ENV
+
+                            if cols[1] == 'eMeaTiming':
+                                # iter += 1
+                                continue
+                            if cols[1] == 'eMeaBearingKurtosis':
+                                # iter += 1
+                                continue
+                            if cols[1] == 'eMeaFourierTransform':  ###########START FFT
+
+                                iter += 1
+                                x.mode = 'FFT'
+                                x.domain = 'FFT'
+                                measflag = 1
+                                iterb = lines_line
+                                while measflag == 1:
+                                    iterb -= 1
                                     cols2 = lines[iterb].split("\t")
-                                    if cols2[0] == 'Year':
-
-                                        if len(cols2[3]) == 1:
-                                            x.date = str(cols2[1] + '-0' + cols2[3] + '-' + cols2[5])
-                                        else:
-                                            x.date = str(cols2[1] + '-' + cols2[3] + '-' + cols2[5])
-                                    if cols2[0] == 'PK':
-                                        x.overall = round(float(cols2[1]), 3)
-                                        measlist.append(
-                                            x)  ##########################################################################
-                                        break
-                                    if iterb == iter + 1000:
+                                    if cols2[0] == 'eDataIdLocation' and cols2[1] == 'eTypePoint':
+                                        x.point = cols2[2]
+                                        pointflag = 1
+                                        iterc = iterb
+                                        while pointflag == 1:
+                                            iterc -= 1
+                                            cols3 = lines[iterc].split("\t")
+                                            if cols3[0] == 'eDataIdLocation' and cols3[1] == 'eTypeMachine':
+                                                x.routename = cols3[2]
+                                                iterc = 0
+                                                break
+                                        if iterc == 0:
+                                            measflag = 0
+                                    if iterb == 0:
                                         measflag = 0
-                                except:
-                                    measflag = 0
-                            #############END PK ENV
+                                measflag = 2
+                                iterb = lines_line
+                                while measflag == 2:
+                                    try:
+                                        iterb += 1
+                                        cols2 = lines[iterb].split("\t")
+                                        if cols2[0] == 'Year':
+                                            if len(cols2[3]) == 1:
+                                                x.date = str(cols2[1] + '-0' + cols2[3] + '-' + cols2[5])
+                                            else:
+                                                x.date = str(cols2[1] + '-' + cols2[3] + '-' + cols2[5])
 
-                        if cols[1] == 'eMeaTiming':
-                            # iter += 1
-                            continue
-                        if cols[1] == 'eMeaBearingKurtosis':
-                            # iter += 1
-                            continue
-                        if cols[1] == 'eMeaFourierTransform':  ###########START FFT
+                                        if cols2[0] == 'eLines':
+                                            iter = 0
+                                            for item in cols2:
+                                                if iter != 0: x.chart.append(round(float(item), 3))
+                                                iter += 1
 
-                            iter += 1
-                            x.mode = 'FFT'
-                            x.domain = 'FFT'
-                            measflag = 1
-                            iterb = lines_line
-                            while measflag == 1:
-                                iterb -= 1
-                                cols2 = lines[iterb].split("\t")
-                                if cols2[0] == 'eDataIdLocation' and cols2[1] == 'eTypePoint':
-                                    x.point = cols2[2]
-                                    pointflag = 1
-                                    iterc = iterb
-                                    while pointflag == 1:
-                                        iterc -= 1
-                                        cols3 = lines[iterc].split("\t")
-                                        if cols3[0] == 'eDataIdLocation' and cols3[1] == 'eTypeMachine':
-                                            x.routename = cols3[2]
-                                            iterc = 0
+                                        if cols2[0] == 'frange':
+                                            if cols2[1] == '2':
+                                                maxF = 400
+                                            elif cols2[1] == '3':
+                                                maxF = 800
+                                            elif cols2[1] == '4':
+                                                maxF = 1600
+                                            elif cols2[1] == '5':
+                                                maxF = 3200
+                                            x.start = (maxF / 1600)
+                                            x.increment = x.start
+                                            x.end = maxF
+
+                                        if cols2[0] == 'avx':
+                                            if cols2[1] == '0':
+                                                x.type = 'Acc'
+                                                x.unit = '[m/s2]'
+                                            elif cols2[1] == '1':
+                                                x.type = 'Vel'
+                                                x.unit = '[m/s]'
+                                            elif cols2[1] == '2':
+                                                x.type = 'Dis'
+                                                x.unit = '[m]'
+                                            elif cols2[1] == '3':
+                                                x.type = 'Env'
+                                                x.unit = '[m/s2]'
+                                            measlist.append(
+                                                x)  ##########################################################################
                                             break
-                                    if iterc == 0:
+                                        if iterb == iter + 1000:
+                                            measflag = 0
+                                    except:
                                         measflag = 0
-                                if iterb == 0:
-                                    measflag = 0
-                            measflag = 2
-                            iterb = lines_line
-                            while measflag == 2:
-                                try:
-                                    iterb += 1
-                                    cols2 = lines[iterb].split("\t")
-                                    if cols2[0] == 'Year':
-                                        if len(cols2[3]) == 1:
-                                            x.date = str(cols2[1] + '-0' + cols2[3] + '-' + cols2[5])
-                                        else:
-                                            x.date = str(cols2[1] + '-' + cols2[3] + '-' + cols2[5])
-
-                                    if cols2[0] == 'eLines':
-                                        iter = 0
-                                        for item in cols2:
-                                            if iter != 0: x.chart.append(round(float(item), 3))
-                                            iter += 1
-
-                                    if cols2[0] == 'frange':
-                                        if cols2[1] == '2':
-                                            maxF = 400
-                                        elif cols2[1] == '3':
-                                            maxF = 800
-                                        elif cols2[1] == '4':
-                                            maxF = 1600
-                                        elif cols2[1] == '5':
-                                            maxF = 3200
-                                        x.start = (maxF / 1600)
-                                        x.increment = x.start
-                                        x.end = maxF
-
-                                    if cols2[0] == 'avx':
-                                        if cols2[1] == '0':
-                                            x.type = 'Acc'
-                                            x.unit = '[m/s2]'
-                                        elif cols2[1] == '1':
-                                            x.type = 'Vel'
-                                            x.unit = '[m/s]'
-                                        elif cols2[1] == '2':
-                                            x.type = 'Dis'
-                                            x.unit = '[m]'
-                                        elif cols2[1] == '3':
-                                            x.type = 'Env'
-                                            x.unit = '[m/s2]'
-                                        measlist.append(
-                                            x)  ##########################################################################
-                                        break
-                                    if iterb == iter + 1000:
-                                        measflag = 0
-                                except:
-                                    measflag = 0
             pbar.destroy()
 
         def readezthomas():
@@ -833,4 +834,4 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 # 'Vibscanner'
 # 'Marvib'
 # 'ezThomas'
-
+#read_measurement_file('Marvib','testuser','info','localhost','2016-2019', '61')

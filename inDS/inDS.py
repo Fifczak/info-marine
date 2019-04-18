@@ -6,6 +6,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from pathlib import Path
 import psycopg2
+
 import csv
 host = 'localhost'
 ownerlist = []
