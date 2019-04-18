@@ -40,6 +40,10 @@ def q_run(connD, querry):
 def remindershow():
     class device:
         def __init__(self):
+            self.status =''
+
+            self.name = ''
+            self.id = ''
             self.lastraport = ''
             self.requestdate = ''
             self.lastraportdate =''
@@ -66,6 +70,21 @@ def remindershow():
         makedevs(shipname)
 
     def makedevs(shipname):
+        def devremdet(evt):
+            w = evt.widget
+            index = int(w.curselection()[0])
+            detWindow = tk.Tk()
+            detWindow.title("Reminder details")
+
+            LabName = tk.Label(detWindow,text =str(devlist[index].name)).pack()
+            LabId   = tk.Label(detWindow,text =str(devlist[index].id)).pack()
+            LabLastRN  = tk.Label(detWindow,text ="Last report: " + str(devlist[index].lastraport)).pack()
+            LabLastRDate  = tk.Label(detWindow,text ="Last date: " + str(devlist[index].lastraportdate)).pack()
+
+
+
+
+            detWindow.mainloop()
         devlistbox.delete(0, 'end')
 
         querry = "select id from main where name = '" + str(shipname)+ "'"
@@ -85,29 +104,38 @@ def remindershow():
             parent) + "group by id,raport_number order by id,raport_number desc"
         resultr = q_run(connD, querry)
 
+        querry ="select id,raport_number from reminder where status <> 2 and parent = " + str(parent)
+        remindertbl = q_run(connD, querry)
+
+
         p = 0
-        devlist = list()
+
         for line in results:
             for line2 in resultr:
                 if str(line[0]) == str(line2[0]):
                     x = device()
+                    x.name = str(line[1])
+                    x.id = str(line2[0])
                     x.lastraport = str(line2[1])
                     x.lastraportdate = datetime.datetime.strptime(str(line2[2]), '%Y-%m-%d').date()
                     devlistbox.insert(END, results[p][1])
 
                     if x.lastraportdate >= lastfulldate:
                         devlistbox.itemconfig(END, bg='Green')
+                        x.status = 'OK'
+                        for line3 in remindertbl:   #SZUKANIE REMINDEROW
+
+
+
                     else:
                         devlistbox.itemconfig(END, bg='Red')
+                        x.status = 'NOK'
                     devlist.append(x)
                     break
 
             p += 1
-
+        devlistbox.bind('<Double-Button>',devremdet)
         makemessage()
-
-
-
 
 
 
@@ -133,19 +161,20 @@ Please be so kind and inform us whether taking vibration measurements is possibl
         textfield.insert(INSERT, headerstr)
 
         reminderstr = """
-        TUBEDZIELISTAURZADZEN
+TUBEDZIELISTAURZADZEN
         """
         textfield.insert(INSERT, reminderstr)
 
         header2str = """
-        Could you also perform measurements of machinery missing from three months survey:
+Could you also perform measurements of machinery missing from three months survey:
         """
         textfield.insert(INSERT, header2str)
+        devstr = ''
+        for line in devlist:
+            if str(line.status) == 'NOK':
+                devstr += chr(10) + str('-') + str(line.name)
 
-        reminderstr = """
-        TUBEDZIELISTAURZADZEN
-        """
-        textfield.insert(INSERT, reminderstr)
+        textfield.insert(INSERT, devstr)
 
         textfield.pack(side=LEFT)
 
@@ -163,7 +192,7 @@ Please be so kind and inform us whether taking vibration measurements is possibl
 
     remWindow = tk.Tk()
     remWindow.title("Reminder")
-
+    devlist = list()
     Ownerlistbox = Listbox(remWindow)
     Ownerlistbox.config(width=0)
     Ownerlistbox.bind('<Double-Button>', getships)
@@ -173,7 +202,7 @@ Please be so kind and inform us whether taking vibration measurements is possibl
 
     devlistbox = Listbox(remWindow)
     devlistbox.config(width=0)
-    #pointslist.bind('<Double-Button>', pointselect)
+
 
     textfield = tk.Text(remWindow, width=100, height=60)
 
