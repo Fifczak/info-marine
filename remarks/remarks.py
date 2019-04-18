@@ -14,7 +14,7 @@ import tkinter as tkk
 from tkinter import filedialog
 
 
-connD=['testuser','info','localhost']
+connD=['testuser','info','192.168.8.125']
 
 class Scrollable(ttk.Frame):
     """
@@ -288,7 +288,18 @@ def remarks(connD):
 		UploadButton.pack()
 		GetReportButton = Button(header, text='Get report')#, command=upload)
 		GetReportButton.pack()
-		ttk.Label(header, text="The header").pack()
+
+
+
+		try:
+			querry = "Select send_raport_koniec from harmonogram where report_number = '" + str(report) + "'"
+			senddate = q_run(connD, querry)[0][0]
+			senddate = str(senddate)[:10]
+			if senddate == 'None':senddate = 'no date in harmonogram'
+		except:
+			senddate = 'no date in harmonogram'
+
+		ttk.Label(header, text="Send date: " + str(senddate)).pack()
 		scrollable_body = Scrollable(body, width=32)
 		remlist = list()
 		for i in devices:
@@ -298,7 +309,7 @@ def remarks(connD):
 		scrollable_body.update()
 
 	remarksWindow = tk.Tk()
-	remarksWindow.title("Reminder")
+	remarksWindow.title("Remarks")
 	parent = 1
 	MASTERmeasframe = Frame(remarksWindow, width=600,height = 600)
 	Ownerlistbox = Listbox(remarksWindow)

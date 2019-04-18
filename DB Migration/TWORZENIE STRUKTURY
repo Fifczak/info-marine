@@ -37,6 +37,14 @@ CREATE TABLE public.bearings_seals (
     seal character varying(20)
 );
 
+create table public.bourbonid   (
+    devid bigint,
+    bourbon bigint
+    );
+
+
+
+
 
 CREATE TABLE public.costcases (
     lp integer NOT NULL,
@@ -47,6 +55,7 @@ CREATE TABLE public.costcases (
     low text[],
     high text[]
 );
+
 
 
 CREATE SEQUENCE public.costcases_lp_seq
@@ -425,7 +434,8 @@ CREATE TABLE public.remarks (
     documentdate date,
     raport_number character varying(25),
     sended boolean,
-    id bigint
+    id bigint,
+    reminder boolean
 );
 
 
