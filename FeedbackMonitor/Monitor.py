@@ -6,7 +6,7 @@ import tkinter.ttk as ttk
 from pathlib import Path
 import psycopg2
 import csv
-host = '192.168.8.125'
+host = '192.168.10.243'
 username = 'gosiam'
 password =  'infog'
 connD = [username,password,host]

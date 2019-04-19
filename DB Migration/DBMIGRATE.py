@@ -6,7 +6,7 @@ username = 'filipb'
 password = '@infomarine'
 username2 = 'dbadmin'
 password2 = '242QhpbS&9Fv'
-host1 = '192.168.8.125'
+host1 = '192.168.8.10'
 host2 = '192.168.10.243'
 connBASE = [username,password,host1]
 connTARGET = [username2,password2,host2]
@@ -1148,40 +1148,39 @@ def migratestruct():
 
 
 
-	main()
-	shipsdata()
-	users()
-	ds_structure()
-	devices()
+	# main()
+	# shipsdata()
+	# users()
+	# ds_structure()
+	# devices()
+	#
+	#
+	# costcases()
+	# costflags()
+	# crosstable()
+	# points() #PRZETESTOWANE CZESCIOWO - ZAMULILO STRASZNIE W TRAKCIE
+	#
+	# standards()
+	#
+	# bearings()
+	# bearings_add()
+	# bearings_freq()
+	# bearings_seals()
+	#
+	#
+	#
+	# equipment()
+	# fdbflags()
 
+	# #harmonogram przeniesc recznie - za duzo kolumn a za mało danych zeby było warto sie bawic
+	#
+	# main_models()
+	#
+	# meascharts()
 
-	costcases()
-	costflags()
-	crosstable()
-	points() #PRZETESTOWANE CZESCIOWO - ZAMULILO STRASZNIE W TRAKCIE
-
-	standards()
-
-	bearings()
-	bearings_add()
-	bearings_freq()
-	bearings_seals()
-
-
-
-	equipment()
-	fdbflags()
-
-	#harmonogram przeniesc recznie - za duzo kolumn a za mało danych zeby było warto sie bawic
-
-	main_models()
-
-	meascharts()
-	measurements_low()
 	remarks()
-	feedbacks()
-	reminder()
-	reports()
+	# feedbacks()
+	#reminder()
 
 
 	mcdata()  # stestowac jeszcze raz - zmiana apostrofu na spacje
@@ -1189,7 +1188,12 @@ def migratestruct():
 
 	print("WSTAWIC RECZNIE KOMBAJNVER")
 	print("WSTAWIC RECZNIE HARMONOGRAM")
-	
+
+	## TE ZOSTAŁY
+	#reports()
+	#measurements_low()
+
+
 	pbars.mainloop()
 
 	

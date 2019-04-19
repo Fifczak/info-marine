@@ -152,7 +152,7 @@ def createchart(host, username, password, id, rn, type):
 
 	if host == 'localhost':
 		querry = "select lo_export(measurements.chart, 'C:\\Overmind\\temp\\tempchart.csv') from measurements where id = " + str(id) + " and report_number = '" + str(rn) + "' and point = '"+ str(maxPoint) +"' and type = '" + str(type) + "' ;"	
-	if host == '192.168.8.125':
+	if host == '192.168.10.243':
 		servpath = r'/home/filip/Public/tempchart.csv'
 		querry = "select lo_export(measurements.chart,'" + servpath + "') from measurements where id = '" + str(id) + "' and report_number = '" + str(rn) + "' and point = '"+ str(maxPoint) +"' and type = '" + str(type) + "' ;"	
 		
@@ -171,8 +171,8 @@ def createchart(host, username, password, id, rn, type):
 			x = np.loadtxt(r'C:\\Overmind\\temp\\tempchart.csv')
 		except:
 			messagebox.showinfo("Title", str(querry))
-	if host == '192.168.8.125':
-		servpath = r'\\192.168.8.125\Public\tempchart.csv'
+	if host == '192.168.10.243':
+		servpath = r'\\192.168.10.243\Public\tempchart.csv'
 		while not os.path.exists(servpath):
 			time.sleep(1)
 		try:
@@ -231,8 +231,8 @@ def createchart(host, username, password, id, rn, type):
 
 	if host == 'localhost':
 		os.remove('C:\\Overmind\\temp\\tempchart.csv')
-	if host == '192.168.8.125':
-		servpath = r'\\192.168.8.125\Public\tempchart.csv'
+	if host == '192.168.10.243':
+		servpath = r'\\192.168.10.243\Public\tempchart.csv'
 		os.remove(servpath)
 	return maxPoint
 	plt.close()

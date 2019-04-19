@@ -19,8 +19,9 @@ def float_to_str(f):
     return format(d1, 'f')
 username = 'filipb'
 password = '@infomarine'
-host = 'localhost'
+host = '192.168.8.10'
 connD = [username,password,host]
+connD2 = ['dbadmin','242QhpbS&9Fv','192.168.10.243']
 def q_run(connD, querry):
 	username = connD[0]
 	password = connD[1]
@@ -39,9 +40,10 @@ def q_run(connD, querry):
 	except:
 		pass
 	conn.commit()
-	cur.close()	
-querry = "select chart from measurements where report_number = '1998-2019' order by chart "
+	cur.close()
+querry = "select chart from measurements order by chart "
 chartlist = q_run(connD,querry)
+print(len(chartlist))
 pbar = tk.Tk()
 pbar.title("Charts")
 p=-1
@@ -83,7 +85,7 @@ for oid in chartlist:
 			os.remove(paths)
 			querry = """insert into meascharts(shipid,id,point,report_number,date,domain,type,chart,unit) values
 						(""" + str(parent_) + "," + str(id_) + ",'" + str(point_) + "','" + str(reportno_) + "','" + str(date_) + "','" + str(domain_) + "','" + str(type_) + "','" + str(x) + "','[?]')"
-			q_run(connD,querry)
+			q_run(connD2,querry)
 		except:
 			print('Error, iter ' + str(p))
 pbar.mainloop()

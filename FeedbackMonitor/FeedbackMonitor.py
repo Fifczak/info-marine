@@ -8,9 +8,9 @@ import tkinter.ttk as ttk
 from tkinter import *
 
 def runprogram():
-	username = 'gosiam'
-	password = 'infog'
-	host = '192.168.8.125'
+	username = 'testuser '
+	password = 'testuser'
+	host = '192.168.10.243'
 	connD = [username,password,host]
 	def q_run(connD, querry):
 		username = connD[0]

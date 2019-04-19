@@ -13,7 +13,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 
 
 
-host = '192.168.8.125'
+host = '192.168.10.243'
 username = 'gosiam'
 password = 'infog'
 connD = [username,password,host]

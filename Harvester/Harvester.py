@@ -11,7 +11,7 @@ from tkinter import filedialog
 import psycopg2
 username = 'gosiam'
 password = 'infog'
-host = '192.168.8.125'
+host = '192.168.10.243'
 connD = [username,password,host]
 
 
