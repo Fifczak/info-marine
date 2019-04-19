@@ -232,6 +232,7 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                 if line != " ":  # add other needed checks to skip titles
                     cols = line.split("\t")
                     if cols[0] == 'eDataIdMeaType':
+
                         if str(lines[p][:14]) == 'eDataIdMeaData':
                             xcord += 1
                             x = meas()
@@ -419,8 +420,8 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                                             elif cols2[1] == '3':
                                                 x.type = 'Env'
                                                 x.unit = '[m/s2]'
-                                            measlist.append(
-                                                x)  ##########################################################################
+                                            measlist.append(x)
+
                                             break
                                         if iterb == iter + 1000:
                                             measflag = 0
@@ -659,7 +660,7 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
         okbutton.pack(side=TOP)
 
         def upload():
-            Window.destroy()
+            #Window.destroy()
             pbar = tk.Tk()
             pbar.title("Uploading Measurements")
             progress_bar = ttk.Progressbar(pbar, orient='horizontal', lengt=286, mode='determinate')
@@ -669,8 +670,9 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 
             p = 0
             OveCount = 0
+
             for i in measlist:
-                # print(i.point)
+
                 p += 1
 
                 if i.mode == 'FFT':
@@ -774,6 +776,7 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
         querry = 'select id, point, sort from points where id IN (select id from devices where parent = ' + str(
             parent) + ') order by id, sort'
         pointstable = q_run(connD, querry)
+
         crosstableframe = Frame(Window)
         crosstablelist = Listbox(Window)
         crosstablelist.config(width=100)
@@ -782,7 +785,9 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
         mylist.config(width=100)
         mylist.bind('<Double-Button>', onselect2)
         ycord = 0
+        print(measlist)
         for x in measlist:
+
             mylist.insert(END,
                           str(x.routename) + ' ' + str(x.point) + ' ' + str(x.mode) + ' ' + str(x.overall) + ' ' + str(
                               x.type) + ' ' + str(x.date))
@@ -794,6 +799,7 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
             ycord += 1
         cs = mylist.curselection()
         mylist.pack(side=LEFT, fill=BOTH)
+
         cs = crosstablelist.curselection()
         crosstablelist.pack(side=LEFT, fill=BOTH)
         okbutton.config(command=reload_lists)
@@ -826,7 +832,7 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
     # parent = 46 #Elizabeth russ
     # rnumber = '2008-2019'
 
-    measlist = []
+    measlist = list()
     get_meas()
 
     window_crosstable()
@@ -834,4 +840,4 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 # 'Vibscanner'
 # 'Marvib'
 # 'ezThomas'
-#read_measurement_file('Marvib','testuser','info','localhost','2016-2019', '61')
+read_measurement_file('Marvib','testuser','testuser','192.168.10.243','2016-2018', '15')
