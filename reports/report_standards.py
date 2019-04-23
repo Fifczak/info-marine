@@ -8,6 +8,7 @@ from docx.enum.table import *
 from docx.enum.text import WD_BREAK
 
 
+
 #limity, trzeba przemyśleć w jaki sposób uzupełniać tabelę
 #pomysł: pobierac listę urządzeń z tabeli measurements i wtedy pętla z wyszukiwaniem limitów, break na kolejnym urządzeniu z tym samym limitem
 
@@ -219,3 +220,15 @@ def legend_KAMTRO(document):
 
 def standards_GSR(document):
     print('fe')
+    H0=document.add_paragraph()
+    description=H0.add_run('Zgodnie z ISO 10816-3 silniki elektryczne o mocy przekraczającej 15 kW, o prędkościach obrotowych z zakresu 120- 15 000 obr/min, posiadają następujące limity wartości drgań:')
+    H0.alignment=WD_ALIGN_PARAGRAPH.JUSTIFY
+
+    limittable=document.add_table(4,4)
+    Cla=limittable.cell(0,0).text='Cl. A'
+    limittable.cell(0,1).text='0 - 3,5'
+
+    Clb = limittable.cell(1, 0).text = 'Cl. B'
+    limittable.cell(1, 1).text = '3,5 - 7,1'
+    Clc = limittable.cell(2, 0).text = 'Cl. C'
+    Cld = limittable.cell(3, 0).text = 'Cl. D'
