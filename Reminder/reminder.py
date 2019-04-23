@@ -4,7 +4,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import *
 from tkinter import messagebox
-
+from tkcalendar import Calendar, DateEntry
 from tkinter.filedialog import askopenfilename
 from tkinter import Tk
 
@@ -45,8 +45,11 @@ def remindershow():
             self.name = ''
             self.id = ''
             self.lastraport = ''
-            self.requestdate = ''
             self.lastraportdate =''
+            self.senddate = ''
+            self.requestdate = ''
+
+
 
     def getships(evt):
         w = evt.widget
@@ -71,16 +74,46 @@ def remindershow():
 
     def makedevs(shipname):
         def devremdet(evt):
+
+            def datepick(ob):
+                def print_sel():
+                    ob.requestdate = str(cal.selection_get())
+                    ob.dateLabel.configure(text=ob.requestdate)
+                    root.destroy()
+
+                root = Tk()
+                root.title("Calendar")
+                s = ttk.Style(root)
+                s.theme_use('clam')
+                top = tk.Toplevel(root)
+
+                cal = Calendar(top,
+                               font="Arial 14", selectmode='day',
+                               cursor="hand1", year=2019, month=4, day=15)
+                cal.pack(fill="both", expand=True)
+                ttk.Button(top, text="ok", command=print_sel).pack()
+                root.mainloop()
+
+
             w = evt.widget
             index = int(w.curselection()[0])
             detWindow = tk.Tk()
             detWindow.title("Reminder details")
 
-            LabName = tk.Label(detWindow,text =str(devlist[index].name)).pack()
-            LabId   = tk.Label(detWindow,text =str(devlist[index].id)).pack()
-            LabLastRN  = tk.Label(detWindow,text ="Last report: " + str(devlist[index].lastraport)).pack()
-            LabLastRDate  = tk.Label(detWindow,text ="Last date: " + str(devlist[index].lastraportdate)).pack()
+            LabName = tk.Label(detWindow,text =str(devlist[index].name)).grid(column = 0, row = 0)
+            LabId   = tk.Label(detWindow,text =str(devlist[index].id)).grid(column = 1, row = 0)
+            LabLastRNL  = tk.Label(detWindow,text ="Last report:").grid(column = 0, row = 2)
+            LabLastRN = tk.Label(detWindow, text= str(devlist[index].lastraport)).grid(column = 1, row = 2)
 
+            LabLastRDateL  = tk.Label(detWindow,text ="Last date:" ).grid(column = 0, row = 3)
+            LabLastRDate = tk.Label(detWindow,text = str(devlist[index].lastraportdate)).grid(column = 1, row = 3)
+
+            SendDateL = tk.Label(detWindow, text="Send date:").grid(column = 0, row = 4)
+            SendDate = tk.Label(detWindow, text=str(devlist[index].senddate))
+            SendDate.bind('<Double-Button-1>', datepick)
+            SendDate.grid(column=1, row=4)
+            RequestDateL = tk.Label(detWindow, text="Request date:").grid(column = 0, row = 5)
+            RequestDate = tk.Label(detWindow, text= str(devlist[index].requestdate)).grid(column = 1, row = 5)
 
 
 
@@ -100,8 +133,22 @@ def remindershow():
               as dss where dss.parent = " + str(parent)
         results = q_run(connD, querry)
 
-        querry = "select id,raport_number,min(date) from measurements_low where parent =" + str(
-            parent) + "group by id,raport_number order by id,raport_number desc"
+
+
+
+
+        querry = """
+        
+select ml.id,ml.raport_number,min(ml.date),rem.send_date,rem.request_date
+from measurements_low as ml
+left join reminder as rem on ml.id = rem.id and ml.raport_number = rem.raport_number 
+where ml.parent = """ + str(parent) + """
+group by ml.id,ml.raport_number,rem.request_date,rem.send_date order by ml.id,ml.raport_number desc
+        
+        """
+
+
+
         resultr = q_run(connD, querry)
 
         querry ="select id,raport_number from reminder where status is null and parent = " + str(parent)
@@ -109,7 +156,7 @@ def remindershow():
 
         print(querry)
         p = 0
-
+        devlist.clear()
         for line in results:
             for line2 in resultr:
                 if str(line[0]) == str(line2[0]):
@@ -118,23 +165,39 @@ def remindershow():
                     x.id = str(line2[0])
                     x.lastraport = str(line2[1])
                     x.lastraportdate = datetime.datetime.strptime(str(line2[2]), '%Y-%m-%d').date()
+                    if str(line2[3]) == "None":pass
+                    else: x.senddate = datetime.datetime.strptime(str(line2[3]), '%Y-%m-%d').date()
+                    if str(line2[3]) == "None": pass
+                    else:x.requestdate = datetime.datetime.strptime(str(line2[4]), '%Y-%m-%d').date()
                     devlistbox.insert(END, results[p][1])
+
+
 
                     if x.lastraportdate >= lastfulldate:
                         devlistbox.itemconfig(END, bg='Green')
                         x.status = 'OK'
                         for line3 in remindertbl:   #SZUKANIE REMINDEROW
-
-
                             if str(line3[0]) ==  str(line2[0]) and str(line3[1]) ==  str(line2[1]):
-                                print(line3[0])
-                                devlistbox.itemconfig(END, bg='Yellow')
+                                if x.senddate == '':
+                                    devlistbox.itemconfig(END, bg='Grey')
+                                else:
+                                    x.status = 'REM'
+                                    devlistbox.itemconfig(END, bg='Yellow')
+
+
 
                     else:
                         devlistbox.itemconfig(END, bg='Red')
                         x.status = 'NOK'
+
+
+
+
+
+
                     devlist.append(x)
                     break
+
 
             p += 1
         devlistbox.bind('<Double-Button>',devremdet)
@@ -163,12 +226,16 @@ Please be so kind and inform us whether taking vibration measurements is possibl
         """
         textfield.insert(INSERT, headerstr)
 
-        reminderstr = """
-TUBEDZIELISTAURZADZEN
-        """
-        textfield.insert(INSERT, reminderstr)
+        devstr = ''
+        for line in devlist:
+            if str(line.status) == 'REM':
+                devstr += chr(10) + str('-') + str(line.name)
+
+
+        textfield.insert(INSERT, devstr)
 
         header2str = """
+        
 Could you also perform measurements of machinery missing from three months survey:
         """
         textfield.insert(INSERT, header2str)
@@ -176,6 +243,7 @@ Could you also perform measurements of machinery missing from three months surve
         for line in devlist:
             if str(line.status) == 'NOK':
                 devstr += chr(10) + str('-') + str(line.name)
+
 
         textfield.insert(INSERT, devstr)
 
