@@ -196,3 +196,12 @@ def standard_PMS_limit(document):
 
 def standard_GSR(document):
 	document.add_paragraph()
+	H0=document.add_paragraph('Warunki pomiaru wibracji')
+	H0.runs[0].add_break()
+	H0.add_run('Wibracje mierzone w Stoczni Remontowej w Gdańsku. Przedmiotem pomiaru są kompresory powietrza firmy Boge.')
+	H0.runs[1].add_break()
+	H0.add_run('Mierzone punkty są podzielone na źródła mocy oraz elementy wykonawcze.')
+	document.add_picture('C:\Overmind\data\screw_comp.png')
+	H1=document.add_paragraph()
+	pict_desc=H1.add_run('(Typowa maszyna z rozmieszczonymi punktami pomiarowycmi)')
+	pict_desc.font.size=Pt(10)

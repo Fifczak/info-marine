@@ -106,9 +106,42 @@ def standard_info_table(connD, document,rn_):
 	footer.alignment=WD_ALIGN_PARAGRAPH.LEFT
 	footer.alignment_vertical=WD_ALIGN_VERTICAL.TOP
 
-
+rntxt='1999-2019'
 #tabela początkowa kamtro
 def standard_Kamtro_table(document):
 	headtable = document.add_table(rows=3, cols=2)
 	headtable.cell(0,0).add_paragraph('KAMTRO KAMTRO KAMTRO: ','texthead')
 	headtable.cell(0,0).alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+def standard_GSR_table(document):
+	headtable = document.add_table(rows=2,cols=3)
+	headtable.cell(0,0).text='Raport z pomiaru wibracji'
+	proj=headtable.cell(1,0).paragraphs[0].add_run('Projekt:')
+	proj.add_break()
+	headtable.cell(1,0).paragraphs[0].add_run('Kompresory powietrza')
+	headtable.cell(1,0).paragraphs[0].alignment=WD_ALIGN_PARAGRAPH.CENTER
+
+	headtable.cell(0,1).paragraphs[0].add_run(rntxt).bold=True
+	headtable.cell(0,1).paragraphs[0].alignment=WD_ALIGN_PARAGRAPH.CENTER
+
+	zlec=headtable.cell(1,1).paragraphs[0].add_run()
+	zlec.text='Zleceniodawca:'
+	zlec.add_break()
+	zlec_gsr=headtable.cell(1,1).paragraphs[0].add_run()
+	zlec_gsr.text='Stocznia Remontowa Gdańsk'
+	zlec_gsr.bold=True
+	headtable.cell(1, 1).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+	headtable.cell(0,2).paragraphs[0].add_run('Data pomiaru:')
+	headtable.cell(0,2).paragraphs[0].add_run().add_break()
+
+	headtable.cell(0,2).paragraphs[0].alignment=WD_ALIGN_PARAGRAPH.CENTER
+	date=headtable.cell(0,2).paragraphs[0].add_run('Tu wstaw date pomiaru')
+	date.bold=True
+
+
+	headtable.cell(1,2).paragraphs[0].add_run('Miejsce pomiaru:')
+	headtable.cell(1,2).paragraphs[0].add_run().add_break()
+	place=headtable.cell(1,2).paragraphs[0].add_run('Gdańsk')
+	place.bold=True
+	headtable.cell(1,2).paragraphs[0].alignment=WD_ALIGN_PARAGRAPH.CENTER

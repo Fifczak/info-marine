@@ -31,7 +31,7 @@ from report_styles import loadstyles
 from report_headtables import *
 from report_frontpages import *
 from report_resulttables import prepare_IM, drawtable_IM
-from report_standards import standards, legend_IM
+from report_standards import standards, legend_IM,standards_GSR
 from report_signature import signature
 
 username = 'postgres'
@@ -97,73 +97,61 @@ def getTrend (self):
 	return measlist
 
 # TRZEBA PRZEMYSLEC W JAKI SPOSOB BĘDĄ WYBIERANE DANE DO TWORZENIA RAPORTÓW
-fileformattype = 1 # 1 - IM; 2 - KAMTRO ; 3-Stocznia Remontowa
-headtabletype = 1 # 1 - IM; 2 - KAMTRO
-frontpagetype = 1 
+fileformattype = 3 # 1 - IM; 2 - KAMTRO ; 3-Stocznia Remontowa
+headtabletype = 3 # 1 - IM; 2 - KAMTRO; 3 - stocznia remontowa
+frontpagetype = 1
+resulttable = 1 # 1 - IM; 2-remontowa
+def makereport (connD, rn_):
+    username = connD[ 0 ]
+    password = connD[ 1 ]
+    host = connD[ 2 ]
+    # PRZYGOTOWANIE TEMPLATA DO GENEROWANIA RAPORTU
+    # dodana formatka do remontowej
+    if fileformattype == 1:
+        filepath = 'C:\\overmind\\Data\\baseIM.docx'
+    if fileformattype == 2:
+        filepath = 'C:\\overmind\\Data\\baseKAM.docx'
+    if fileformattype == 3:
+        filepath = 'C:\\overmind\\Data\\baseGSR.docx'
+    document = Document(filepath)
+    loadstyles(document)
+    rn_ = str(rn_)
+    # wybór headtable IM/Kamtro
+    if headtabletype == 1:
+        standard_info_table(connD, document, rn_)
 
-	
-resulttable = 1 # 1 - IM;	
-	
-def makereport(connD,rn_):
-	username = connD[0]
-	password = connD[1]
-	host = connD[2]
-	#PRZYGOTOWANIE TEMPLATA DO GENEROWANIA RAPORTU
-	#dodana formatka do remontowej
-	if fileformattype == 1:
-		filepath = 'C:\\overmind\\Data\\baseIM.docx'
-	if fileformattype == 2:
-		filepath = 'C:\\overmind\\Data\\baseKAM.docx'
-	if fileformattype==3:
-		filepath='C:\\overmind\\Data\\baseGSR.docx'
-	document = Document(filepath)
-	loadstyles(document) 
-	rn_ = str(rn_)
-	
-	#wybór headtable IM/Kamtro
-	if headtabletype == 1:
-		standard_info_table(connD,document,rn_)
-	if headtabletype == 2:
-		standard_Kamtro_table(document)
-	#wybór rodzaju raportu (pms/charts etc)
-	#P2 = document.add_paragraph('02. FRONT PAGE (put front page text here)')
-	if frontpagetype == 1:
-		standard_PMS_limit(document)
+    if headtabletype == 2:
+        standard_Kamtro_table(document)
 
-	document.add_paragraph()
+    if headtabletype == 3:
+        standard_GSR_table(document)
+    standard_GSR(document)
+    #if frontpagetype == 1:
+      #  standard_PMS_limit(document)
+    document.add_paragraph()
+    # P3 = document.add_paragraph('03. STANDARDS (put informations about standards here)')
+    #standards(document)
+    if headtabletype == 1:
+        legend_IM(document)
+    if headtabletype == 2:
+        legend_KAMTRO(document)
+    if headtabletype==3:
+        standards_GSR(document)
+    #if resulttable == 1:
+      #  measlist = prepare_IM(connD, rn_)
+     #  drawtable_IM(document, measlist, connD, rn_)
 
-	#P3 = document.add_paragraph('03. STANDARDS (put informations about standards here)')
-	standards(document)
-	if headtabletype==1:
-		legend_IM(document)
-
-	if headtabletype==2:
-		legend_KAMTRO(document)
-
-
-	#prepare_IM(connD, '1987-2019')
-	#getTrend(shipstr)
-	#rawtable_IM(document, measlist, connD, report_number)
-
-
-
-	if resulttable == 1:
-		measlist = prepare_IM(connD,rn_)
-		drawtable_IM(document,measlist,connD,rn_)
-	
-	P5 = document.add_paragraph('05. MEASUREMENT EQUIPMENT (put information about measurement equipment here)')
-	P6 = document.add_paragraph('06. SUMMARY (put summary informations here)')
-	P7 = document.add_paragraph('07. SIGNATURES (put company / personal informations here)')
-
-	signature(document)
-	appr=document.add_paragraph()
-	appr.alignment=WD_ALIGN_PARAGRAPH.RIGHT
-	appr.add_run('Approved by: ')
-	document.save('C:\overmind\Reports\TEST SIEM '+rn_+'.docx')
+    #podpisy, kto przygotował, kto zatwierdził
+    #do usunięcia 'rozjechana linia', tzn. prepared by i approved by są w różnych liniach,
+    #pomysł: paragraphs[0].add_run jako kto_zrobil i tak samo dla appr
+    signature(document)
+    appr = document.add_paragraph()
+    appr.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    appr.add_run('Approved by: ')
+    document.save('C:\overmind\Reports\GSR ' + rn_ + '.docx')
 
 ##########################################
 
 
-
 makereport(connD,'1987-2019')
-os.startfile('C:\overmind\Reports\TEST SIEM 1987-2019.docx')
+os.startfile('C:\overmind\Reports\GSR 1987-2019.docx')

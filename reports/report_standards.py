@@ -212,9 +212,10 @@ def legend_IM(document):
     er=end.add_run()
     er.add_break(WD_BREAK.PAGE)
 
-    
 
 #legenda dla kamtro - do dokończenia [odwolanie-if w report.py]
 def legend_KAMTRO(document):
     H0 = document.add_paragraph('Legend according to vibration class').style = document.styles['IM HEAD']
 
+def standards_GSR(document):
+    print('fe')

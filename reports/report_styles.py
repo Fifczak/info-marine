@@ -15,7 +15,6 @@ from docx.enum.table import *
 
 
 
-
 # filepath = 'C:\\overmind\\Data\\base.docx'
 def loadstyles(document):
     obj_styles = document.styles
