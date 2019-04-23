@@ -1,8 +1,14 @@
-from docx.shared import Pt
 from docx.enum.text import WD_BREAK
-from docx.enum.text import WD_COLOR_INDEX
+from docx.enum.text import WD_COLOR_INDEX, WD_ALIGN_PARAGRAPH
+from docx.shared import Cm
 from docx.shared import Pt
 
+
+def set_col_width(table):
+    widths=(Cm(2),Cm(3),Cm(1),Cm(7))
+    for row in table.rows:
+        for idx, width in enumerate(widths):
+            row.cells[idx].width=width
 
 #limity, trzeba przemyśleć w jaki sposób uzupełniać tabelę
 #pomysł: pobierac listę urządzeń z tabeli measurements i wtedy pętla z wyszukiwaniem limitów, break na kolejnym urządzeniu z tym samym limitem
@@ -247,6 +253,8 @@ def standards_GSR(document):
     limittable.cell(3, 2).text = 'mm/s'
     limittable.cell(3, 3).text = 'wysokie prawdopodobieństwo uszkodzenia'
 
+
+
     document.add_paragraph('')
     H1=document.add_paragraph('Zgodnie z dodatkiem VDI 3839 do normy DIN ISO 10816-3 sprężarki śrubowe bez kół synchronizujących o mocy powyżej 37 kW wraz z przekładniami osadzone na sztywnym fundamencie, podlegają ocenie według wartości prędkości drgań zgodnie z podziałem:')
     H2=document.add_paragraph('Dla zakresu A: 10-1000Hz')
@@ -269,6 +277,7 @@ def standards_GSR(document):
     H3=document.add_paragraph('Dla zakresu B: 10Hz - 2,2 x prędkość obrotowa')
 
     limittable_rangeB=document.add_table(rows=3,cols=4)
+    limittable_rangeB.width=Cm(10)
 
     limittable_rangeB.cell(0,0).text='Zone I'
     limittable_rangeB.cell(0,1).text='0 - 3'
@@ -281,5 +290,11 @@ def standards_GSR(document):
     limittable_rangeB.cell(1,3).text='alarm'
 
     limittable_rangeB.cell(2,0).text='Zone III'
-    limittable_rangeB.cell(2,1).text='>4,5'
-    limittable_rangeB.cell(2,2).text='ograniczone długotrwałe operacje'
+    limittable_rangeB.cell(2,1).text=' >4,5'
+    limittable_rangeB.cell(2,2).text='mm/s'
+    limittable_rangeB.cell(2,3).text='ograniczone długotrwałe operacje'
+
+
+    set_col_width(limittable)
+    set_col_width(limittable_rangeA)
+    set_col_width(limittable_rangeB)
