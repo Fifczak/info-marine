@@ -7,34 +7,29 @@ import psycopg2
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import matplotlib.backends.tkagg as tkagg
+#import matplotlib.backends.tkagg as tkagg
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 
-username = 'testuser'
+username = 'postgres'
 password = 'info'
 host = 'localhost'
 connD = [username,password,host]
 
 def q_run(connD, querry):
-	username = connD[0]
-	password = connD[1]
-	host = connD[2]
-	kport = "5432"
-	kdb = "postgres"
+    username = connD[0]
+    password = connD[1]
+    host = connD[2]
+    kport = "5432"
+    kdb = "postgres"
 	#cs = ' host="localhost",database="postgres", user= "postgres" , password="info" '
-	cs = "dbname=%s user=%s password=%s host=%s port=%s"%(kdb,username,password,host,kport)
-	conn = None
-	conn = psycopg2.connect(str(cs))
-	cur = conn.cursor()
-	cur.execute(querry)
-	try:
-		result = cur.fetchall()
-		return result
-	except:
-		pass
-	conn.commit()
-	cur.close()
+    cs = "dbname=%s user=%s password=%s host=%s port=%s"%(kdb,username,password,host,kport)
 
+    conn = psycopg2.connect(str(cs))
+
+    cur = conn.cursor()
+    cur.execute(querry)
+    conn.commit()
+    cur.close()
 def trendchart():
 
     chartwindow = tk.Tk()
@@ -63,12 +58,12 @@ def trendchart():
     controlframe.pack()
     querry = "select raport_number from measurements_low where id = 5008 group by raport_number order by raport_number desc"
     raports = q_run(connD,querry)
-    for line in raports:
-        print(line)
+    #for line in raports:
+    #    print(line)
 
 
     chartwindow.mainloop()
 
 
-trendchart()
+#trendchart()
 

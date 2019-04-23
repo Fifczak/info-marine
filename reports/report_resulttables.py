@@ -1,8 +1,27 @@
 import psycopg2
-import time
+import time,re
 from docx import Document
 from report_database import *
 from chart_scripts import *
+from report_headtables import *
+
+rn_='1987-2019'
+
+def q_run(connD, querry):
+	username = connD[0]
+	password = connD[1]
+	#cs = (host="localhost"  , dbname="postgres" , user= "postgres" , password="info")
+	#cs = "dbname=%s user=%s password=%s host=%s port=%s"%(kdb,username,password,host,kport)
+	conn = psycopg2.connect(host="localhost", dbname="postgres", user="postgres", password="info")
+	cur = conn.cursor()
+	cur.execute(querry)
+	try:
+		result = cur.fetchall()
+		return result
+	except:
+		pass
+	conn.commit()
+	cur.close()
 
 def prepare_IM(connD,report_number): #RETURN MEASLIST
 	measlist = list()
@@ -40,6 +59,7 @@ def prepare_IM(connD,report_number): #RETURN MEASLIST
 								break
 				
 			return limSrt
+
 		def getTrend(self):
 			trendlist = list()
 			for line in reportresults:
@@ -48,27 +68,26 @@ def prepare_IM(connD,report_number): #RETURN MEASLIST
 						newdate = time.strptime(str(line[6]), "%Y-%m-%d")
 						mydate = time.strptime(str(self.date), "%Y-%m-%d")
 						if newdate < mydate:
-							trendlist.append(str(line[3])) #VAL
-							trendlist.append(str(line[6])) #DATE
-							
-							change = abs((float(line[3])-float(self.maxval))/float(line[3]))
-							
+							trendlist.append(str(line[3]))  # VAL
+							trendlist.append(str(line[6]))  # DATE
+
+							change = abs((float(line[3]) - float(self.maxval)) / float(line[3]))
+
 							if change <= 0.05:
 								TREND = 'C'
-								
+
 							if float(line[3]) < float(self.maxval):
 								TREND = 'U'
-								
+
 							if float(line[3]) > float(self.maxval):
 								TREND = 'D'
-								
-						
-							
-							trendlist.append(TREND) #TREND=> U-UP, D-DOWN, C-CONST
+
+							trendlist.append(TREND)  # TREND=> U-UP, D-DOWN, C-CONST
 							break
-			self.trend = trendlist	
-		querry = "Select parent from measurements_low where raport_number = '" + str(report_number) + "' limit 1"
-		parent = q_run(connD,querry)[0][0]
+			self.trend = trendlist
+			return measlist
+		querry = "Select parent from measurements_low where raport_number = '" + rn_ + "' limit 1"
+		parent = q_run(connD,querry)
 	
 		querry = """select standard,
 							limit_1_value,limit_1_name,
@@ -77,18 +96,18 @@ def prepare_IM(connD,report_number): #RETURN MEASLIST
 							limit_4_value,limit_4_name,
 						envflag
 					from standards"""
-		limits = q_run(connD,querry)			
+		limits = q_run(connD,querry)
 		querry = """select 
 					 ml.id, ml.raport_number, dev.name,  max(ml.value) as RMS, ml2.max as Envelope, dev.norm ,ml.date, dev.drivenby,dss.sort
 					from measurements_low as ml
 					left join (select 
 								 ml.id, ml.raport_number,  max(ml.value)
 								 from measurements_low as ml
-								 where type = 'envelope P-K' and parent = """ + str(parent) + """
+								 where type = 'envelope P-K' and parent = """ + str(parent[0][0]) + """
 								 group by id,raport_number order by raport_number DESC) as ml2 on ml.id = ml2.id and ml.raport_number = ml2.raport_number
 					 left join devices as dev on ml.id = dev.id
 					 left join(select cast (id as integer), sort from ds_structure where id ~E'^\\\d+$' ) as dss on ml.id = dss.id
-					 where ml.type = 'RMS' and ml.parent = """ + str(parent) + """
+					 where ml.type = 'RMS' and ml.parent = """ + str(parent[0][0]) + """
 					 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,ml.date,dev.drivenby,dss.sort order by raport_number DESC"""
 		reportresults = q_run(connD, querry)
 		
@@ -114,8 +133,9 @@ def prepare_IM(connD,report_number): #RETURN MEASLIST
 def	drawtable_IM(document,measlist,connD,report_number):#):
 
 	querry = "Select parent from measurements_low where raport_number = '" + str(report_number) + "' limit 1"
-	parent = q_run(connD,querry)[0][0]
-	querry = "Select sort, id from ds_structure where parent = '" + str(parent) + "' order by sort"
+	parent = q_run(connD,querry)
+	print(parent)
+	querry = "Select sort, id from ds_structure where parent = '" +'84'+ "' order by sort"
 	sortlistQ = q_run(connD,querry)
 	trueMeasList = list()
 	activeIdList = list()

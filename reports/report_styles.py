@@ -10,6 +10,7 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.text import WD_TAB_ALIGNMENT, WD_TAB_LEADER
 from docx.oxml.ns import nsdecls
 from docx.oxml import parse_xml
+from docx.enum.table import *
 
 
 
@@ -19,13 +20,14 @@ from docx.oxml import parse_xml
 def loadstyles(document):
     obj_styles = document.styles
 
+    #headingi - 1 akapit
     obj_charstyle = obj_styles.add_style('IM HEAD', WD_STYLE_TYPE.PARAGRAPH)
     style = document.styles['IM HEAD']
     font = style.font
     font.name = 'Cambria'
     font.size = Pt(16)
     font.color.rgb = RGBColor(54, 95, 145)
-
+    #tekst do akapitów
     obj_charstyle = obj_styles.add_style('IM TEXT', WD_STYLE_TYPE.PARAGRAPH)
     style = document.styles['IM TEXT']
     font = style.font
@@ -103,3 +105,10 @@ def loadstyles(document):
     font.name = 'Calibri'
     font.size = Pt(9)
     font.italic = True
+
+    obj_charstyle = obj_styles.add_style('standardtable', WD_STYLE_TYPE.TABLE)
+    style = document.styles['standardtable']
+    font = style.font
+    font.name = 'Calibri'
+    font.size = Pt(11)
+    font.bold = True

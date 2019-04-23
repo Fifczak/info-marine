@@ -17,15 +17,16 @@ from docx.oxml import parse_xml
 
 from report_database import *
 
-
+#używana wszędzie w raportach IM
 def standard_info_table(connD, document,rn_):
 	username = connD[0]
 	password = connD[1]
 	host = connD[2]
-	querry = "select main.name, shd.imo, main2.name from main right join shipsdata as shd on main.id = shd.shipid right join main as main2 on main.parent = main2.id where main.id = (select shipid from reports where raport_number = '2004-2019')"
+	querry = "select main.name, shd.imo, main2.name from main right join shipsdata as shd on main.id = shd.shipid right join main as main2 on main.parent = main2.id where main.id = (select shipid from reports where raport_number = '1987-2019')"
 	result = q_run(connD, querry)
+
 	print (str(result)+'rn: '+str(rn_))
-	shipstr = str(result[0][0])
+	shipstr=result[0][0]
 	print(shipstr)
 	headtable = document.add_table(rows=2, cols=3)#trzeba usunąć enter przed
 
@@ -88,7 +89,6 @@ def standard_info_table(connD, document,rn_):
 	r0 = ht.add_run('XXXX-XX-XX')
 	r0.bold=True
 	r0.font.name = 'Calibri'
-
 	ht = headtable.cell(1,2).paragraphs[0]
 	ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
 	r0 = ht.add_run('Place of measurement:')
@@ -100,6 +100,14 @@ def standard_info_table(connD, document,rn_):
 	r0 = ht.add_run('During normal operation')
 	r0.bold=True
 	r0.font.name = 'Calibri'
+	section=document.sections[0]
+	footer=section.footer
+	footer.add_paragraph(shipstr+' '+rn_)
+	footer.alignment=WD_ALIGN_PARAGRAPH.LEFT
+	footer.alignment_vertical=WD_ALIGN_VERTICAL.TOP
+
+
+#tabela początkowa kamtro
 def standard_Kamtro_table(document):
 	headtable = document.add_table(rows=3, cols=2)
 	headtable.cell(0,0).add_paragraph('KAMTRO KAMTRO KAMTRO: ','texthead')
