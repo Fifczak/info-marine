@@ -1,12 +1,7 @@
-import docx
-from docx.shared import Inches,Cm
 from docx.shared import Pt
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.shared import RGBColor
-from docx.enum.text import WD_COLOR_INDEX
-from docx.enum.table import *
 from docx.enum.text import WD_BREAK
-
+from docx.enum.text import WD_COLOR_INDEX
+from docx.shared import Pt
 
 
 #limity, trzeba przemyśleć w jaki sposób uzupełniać tabelę
@@ -224,11 +219,67 @@ def standards_GSR(document):
     description=H0.add_run('Zgodnie z ISO 10816-3 silniki elektryczne o mocy przekraczającej 15 kW, o prędkościach obrotowych z zakresu 120- 15 000 obr/min, posiadają następujące limity wartości drgań:')
     H0.alignment=WD_ALIGN_PARAGRAPH.JUSTIFY
 
+    #konwencja:
+        #definicja klasy [ClA/B/C/D]
+        #jednostka[mm/s]
+        #opis
+
     limittable=document.add_table(4,4)
+
     Cla=limittable.cell(0,0).text='Cl. A'
     limittable.cell(0,1).text='0 - 3,5'
+    limittable.cell(0,2).text='mm/s'
+    limittable.cell(0,3).text='nowo oddane'
+
 
     Clb = limittable.cell(1, 0).text = 'Cl. B'
     limittable.cell(1, 1).text = '3,5 - 7,1'
+    limittable.cell(1, 2).text = 'mm/s'
+    limittable.cell(1, 3).text = 'bez zastrzeżeń'
+
     Clc = limittable.cell(2, 0).text = 'Cl. C'
+    limittable.cell(2,1).text='7,1 - 11,0'
+    limittable.cell(2, 2).text = 'mm/s'
+    limittable.cell(2, 3).text = 'ograniczone długotrwałe operacje'
+
     Cld = limittable.cell(3, 0).text = 'Cl. D'
+    limittable.cell(3,1).text='11,0 - więcej'
+    limittable.cell(3, 2).text = 'mm/s'
+    limittable.cell(3, 3).text = 'wysokie prawdopodobieństwo uszkodzenia'
+
+    document.add_paragraph('')
+    H1=document.add_paragraph('Zgodnie z dodatkiem VDI 3839 do normy DIN ISO 10816-3 sprężarki śrubowe bez kół synchronizujących o mocy powyżej 37 kW wraz z przekładniami osadzone na sztywnym fundamencie, podlegają ocenie według wartości prędkości drgań zgodnie z podziałem:')
+    H2=document.add_paragraph('Dla zakresu A: 10-1000Hz')
+    limittable_rangeA=document.add_table(rows=3,cols=4)
+    limittable_rangeA.cell(0,0).text='Zone I'
+    limittable_rangeA.cell(0,1).text='0 - 8'
+    limittable_rangeA.cell(0,2).text='mm/s'
+    limittable_rangeA.cell(0,3).text='poziom akceptowalny'
+
+    limittable_rangeA.cell(1,0).text='Zone II'
+    limittable_rangeA.cell(1,1).text='8 - 12'
+    limittable_rangeA.cell(1, 2).text = 'mm/s'
+    limittable_rangeA.cell(1, 3).text = 'alarm'
+
+    limittable_rangeA.cell(2,0).text='Zone III'
+    limittable_rangeA.cell(2,1).text=' > 12'
+    limittable_rangeA.cell(2, 2).text = 'mm/s'
+    limittable_rangeA.cell(2, 3).text = 'ograniczone długotrwałe operacje'
+
+    H3=document.add_paragraph('Dla zakresu B: 10Hz - 2,2 x prędkość obrotowa')
+
+    limittable_rangeB=document.add_table(rows=3,cols=4)
+
+    limittable_rangeB.cell(0,0).text='Zone I'
+    limittable_rangeB.cell(0,1).text='0 - 3'
+    limittable_rangeB.cell(0,2).text='mm/s'
+    limittable_rangeB.cell(0,3).text='poziom akceptowalny'
+
+    limittable_rangeB.cell(1,0).text='Zone II'
+    limittable_rangeB.cell(1,1).text='3 - 4,5'
+    limittable_rangeB.cell(1,2).text='mm/s'
+    limittable_rangeB.cell(1,3).text='alarm'
+
+    limittable_rangeB.cell(2,0).text='Zone III'
+    limittable_rangeB.cell(2,1).text='>4,5'
+    limittable_rangeB.cell(2,2).text='ograniczone długotrwałe operacje'

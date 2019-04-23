@@ -1,18 +1,6 @@
-from docx import *
-from docx import Document
-from docx.shared import Inches
-from docx.shared import Pt
-from docx.shared import RGBColor
-
-from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.text import WD_BREAK
-from docx.enum.text import WD_LINE_SPACING
-from docx.enum.table import WD_TABLE_ALIGNMENT
-from docx.enum.text import WD_TAB_ALIGNMENT, WD_TAB_LEADER
+from docx.shared import Pt
 
-from docx.oxml.ns import nsdecls
-from docx.oxml import parse_xml
 
 #standard z wykresami (nordy holandia)
 #na podstawie raportu 1969-2019 NordOrchid
@@ -203,5 +191,5 @@ def standard_GSR(document):
 	H0.add_run('Mierzone punkty są podzielone na źródła mocy oraz elementy wykonawcze.')
 	document.add_picture('C:\Overmind\data\screw_comp.png')
 	H1=document.add_paragraph()
-	pict_desc=H1.add_run('(Typowa maszyna z rozmieszczonymi punktami pomiarowycmi)')
+	pict_desc=H1.add_run('(Typowa maszyna z rozmieszczonymi punktami pomiarowymi)')
 	pict_desc.font.size=Pt(10)

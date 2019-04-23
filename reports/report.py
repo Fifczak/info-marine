@@ -1,6 +1,4 @@
 ##2131231232
-import sys
-import datetime
 import os
 import os.path
 import time
@@ -8,31 +6,15 @@ import time
 import matplotlib.pyplot as plt
 
 from docx import Document
-from docx.shared import Inches
 from docx.shared import Pt
-from docx.shared import RGBColor
 
-from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.text import WD_BREAK
-from docx.enum.text import WD_LINE_SPACING
-from docx.enum.table import WD_TABLE_ALIGNMENT
-from docx.enum.text import WD_TAB_ALIGNMENT, WD_TAB_LEADER
 
-from tkinter import messagebox
-from tkinter import *
-from tkinter.ttk import *
-
-from docx.oxml.ns import nsdecls
-from docx.oxml import parse_xml
-
-import numpy as np	
+import numpy as np
 from report_styles import loadstyles	
 from report_headtables import *
 from report_frontpages import *
-from report_resulttables import prepare_IM, drawtable_IM
 from report_standards import standards, legend_IM,standards_GSR
-from report_signature import signature
 
 username = 'postgres'
 password = 'info'
@@ -144,10 +126,10 @@ def makereport (connD, rn_):
     #podpisy, kto przygotował, kto zatwierdził
     #do usunięcia 'rozjechana linia', tzn. prepared by i approved by są w różnych liniach,
     #pomysł: paragraphs[0].add_run jako kto_zrobil i tak samo dla appr
-    signature(document)
+   # signature(document)
     appr = document.add_paragraph()
     appr.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    appr.add_run('Approved by: ')
+    #appr.add_run('Approved by: ')
     document.save('C:\overmind\Reports\GSR ' + rn_ + '.docx')
 
 ##########################################

@@ -1,21 +1,8 @@
-from docx import *
-from docx import Document
-from docx.shared import Inches
-from docx.shared import Pt
-from docx.shared import RGBColor
-
-from docx.enum.style import WD_STYLE_TYPE
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.text import WD_BREAK
-from docx.enum.text import WD_LINE_SPACING
-from docx.enum.table import WD_TABLE_ALIGNMENT
-from docx.enum.text import WD_TAB_ALIGNMENT, WD_TAB_LEADER
 from docx.enum.table import WD_ALIGN_VERTICAL
-
-from docx.oxml.ns import nsdecls
-from docx.oxml import parse_xml
-
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.shared import Pt
 from report_database import *
+
 
 #używana wszędzie w raportach IM
 def standard_info_table(connD, document,rn_):
@@ -118,7 +105,7 @@ def standard_GSR_table(document):
 	headtable.cell(0,0).text='Raport z pomiaru wibracji'
 	proj=headtable.cell(1,0).paragraphs[0].add_run('Projekt:')
 	proj.add_break()
-	headtable.cell(1,0).paragraphs[0].add_run('Kompresory powietrza')
+	headtable.cell(1,0).paragraphs[0].add_run('Kompresory powietrza').bold=True
 	headtable.cell(1,0).paragraphs[0].alignment=WD_ALIGN_PARAGRAPH.CENTER
 
 	headtable.cell(0,1).paragraphs[0].add_run(rntxt).bold=True
