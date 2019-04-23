@@ -294,7 +294,10 @@ def standards_GSR(document):
     limittable_rangeB.cell(2,2).text='mm/s'
     limittable_rangeB.cell(2,3).text='ograniczone długotrwałe operacje'
 
-
+    h4=document.add_paragraph()
+    run=h4.add_run()
+    run.add_break(WD_BREAK.PAGE)
     set_col_width(limittable)
     set_col_width(limittable_rangeA)
     set_col_width(limittable_rangeB)
+
