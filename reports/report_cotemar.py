@@ -1,34 +1,23 @@
-import sys
 import datetime
 import os
 import os.path
 import time
-
+from tkinter import *
+from tkinter import messagebox
+from tkinter.ttk import *
 
 import matplotlib.pyplot as plt
-
+import numpy as np
+import psycopg2
 from docx import Document
+from docx.enum.style import WD_STYLE_TYPE
+from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.oxml import parse_xml
+from docx.oxml.ns import nsdecls
 from docx.shared import Inches
 from docx.shared import Pt
 from docx.shared import RGBColor
-
-from docx.enum.style import WD_STYLE_TYPE
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.text import WD_BREAK
-from docx.enum.text import WD_LINE_SPACING
-from docx.enum.table import WD_TABLE_ALIGNMENT
-from docx.enum.text import WD_TAB_ALIGNMENT, WD_TAB_LEADER
-
-from tkinter import messagebox
-from tkinter import *
-from tkinter.ttk import *
-
-from docx.oxml.ns import nsdecls
-from docx.oxml import parse_xml
-
-import numpy as np	
-	
-import psycopg2
 
 tk=Tk()
 document = Document('C:\\overmind\\Data\\base.docx')
@@ -501,12 +490,16 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 		
 	table2.cell(0,1).add_paragraph(str(platname),'text')		
 	table2.cell(0,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
-
+	#IMO W zależności od id_
 	table2.cell(1,0).add_paragraph('The IMO Number:','texthead')
-	table2.cell(1,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
-	
-	table2.cell(1,1).add_paragraph('9704128','text')
-	table2.cell(1,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
+	table2.cell(1,0).alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+	if id_ == '55':
+		table2.cell(1,1).add_paragraph('9662136','text')
+		table2.cell(1,1).alignment = WD_ALIGN_PARAGRAPH.LEFT
+	else:
+		table2.cell(1, 1).add_paragraph('9704128', 'text')
+		table2.cell(1, 1).alignment = WD_ALIGN_PARAGRAPH.LEFT
 	
 	table2.cell(2,0).add_paragraph('Owner of platform:','texthead')
 	table2.cell(2,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
@@ -677,7 +670,9 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	table4.cell(3,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
 	table4.cell(3,1).add_paragraph('7 mm/s','text')
-	table4.cell(3,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
+	table4.cell(3,1).alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+	
 	
 	document.add_page_break()
 	l23 = document.add_paragraph('2.3.	Measurement equipment')
