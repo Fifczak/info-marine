@@ -1,20 +1,13 @@
 ##2131231232
-import os
 import os.path
 import time
 
-import matplotlib.pyplot as plt
-
 from docx import Document
-from docx.shared import Pt
-
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-
-import numpy as np
-from report_styles import loadstyles	
-from report_headtables import *
 from report_frontpages import *
-from report_standards import standards, legend_IM,standards_GSR
+from report_headtables import *
+from report_resulttables import drawtable_GSR , prepare_IM
+from report_standards import legend_IM , standards_GSR
+from report_styles import loadstyles
 
 username = 'postgres'
 password = 'info'
@@ -83,57 +76,55 @@ fileformattype = 3 # 1 - IM; 2 - KAMTRO ; 3-Stocznia Remontowa
 headtabletype = 3 # 1 - IM; 2 - KAMTRO; 3 - stocznia remontowa
 frontpagetype = 1
 resulttable = 1 # 1 - IM; 2-remontowa
-def makereport (connD, rn_):
-    username = connD[ 0 ]
-    password = connD[ 1 ]
-    host = connD[ 2 ]
-    # PRZYGOTOWANIE TEMPLATA DO GENEROWANIA RAPORTU
-    # dodana formatka do remontowej
-    if fileformattype == 1:
-        filepath = 'C:\\overmind\\Data\\baseIM.docx'
-    if fileformattype == 2:
-        filepath = 'C:\\overmind\\Data\\baseKAM.docx'
-    if fileformattype == 3:
-        filepath = 'C:\\overmind\\Data\\baseGSR.docx'
-    document = Document(filepath)
-    loadstyles(document)
-    rn_ = str(rn_)
-    # wybór headtable IM/Kamtro
-    if headtabletype == 1:
-        standard_info_table(connD, document, rn_)
 
-    if headtabletype == 2:
-        standard_Kamtro_table(document)
 
-    if headtabletype == 3:
-        standard_GSR_table(document)
-    standard_GSR(document)
-    #if frontpagetype == 1:
-      #  standard_PMS_limit(document)
-    document.add_paragraph()
-    # P3 = document.add_paragraph('03. STANDARDS (put informations about standards here)')
-    #standards(document)
-    if headtabletype == 1:
-        legend_IM(document)
-    if headtabletype == 2:
-        legend_KAMTRO(document)
-    if headtabletype==3:
-        standards_GSR(document)
-    #if resulttable == 1:
-      #  measlist = prepare_IM(connD, rn_)
-     #  drawtable_IM(document, measlist, connD, rn_)
+def makereport (connD , rn_):
+	username = connD[ 0 ]
+	password = connD[ 1 ]
+	host = connD[ 2 ]
+	# PRZYGOTOWANIE TEMPLATA DO GENEROWANIA RAPORTU
+	# dodana formatka do remontowej
+	if fileformattype == 1:
+		filepath = 'C:\\overmind\\Data\\baseIM.docx'
+	if fileformattype == 2:
+		filepath = 'C:\\overmind\\Data\\baseKAM.docx'
+	if fileformattype == 3:
+		filepath = 'C:\\overmind\\Data\\baseGSR.docx'
+	document = Document(filepath)
+	loadstyles(document)
+	rn_ = str(rn_)
+	# wybór headtable IM/Kamtro
+	if headtabletype == 1:
+		standard_info_table(connD , document , rn_)
 
-    #podpisy, kto przygotował, kto zatwierdził
-    #do usunięcia 'rozjechana linia', tzn. prepared by i approved by są w różnych liniach,
-    #pomysł: paragraphs[0].add_run jako kto_zrobil i tak samo dla appr
-   # signature(document)
-    appr = document.add_paragraph()
-    appr.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    #appr.add_run('Approved by: ')
-    document.save('C:\overmind\Reports\GSR ' + rn_ + '.docx')
+	if headtabletype == 2:
+		standard_Kamtro_table(document)
 
+	if headtabletype == 3:
+		standard_GSR_table(document)
+		standard_GSR(document)
+	# if frontpagetype == 1:
+	#  standard_PMS_limit(document)
+		document.add_paragraph()
+	# P3 = document.add_paragraph('03. STANDARDS (put informations about standards here)')
+	# standards(document)
+	if headtabletype == 1:
+		legend_IM(document)
+	if headtabletype == 2:
+		legend_KAMTRO(document)
+	if headtabletype == 3:
+		standards_GSR(document)
+	measlist = prepare_IM(connD , rn_)
+	drawtable_GSR(document,measlist,connD,rn_)
+	if resulttable == 1:
+		measlist = prepare_IM(connD, rn_)
+
+	# drawtable_IM()
 ##########################################
-
+	# appr = document.add_paragraph()
+	# appr.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+	document.save('C:\overmind\Reports\GSR ' + rn_ + '.docx')
 
 makereport(connD,'1987-2019')
 os.startfile('C:\overmind\Reports\GSR 1987-2019.docx')
+

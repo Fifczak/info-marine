@@ -24,7 +24,7 @@ def standard_info_table(connD, document,rn_):
 	#parent_=cur.fetchall()
 
 
-	headtable.style = 'Table Grid'
+	#headtable.style = 'Table Grid'
 	headtable.cell(0,0).merge(headtable.cell(0,1).merge(headtable.cell(0,2)))
 	ht= headtable.cell(0,0).paragraphs[0]
 	ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -91,7 +91,7 @@ def standard_info_table(connD, document,rn_):
 	footer=section.footer
 	footer.add_paragraph(shipstr+' '+rn_)
 	footer.alignment=WD_ALIGN_PARAGRAPH.LEFT
-	footer.alignment_vertical=WD_ALIGN_VERTICAL.TOP
+	footer.vertical_alignment=WD_ALIGN_VERTICAL.TOP
 
 rntxt='1999-2019'
 #tabela początkowa kamtro
@@ -101,7 +101,12 @@ def standard_Kamtro_table(document):
 	headtable.cell(0,0).alignment = WD_ALIGN_PARAGRAPH.LEFT
 
 def standard_GSR_table(document):
+	htstyle=document.styles
+	#htstyle.style[0]=WD_STYLE_TYPE.TABLE
+	#assert styles[0].type == WD_STYLE_TYPE.PARAGRAPH
+
 	headtable = document.add_table(rows=2,cols=3)
+
 	headtable.cell(0,0).text='Raport z pomiaru wibracji'
 	proj=headtable.cell(1,0).paragraphs[0].add_run('Projekt:')
 	proj.add_break()
