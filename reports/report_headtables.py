@@ -101,12 +101,10 @@ def standard_Kamtro_table(document):
 	headtable.cell(0,0).alignment = WD_ALIGN_PARAGRAPH.LEFT
 
 def standard_GSR_table(document):
-	htstyle=document.styles
 	#htstyle.style[0]=WD_STYLE_TYPE.TABLE
 	#assert styles[0].type == WD_STYLE_TYPE.PARAGRAPH
-
 	headtable = document.add_table(rows=2,cols=3)
-
+	headtable.style='Table Grid'
 	headtable.cell(0,0).text='Raport z pomiaru wibracji'
 	proj=headtable.cell(1,0).paragraphs[0].add_run('Projekt:')
 	proj.add_break()

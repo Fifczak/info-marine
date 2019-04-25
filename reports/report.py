@@ -1,12 +1,11 @@
-##2131231232
 import os.path
 import time
 
 from docx import Document
 from report_frontpages import *
 from report_headtables import *
-from report_resulttables import drawtable_GSR , prepare_IM
-from report_standards import legend_IM , standards_GSR
+from report_resulttables import drawtable_GSR ,prepare_IM
+from report_standards import legend_IM ,standards_GSR
 from report_styles import loadstyles
 
 username = 'postgres'
@@ -102,7 +101,8 @@ def makereport (connD , rn_):
 
 	if headtabletype == 3:
 		standard_GSR_table(document)
-		standard_GSR(document)
+		standard_GSR( document )
+
 	# if frontpagetype == 1:
 	#  standard_PMS_limit(document)
 		document.add_paragraph()
