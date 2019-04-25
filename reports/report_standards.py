@@ -229,7 +229,7 @@ def legend_KAMTRO(document):
     H0 = document.add_paragraph('Legend according to vibration class').style = document.styles['IM HEAD']
 
 def standards_GSR(document):
-    print('fe')
+
     H0=document.add_paragraph()
     description=H0.add_run('Zgodnie z ISO 10816-3 silniki elektryczne o mocy przekraczającej 15 kW, o prędkościach obrotowych z zakresu 120- 15 000 obr/min, posiadają następujące limity wartości drgań:')
     H0.alignment=WD_ALIGN_PARAGRAPH.JUSTIFY
