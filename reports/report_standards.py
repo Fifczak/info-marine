@@ -233,8 +233,7 @@ def legend_IM(document):
     end=document.add_paragraph()
     er=end.add_run()
     er.add_break(WD_BREAK.PAGE)
-    set_col_width_lim ( legend )
-
+    set_col_width_std ( legend )
 
 #legenda dla kamtro - do dokończenia [odwolanie-if w report.py]
 def legend_KAMTRO(document):

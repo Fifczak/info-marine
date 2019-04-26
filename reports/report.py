@@ -2,9 +2,10 @@ import os.path
 import time
 
 from docx import Document
+from report_devicetable import devicetable
 from report_frontpages import *
 from report_headtables import *
-from report_resulttables import prepare_IM
+from report_resulttables import prepare_IM ,drawtable_IM
 from report_standards import legend_IM ,standards
 from report_styles import loadstyles
 
@@ -82,7 +83,7 @@ fileformattype = 1  # 1 - IM; 2 - KAMTRO ; 3-Stocznia Remontowa
 headtabletype = 1  # 1 - IM; 2 - KAMTRO; 3 - stocznia remontowa
 frontpagetype = 1
 resulttable = 1  # 1 - IM; 2-remontowa
-
+report_number = '1987-2019'
 
 def makereport ( connD ,rn_ ):
     username = connD[ 0 ]
@@ -105,6 +106,18 @@ def makereport ( connD ,rn_ ):
         standard_with_pms ( document )
         standards ( document )
         legend_IM ( document )
+        prepare_IM ( connD ,report_number )
+        measlist = prepare_IM ( connD ,rn_ )
+        respar = document.add_paragraph ( 'Results' )
+        respar.runs[ 0 ].bold = True
+        respar.runs[ 0 ].font.name = 'Times New Roman'
+        respar.runs[ 0 ].font.size = Pt ( 12 )
+        respar.add_run ().add_break ()
+        resrun = respar.add_run (
+            "In table are presented only readings with max. RMS results for each device equipment:" )
+        resrun.font.size = Pt ( 11 )
+        drawtable_IM ( document ,measlist ,connD ,report_number )
+        devicetable ( document )
 
 
     if headtabletype == 2:
@@ -121,8 +134,6 @@ def makereport ( connD ,rn_ ):
     # standards(document)
     measlist = prepare_IM ( connD ,rn_ )
     # drawtable_GSR ( document ,measlist ,connD ,rn_ )
-    if resulttable == 1:
-        measlist = prepare_IM ( connD ,rn_ )
 
     # drawtable_IM()
     ##########################################

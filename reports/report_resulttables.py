@@ -211,7 +211,7 @@ def drawtable_IM( document ,measlist ,connD ,report_number ):  # ):
 
     rowscount = xcord
     resulttable = document.add_table( rows=rowscount + 1 ,cols=7 )
-    # resulttable.style = 'Table Grid'
+    resulttable.style = 'Table Grid'
 
     ht = resulttable.cell( 0 ,0 ).paragraphs[ 0 ]
     r0 = ht.add_run( 'Nazwa urządzenia' )
@@ -276,7 +276,7 @@ def drawtable_IM( document ,measlist ,connD ,report_number ):  # ):
                     ht = resulttable.cell( xcord + 1 ,3 ).paragraphs[ 0 ]
                     r0 = ht.add_run( str( xx.limit ) )
                     ht = resulttable.cell( xcord + 1 ,4 ).paragraphs[ 0 ]
-                    r0 = ht.add_run( str( xx.maxenv ) )
+                    r0 = ht.add_run ( str ( xx.maxenv ).replace ( "." ,"," ) )
                     ht = resulttable.cell( xcord + 1 ,5 ).paragraphs[ 0 ]
                     if str( xx.limit ) == 'Cl. D':  # TEGO DLA CZYTELNOSCI LEPIEJ ZROBIC FUNKCJE
                         try:
