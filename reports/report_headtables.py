@@ -16,7 +16,7 @@ def standard_info_table ( connD ,document ,rn_ ):
     shipstr = result[ 0 ][ 0 ]
     print( shipstr )
     headtable = document.add_table( rows=2 ,cols=3 )  # trzeba usunąć enter przed
-
+    headtable.style = 'Table Grid'
     # querry='select reporttype from main where name="%s"'%(shipstr)
     # conn=psycopg2.connect(dbname='postgres',user='postgres',password='info')
     # cur=conn.cursor()

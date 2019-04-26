@@ -6,18 +6,29 @@ from docx.shared import Pt
 
 
 def set_col_width(table):
-    widths=(Cm(2),Cm(3),Cm(1),Cm(9))
+    widths = (Cm ( 1.4 ) ,Cm ( 3 ) ,Cm ( 1 ) ,Cm ( 9 ))
     for row in table.rows:
         for idx, width in enumerate(widths):
             row.cells[idx].width=width
 
 
+def set_col_width_lim ( table ):
+    widths = (Cm ( 2 ) ,Cm ( 6 ))
+    for row in table.rows:
+        for idx ,width in enumerate ( widths ):
+            row.cells[ idx ].width = width
 def set_col_width_GSR(table):
     widths=(Cm(5.5),Cm(1.5),Cm(1.5),Cm(2),Cm(2),Cm(2),Cm(3.5))
     for row in table.rows:
         for idx, width in enumerate(widths):
             row.cells[idx].width=width
 
+
+def set_col_width_std ( table ):
+    widths = (Cm ( 3 ) ,Cm ( 15 ))
+    for row in table.rows:
+        for idx ,width in enumerate ( widths ):
+            row.cells[ idx ].width = width
 
 #limity, trzeba przemyśleć w jaki sposób uzupełniać tabelę
 #pomysł: pobierac listę urządzeń z tabeli measurements i wtedy pętla z wyszukiwaniem limitów, break na kolejnym urządzeniu z tym samym limitem
@@ -145,7 +156,7 @@ def standards(document):
     t_std.cell(5, 1).paragraphs[0].runs[0].font.size = Pt(11)
     t_std.cell(5, 1).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
     t_std.cell(5, 1).paragraphs[0].runs[0].bold = False
-
+    set_col_width_std ( t_std )
 
 #legenda dla IM 'legend accordin to vib class'
 def legend_IM(document):
@@ -222,6 +233,7 @@ def legend_IM(document):
     end=document.add_paragraph()
     er=end.add_run()
     er.add_break(WD_BREAK.PAGE)
+    set_col_width_lim ( legend )
 
 
 #legenda dla kamtro - do dokończenia [odwolanie-if w report.py]
@@ -326,4 +338,3 @@ def standards_GSR(document):
     set_col_width(limittable)
     set_col_width(limittable_rangeA)
     set_col_width(limittable_rangeB)
-

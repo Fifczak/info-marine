@@ -4,8 +4,8 @@ import time
 from docx import Document
 from report_frontpages import *
 from report_headtables import *
-from report_resulttables import drawtable_GSR ,prepare_IM
-from report_standards import legend_IM ,standards_GSR
+from report_resulttables import prepare_IM
+from report_standards import legend_IM ,standards
 from report_styles import loadstyles
 
 username = 'postgres'
@@ -78,8 +78,8 @@ def getTrend ( self ):
 
 
 # TRZEBA PRZEMYSLEC W JAKI SPOSOB BĘDĄ WYBIERANE DANE DO TWORZENIA RAPORTÓW
-fileformattype = 3  # 1 - IM; 2 - KAMTRO ; 3-Stocznia Remontowa
-headtabletype = 3  # 1 - IM; 2 - KAMTRO; 3 - stocznia remontowa
+fileformattype = 1  # 1 - IM; 2 - KAMTRO ; 3-Stocznia Remontowa
+headtabletype = 1  # 1 - IM; 2 - KAMTRO; 3 - stocznia remontowa
 frontpagetype = 1
 resulttable = 1  # 1 - IM; 2-remontowa
 
@@ -102,10 +102,14 @@ def makereport ( connD ,rn_ ):
     # wybór headtable IM/Kamtro
     if headtabletype == 1:
         standard_info_table ( connD ,document ,rn_ )
+        standard_with_pms ( document )
+        standards ( document )
+        legend_IM ( document )
+
 
     if headtabletype == 2:
         standard_Kamtro_table ( document )
-
+        standard_with_pms ( document )
     if headtabletype == 3:
         standard_GSR_table ( document )
         standard_GSR ( document )
@@ -115,14 +119,8 @@ def makereport ( connD ,rn_ ):
         document.add_paragraph ()
     # P3 = document.add_paragraph('03. STANDARDS (put informations about standards here)')
     # standards(document)
-    if headtabletype == 1:
-        legend_IM ( document )
-    if headtabletype == 2:
-        legend_KAMTRO ( document )
-    if headtabletype == 3:
-        standards_GSR ( document )
     measlist = prepare_IM ( connD ,rn_ )
-    drawtable_GSR ( document ,measlist ,connD ,rn_ )
+    # drawtable_GSR ( document ,measlist ,connD ,rn_ )
     if resulttable == 1:
         measlist = prepare_IM ( connD ,rn_ )
 

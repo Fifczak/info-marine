@@ -79,7 +79,7 @@ def standard_with_pms(document):
 
 	r2.italic=True
 	r2.underline=True
-	r2=h3.add_run(' of the table consist PMS number and name of the equipment.')
+	r2 = h3.add_run ( ' of the table consist PMS number and name of the equipment. ' )
 	r3=h3.add_run('Third column')
 	r3.italic=True
 	r3.underline=True
