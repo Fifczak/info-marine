@@ -65,3 +65,8 @@ def devicetable ( document ) :
 
     devtab.cell ( 5 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt ( 12 )
     devtab.cell ( 5 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
+
+    devsummary = document.add_paragraph ()
+    devsummary.add_run ().add_break ()
+    devrun = devsummary.add_run ( 'MarVib is calibrated, certificate for verification - if requied. ' )
+    devrun.italic = True
