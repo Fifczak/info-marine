@@ -70,3 +70,4 @@ def devicetable ( document ) :
     devsummary.add_run ().add_break ()
     devrun = devsummary.add_run ( 'MarVib is calibrated, certificate for verification - if requied. ' )
     devrun.italic = True
+    document.add_paragraph ()
