@@ -2,6 +2,7 @@ import os.path
 import time
 
 from docx import Document
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from report_devicetable import devicetable
 from report_frontpages import *
 from report_headtables import *
@@ -120,6 +121,28 @@ def makereport ( connD ,rn_ ):
         drawtable_IM ( document ,measlist ,connD ,report_number )
         devicetable ( document )
         shipdata ( document )
+        # podsumowanie daję tu na sztywno, na dzień dzisiejszy nie wiem czy to jest pobierane z bazy czy uzupełniane ręcznie
+        document.add_page_break ()
+        summary = document.add_paragraph ()
+        summary.add_run ( 'Summary:' ).bold = True
+        summary.runs[ 0 ].add_break ()
+        s1 = summary.add_run (
+            'Next measurements should be done in three month period to obtain trend value for each equipment, in some cases even one month period is preferable.' )
+        s1.add_break ()
+        s1.add_break ()
+        summary.add_run (
+            'This report is prepared in good faith based on measurement diagnostic done on available running rotary machine and documentation submitted.' ).font.size = Pt (
+            11 )
+        document.add_paragraph ()
+
+        signpar = document.add_paragraph ()
+        seCAP = signpar.add_run (
+            'Service Engineer                                                                                             Approved by' )
+        seCAP.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        signpar = document.add_paragraph (
+            'Tu FULLNAME                                                                                             a Tu Mariusz' )
+
+
 
     if headtabletype == 2:
         standard_Kamtro_table ( document )
@@ -141,7 +164,6 @@ def makereport ( connD ,rn_ ):
     # appr = document.add_paragraph()
     # appr.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     document.save ( 'C:\overmind\Reports\GSR ' + rn_ + '.docx' )
-    document.paragraphs[0].paragraph_format.space_before=Pt(0)
 
 makereport ( connD ,'1987-2019' )
 os.startfile ( 'C:\overmind\Reports\GSR 1987-2019.docx' )
