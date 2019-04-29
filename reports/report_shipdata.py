@@ -23,3 +23,7 @@ def shipdata ( document ) :
     weather = sdata.cell ( 1 ,1 ).add_paragraph ( '-' ).alignment = WD_ALIGN_PARAGRAPH.CENTER
     sdata.cell ( 1 ,1 ).add_paragraph ()
     sdata.cell ( 2 ,0 ).merge ( sdata.cell ( 2 ,1 ) )
+    sdata.cell ( 2 ,0 ).paragraphs[ 0 ].add_run ( 'Measurement method: ' )
+    isoexpl = sdata.cell ( 2 ,0 ).add_paragraph ()
+    isoexplr = isoexpl.add_run ( 'According to standard ISO 10816 : - procedure No. 2 Measurement report' )
+    isoexplr.bold = True
