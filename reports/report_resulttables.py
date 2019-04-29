@@ -860,3 +860,14 @@ def drawtable_GSR( document ,measlist ,connD ,rn_ ):
         restable_gsr2.cell( 30 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
         restable_gsr2.cell( 30 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
         restable_gsr2.style='Table Grid'
+
+
+def trendresults ( document ) :
+    trendpar = document.add_paragraph ( 'Trend results:' )
+    trendpar.runs[ 0 ].bold = True
+    trendpar.runs[ 0 ].underline = True
+    trendpar.runs[ 0 ].font.size = Pt ( 8 )
+    trendpar.runs[ 0 ].font.name = 'Arial'
+
+    trendsres = document.add_table ( rows=3 ,cols=2 )
+    trendsres.cell ( 0 ,0 ).paragraphs[ 0 ].add_picture ( 'C:\\overmind\\Data\\baseIM.docx\\up.gif' )

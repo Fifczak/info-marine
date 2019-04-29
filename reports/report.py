@@ -6,7 +6,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from report_devicetable import devicetable
 from report_frontpages import *
 from report_headtables import *
-from report_resulttables import prepare_IM ,drawtable_IM
+from report_resulttables import prepare_IM ,drawtable_IM ,trendresults
 from report_shipdata import shipdata
 from report_standards import legend_IM ,standards
 from report_styles import loadstyles
@@ -119,6 +119,8 @@ def makereport ( connD ,rn_ ):
             "In table are presented only readings with max. RMS results for each device equipment:" )
         resrun.font.size = Pt ( 11 )
         drawtable_IM ( document ,measlist ,connD ,report_number )
+        document.add_paragraph ()
+        trendresults ( document )
         devicetable ( document )
         shipdata ( document )
         # podsumowanie daję tu na sztywno, na dzień dzisiejszy nie wiem czy to jest pobierane z bazy czy uzupełniane ręcznie
