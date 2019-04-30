@@ -1,6 +1,6 @@
-import psycopg2
-
 from tkinter import *
+
+import psycopg2
 
 
 def q_run(connD, querry):
@@ -29,7 +29,7 @@ def changepass():
     q_run(connD,querry)
     print('DONE')
 #connD=['testuser','info','localhost']
-connD=['dbadmin','242QhpbS&9Fv','192.168.10.243']
+connD = [ 'dbadmin' ,'password' ,'192.168.10.243' ]
 frame=Tk()
 login=Label(frame,text='Login')
 login.grid(row=0, column=0)

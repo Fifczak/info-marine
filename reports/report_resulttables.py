@@ -870,4 +870,4 @@ def trendresults ( document ) :
     trendpar.runs[ 0 ].font.name = 'Arial'
 
     trendsres = document.add_table ( rows=3 ,cols=2 )
-    trendsres.cell ( 0 ,0 ).paragraphs[ 0 ].add_picture ( 'C:\\overmind\\Data\\baseIM.docx\\up.gif' )
+    # trendsres.cell ( 0 ,0 ).paragraphs[ 0 ].add_picture ( 'C:\\overmind\\Data\\baseIM.docx\\up.gif' )
