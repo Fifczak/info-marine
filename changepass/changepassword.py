@@ -29,6 +29,7 @@ def changepass():
     q_run(connD,querry)
     print('DONE')
 #connD=['testuser','info','localhost']
+
 connD = [ 'dbadmin' ,'password' ,'192.168.10.243' ]
 frame=Tk()
 login=Label(frame,text='Login')
