@@ -870,4 +870,12 @@ def trendresults ( document ) :
     trendpar.runs[ 0 ].font.name = 'Arial'
 
     trendsres = document.add_table ( rows=3 ,cols=2 )
-    # trendsres.cell ( 0 ,0 ).paragraphs[ 0 ].add_picture ( 'C:\\overmind\\Data\\baseIM.docx\\up.gif' )
+    up = trendsres.cell ( 0 ,0 ).paragraphs[ 0 ].add_run ()
+    up.add_picture ( 'C:\\overmind\\Data\\up.gif' )
+    zero = trendsres.cell ( 1 ,0 ).paragraphs[ 0 ].add_run ()
+    zero.add_picture ( 'C:\\overmind\\Data\\none.gif' )
+    down = trendsres.cell ( 2 ,0 ).paragraphs[ 0 ].add_run ()
+    down.add_picture ( 'C:\\overmind\\Data\\down.gif' )
+    trendsres.cell ( 0 ,1 ).text = 'Whenever new results are increased more than 5% of previous measurements'
+    trendsres.cell ( 1 ,1 ).text = 'Whenever new results are in range plus / minus 5% of previous measurements'
+    trendsres.cell ( 2 ,1 ).text = 'Whenever new results are reduced more than 5% of previous measurements'
