@@ -11,6 +11,11 @@ from report_headtables import *
 rn_ = '1987-2019'
 
 
+def set_cols_width_trend ( table ):
+    widths = (Cm ( 1.5 ) ,Cm ( 15 ))
+    for row in table.rows:
+        for idx ,width in enumerate ( widths ):
+            row.cells[ idx ].width = width
 # funkcja do stałej szerokości komórek w raportach GSR
 def set_col_width_GSR( table ):
     widths = (Cm( 7 ) ,Cm( 1.5 ) ,Cm( 1.5 ) ,Cm( 1.5 ) ,Cm( 1.5 ) ,Cm( 1.5 ) ,Cm( 5 ))
@@ -886,3 +891,4 @@ def trendresults ( document ) :
     trendsres.cell ( 1 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
     trendsres.cell ( 2 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt ( 8 )
     trendsres.cell ( 2 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
+    set_cols_width_trend ( trendsres )

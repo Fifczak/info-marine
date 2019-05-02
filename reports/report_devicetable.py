@@ -11,8 +11,16 @@ def set_col_width ( table ) :
 
 
 def devicetable ( document ) :
+    rn_ = '1987-2019'
+    querry = 'select device, serialno,manudate from equipment where lp = (select equipment from shipsdata where shipid = 84 )'
+    conn = psycopg2.connect ( user='postgres' ,dbname='postgres' ,host='localhost' ,password='info' ,port='5432' )
+    cur = conn.cursor ()
+    cur.execute ( querry )
+    result = cur.fetchall ()
+    deviceNAME = str ( result[ 0 ][ 0 ] )
+    devSN = str ( result[ 0 ][ 1 ] )
     H = document.add_paragraph ( 'Measurement equipment' )
-    H1 = document.add_paragraph ( 'Wynik kwerendy z nazwą urządzenia' )
+    H1 = document.add_paragraph ( deviceNAME + devSN )
     H.runs[ 0 ].font.name = 'Times New Roman'
     H.runs[ 0 ].font.size = Pt ( 12 )
     H.runs[ 0 ].bold = True
@@ -39,12 +47,6 @@ def devicetable ( document ) :
 
         devtab.cell ( i ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt ( 12 )
 
-    rn_ = '1987-2019'
-    querry = 'select device, serialno,manudate from equipment where lp = (select equipment from shipsdata where shipid = 84 )'
-    conn = psycopg2.connect ( user='postgres' ,dbname='postgres' ,host='localhost' ,password='info' ,port='5432' )
-    cur = conn.cursor ()
-    cur.execute ( querry )
-    result = cur.fetchall ()
     print ( result[ 0 ][ 0 ] )
     print ( result[ 0 ][ 1 ] )
     print ( result[ 0 ][ 2 ] )
