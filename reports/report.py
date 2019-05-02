@@ -17,6 +17,20 @@ host = 'localhost'
 connD = [ username ,password ,host ]
 
 
+def getname ( host ,username ,password ) :
+    kport = "5432"
+    kdb = "postgres"
+    cs = "dbname=%s user=%s password=%s host=%s port=%s" % (kdb ,username ,password ,host ,kport)
+    conn = None
+    conn = psycopg2.connect ( str ( cs ) )
+    cur = conn.cursor ()
+    # tu trzeba dodać 'kuser' w kwerendzie
+    querry = "select full_name from users where login = 'krystiank' limit 1;"
+    cur.execute ( querry )
+    result = cur.fetchall ()
+    conn.commit ()
+    cur.close ()
+    return result[ 0 ][ 0 ]
 def q_run ( connD ,querry ):
     username = connD[ 0 ]
     password = connD[ 1 ]
@@ -141,8 +155,8 @@ def makereport ( connD ,rn_ ):
         seCAP = signpar.add_run (
             'Service Engineer                                                                                             Approved by' )
         seCAP.alignment = WD_ALIGN_PARAGRAPH.LEFT
-        signpar = document.add_paragraph (
-            'Tu FULLNAME                                                                                             a Tu Mariusz' )
+        name = str ( getname ( host='localhost' ,username='postgres' ,password='info' ) )
+        signpar = document.add_paragraph ( str ( name ))
 
 
 
