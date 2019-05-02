@@ -153,7 +153,8 @@ def drawtable_IM( document ,measlist ,connD ,report_number ):  # ):
     querry = "Select parent from measurements_low where raport_number = '" + str( report_number ) + "' limit 1"
     parent = q_run( connD ,querry )
     print ( parent[ 0 ][ 0 ] )
-    querry = "Select sort, id from ds_structure where parent = '" + '84' + "' order by sort"
+
+    querry = "Select sort, id from ds_structure where parent = '" + str ( parent[ 0 ][ 0 ] ) + "' order by sort"
     sortlistQ = q_run( connD ,querry )
     trueMeasList = list()
     activeIdList = list()

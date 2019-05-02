@@ -7,7 +7,7 @@ from report_devicetable import devicetable
 from report_frontpages import *
 from report_headtables import *
 from report_resulttables import prepare_IM ,drawtable_IM ,trendresults
-from report_shipdata import shipdata
+from report_shipdata import shipdata ,getshipsdata
 from report_standards import legend_IM ,standards
 from report_styles import loadstyles
 
@@ -136,7 +136,8 @@ def makereport ( connD ,rn_ ):
         document.add_paragraph ()
         trendresults ( document )
         devicetable ( document )
-        shipdata ( document )
+        getshipsdata ( parent )
+        print ( shipdata ( document ) )
         # podsumowanie daję tu na sztywno, na dzień dzisiejszy nie wiem czy to jest pobierane z bazy czy uzupełniane ręcznie
         document.add_page_break ()
         summary = document.add_paragraph ()
