@@ -24,11 +24,16 @@ def getshipsdata ( parent ):
     cur.close ()
     # tu probuje dojsc o co chodzi z indeksowaniem.. jezeli mamy w bazie np 12 rekordów, to trzeba zapisac 12x [0] przy results? ;x
     print ( 'Cały res:' + str ( result ) )
-    print ( 'Res[0]:' + str ( result[ 0 ] ) )
-    print ( 'Res[1]:' + str ( result[ 0 ][ 0 ] ) )
-    global ship_type
-    ship_type = str ( result[ 0 ][ 1 ] )
-    print ( 'Res[2]:' + str ( result[ 0 ][ 1 ] ) )  # tu jest 'ship type'
+    print ( 'Res[0] - usuwa jedynie kwadratowy nawias:' + str ( result[ 0 ] ) )
+    print ( 'Res[1] - 0 w indeksach dla tabeli 2W:' + str ( result[ 0 ][ 0 ] ) )
+    global ship_type ,Lpp ,Breadth  # dałem jako zmienną globalną
+    ship_type = str ( result[ 0 ][ 1 ] )  # tu jest 'ship type'
+    Breadth = str ( round ( result[ 0 ][ 3 ] ,2 ) )  # tu jest Lbp
+    Lpp = str ( round ( result[ 0 ][ 2 ] ,2 ) )  # tu jest B
+    print ( 'Ship type:' + ship_type )
+    print ( 'Długość:' + Lpp )
+    print ( 'Szerokosc:' + Breadth )
+
 
     return result
 
