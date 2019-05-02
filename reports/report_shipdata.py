@@ -56,8 +56,10 @@ def shipdata ( document ) :
     # sdata.cell(0,1).paragraphs[0].alignment=WD_ALIGN_PARAGRAPH.CENTER
     sdata.cell ( 0 ,1 ).paragraphs[ 0 ].runs[ 0 ].alignment = WD_ALIGN_PARAGRAPH.CENTER
     sdata.cell ( 0 ,1 ).paragraphs[ 0 ].add_run ().add_break ()
-    sdata.cell ( 0 ,1 ).paragraphs[ 0 ].add_run ( 'Lenght BP.....' + 'zmienna z wynikiem querry' ).add_break ()
-    sdata.cell ( 0 ,1 ).paragraphs[ 0 ].add_run ( 'Bradth.............' + 'zmienna z wynikiem querry' )
+    sdata.cell ( 0 ,1 ).paragraphs[ 0 ].add_run (
+        'Length (b.p.) .......................................' + Lpp.replace ( "." ,"," ) + 'm' ).add_break ()
+    sdata.cell ( 0 ,1 ).paragraphs[ 0 ].add_run (
+        'Breadth (B) .......................................' + Breadth.replace ( "." ,"," ) + 'm' )
     sdata.cell ( 1 ,1 ).paragraphs[ 0 ].add_run ( 'Weather conditions: ' ).bold = True
     weather = sdata.cell ( 1 ,1 ).add_paragraph ( '-' ).alignment = WD_ALIGN_PARAGRAPH.CENTER
     sdata.cell ( 1 ,1 ).add_paragraph ()

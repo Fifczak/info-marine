@@ -1,3 +1,4 @@
+import os
 import time
 
 from docx import Document
@@ -6,7 +7,7 @@ from report_devicetable import devicetable
 from report_frontpages import *
 from report_headtables import *
 from report_resulttables import prepare_IM ,drawtable_IM ,trendresults
-from report_shipdata import getshipsdata
+from report_shipdata import getshipsdata ,shipdata
 from report_standards import legend_IM ,standards
 from report_styles import loadstyles
 
@@ -136,6 +137,7 @@ def makereport ( connD ,rn_ ):
         trendresults ( document )
         devicetable ( document )
         getshipsdata ( parent )
+        shipdata ( document )
         # podsumowanie daję tu na sztywno, na dzień dzisiejszy nie wiem czy to jest pobierane z bazy czy uzupełniane ręcznie
         document.add_page_break ()
         summary = document.add_paragraph ()
@@ -181,4 +183,4 @@ def makereport ( connD ,rn_ ):
     document.save ( 'C:\overmind\Reports\GSR ' + rn_ + '.docx' )
 
 makereport ( connD ,'1987-2019' )
-# os.startfile ( 'C:\overmind\Reports\GSR 1987-2019.docx' )
+os.startfile ( 'C:\overmind\Reports\GSR 1987-2019.docx' )
