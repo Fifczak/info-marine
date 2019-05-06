@@ -7,7 +7,7 @@ import psycopg2
 username = 'filipb'
 password = '@infomarine'
 username2 = 'dbadmin'
-password2 = 'nictunaiema'
+password2 = 'nictunaieama'
 host1 = '192.168.8.10'
 host2 = '192.168.10.243'
 connBASE = [username,password,host1]
