@@ -1,13 +1,14 @@
-import psycopg2
-import tkinter as tk
-import tkinter.ttk as ttk
-from tkinter import *
-from tkinter import messagebox
+import decimal
 import os
 import os.path
 import time
+import tkinter as tk
+import tkinter.ttk as ttk
+from tkinter import *
+
 import numpy as np
-import decimal
+import psycopg2
+
 ctx = decimal.Context()
 ctx.prec = 20
 def float_to_str(f):
@@ -21,7 +22,7 @@ username = 'testuser'
 password = 'testuser'
 host = '192.168.8.125'
 connBASE = [username,password,host]
-connTARGET = ['dbadmin','242QhpbS&9Fv','192.168.10.243']
+connTARGET = [ 'dbadmin' ,'niemahasla' ,'192.168.10.243' ]
 #connTARGET = ['testuser','testuser','192.168.10.243']
 
 
