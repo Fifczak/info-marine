@@ -22,7 +22,7 @@ username = 'testuser'
 password = 'testuser'
 host = '192.168.8.125'
 connBASE = [username,password,host]
-connTARGET = [ 'dbadmin' ,'niemahasla' ,'192.168.10.243' ]
+connTARGET = [ 'dbadmin' ,'pw' ,'192.168.10.243' ]
 #connTARGET = ['testuser','testuser','192.168.10.243']
 
 
