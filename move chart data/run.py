@@ -21,7 +21,7 @@ username = 'filipb'
 password = '@infomarine'
 host = '192.168.8.10'
 connD = [username,password,host]
-connD2 = [ 'dbadmin' ,'tutezczysto' ,'192.168.10.243' ]
+connD2 = [ 'dbadmin' ,'tutezaczysto' ,'192.168.10.243' ]
 def q_run(connD, querry):
 	username = connD[0]
 	password = connD[1]
