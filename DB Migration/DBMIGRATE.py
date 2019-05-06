@@ -1,11 +1,13 @@
-import psycopg2
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import *
+
+import psycopg2
+
 username = 'filipb'
 password = '@infomarine'
 username2 = 'dbadmin'
-password2 = '242QhpbS&9Fv'
+password2 = 'nictunaiema'
 host1 = '192.168.8.10'
 host2 = '192.168.10.243'
 connBASE = [username,password,host1]
