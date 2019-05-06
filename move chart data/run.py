@@ -1,13 +1,13 @@
-import psycopg2
+import decimal
+import os.path
+import time
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import *
-from tkinter import messagebox
-import os
-import os.path
-import time
-import numpy as np	
-import decimal
+
+import numpy as np
+import psycopg2
+
 ctx = decimal.Context()
 ctx.prec = 20
 def float_to_str(f):
@@ -21,7 +21,7 @@ username = 'filipb'
 password = '@infomarine'
 host = '192.168.8.10'
 connD = [username,password,host]
-connD2 = ['dbadmin','242QhpbS&9Fv','192.168.10.243']
+connD2 = [ 'dbadmin' ,'tutezczysto' ,'192.168.10.243' ]
 def q_run(connD, querry):
 	username = connD[0]
 	password = connD[1]
