@@ -11,9 +11,9 @@ from report_shipdata import getshipsdata ,shipdata
 from report_standards import legend_IM ,standards
 from report_styles import loadstyles
 
-username = 'postgres'
+username = 'testuser'
 password = 'info'
-host = 'localhost'
+host = '192.168.10.243'
 connD = [ username ,password ,host ]
 
 
@@ -138,6 +138,17 @@ def makereport ( connD ,rn_ ):
         devicetable ( document )
         getshipsdata ( parent )
         shipdata ( document )
+
+
+
+
+
+
+
+
+
+
+
         # podsumowanie daję tu na sztywno, na dzień dzisiejszy nie wiem czy to jest pobierane z bazy czy uzupełniane ręcznie
         document.add_page_break ()
         summary = document.add_paragraph ()

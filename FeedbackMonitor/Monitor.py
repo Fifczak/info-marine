@@ -7,8 +7,8 @@ from pathlib import Path
 import psycopg2
 import csv
 host = '192.168.10.243'
-username = 'gosiam'
-password =  'infog'
+username = 'testuser'
+password =  'testuser'
 connD = [username,password,host]
 
 

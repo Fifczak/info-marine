@@ -74,19 +74,16 @@ def remindershow():
 
     def makedevs(shipname):
         def devremdet(evt):
-
             def datepick(ob):
                 def print_sel():
                     ob.requestdate = str(cal.selection_get())
                     ob.dateLabel.configure(text=ob.requestdate)
                     root.destroy()
-
                 root = Tk()
                 root.title("Calendar")
                 s = ttk.Style(root)
                 s.theme_use('clam')
                 top = tk.Toplevel(root)
-
                 cal = Calendar(top,
                                font="Arial 14", selectmode='day',
                                cursor="hand1", year=2019, month=4, day=15)

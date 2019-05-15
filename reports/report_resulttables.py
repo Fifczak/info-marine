@@ -219,26 +219,29 @@ def drawtable_IM( document ,measlist ,connD ,report_number ):  # ):
     resulttable = document.add_table( rows=rowscount + 1 ,cols=7 )
     resulttable.style = 'Table Grid'
 
-    ht = resulttable.cell( 0 ,0 ).paragraphs[ 0 ]
-    r0 = ht.add_run( 'Nazwa urządzenia' )
+    col_name = 0
+    ht = resulttable.cell( 0 ,col_name ).paragraphs[ 0 ]
+    r0 = ht.add_run( 'Machine name' )
 
-    ht = resulttable.cell( 0 ,1 ).paragraphs[ 0 ]
-    r0 = ht.add_run( 'Prędkość RMS (mm/s) Freq A Max' )
+    col_val = 1
+    ht = resulttable.cell( 0 ,col_val ).paragraphs[ 0 ]
+    r0 = ht.add_run( 'Velocity RMS (mm/s) Max' )
 
-    ht = resulttable.cell( 0 ,2 ).paragraphs[ 0 ]
-    r0 = ht.add_run( 'Prędkość RMS (mm/s) Freq B Max' )
+    col_class = 2
+    ht = resulttable.cell( 0 ,col_class ).paragraphs[ 0 ]
+    r0 = ht.add_run( 'ISO standard' )
 
-    ht = resulttable.cell( 0 ,3 ).paragraphs[ 0 ]
-    r0 = ht.add_run( 'ISO/VDI standard' )
+    col_env = 3
+    ht = resulttable.cell( 0 ,col_env ).paragraphs[ 0 ]
+    r0 = ht.add_run( 'Bearing Envelope 0-Peak (m/s2) Max' )
 
-    ht = resulttable.cell( 0 ,4 ).paragraphs[ 0 ]
-    r0 = ht.add_run( 'Obwiednia łożysk 0-Peak (gE) Max' )
+    col_trend = 4
+    ht = resulttable.cell( 0 ,col_trend ).paragraphs[ 0 ]
+    r0 = ht.add_run( 'Trend Velocity RMS (mm/s) Max' )
 
-    ht = resulttable.cell( 0 ,5 ).paragraphs[ 0 ]
-    r0 = ht.add_run( 'Prędkość RMS Max (mm/s) Trend' )
-
-    ht = resulttable.cell( 0 ,6 ).paragraphs[ 0 ]
-    r0 = ht.add_run( 'Uwagi i sugestie' )
+    col_remark = 5
+    ht = resulttable.cell( 0 ,col_remark ).paragraphs[ 0 ]
+    r0 = ht.add_run( 'Remarks and suggestions' )
 
     xcord = 0
     i = -1
@@ -271,19 +274,17 @@ def drawtable_IM( document ,measlist ,connD ,report_number ):  # ):
                 p += 1
                 if str( measStrip[ 1 ] ) == str( xx.id ):
 
-                    ht = resulttable.cell( xcord + 1 ,0 ).paragraphs[ 0 ]
+                    ht = resulttable.cell( xcord + 1 ,col_name ).paragraphs[ 0 ]
                     r0 = ht.add_run( xx.name )
-                    ht = resulttable.cell( xcord + 1 ,1 ).paragraphs[ 0 ]
+                    ht = resulttable.cell( xcord + 1 ,col_val ).paragraphs[ 0 ]
                     # dodałem tu zamianę kropek na przecinki + zaokrąglenie do 3 miejsca po przecinku
                     txt_result = str( round( xx.maxval ,3 ) )
                     r0 = ht.add_run( txt_result.replace( "." ,"," ) )
-                    ht = resulttable.cell( xcord + 1 ,2 ).paragraphs[ 0 ]
-                    r0 = ht.add_run( str( xx.maxval2 ) )
-                    ht = resulttable.cell( xcord + 1 ,3 ).paragraphs[ 0 ]
+                    ht = resulttable.cell( xcord + 1 ,col_class ).paragraphs[ 0 ]
                     r0 = ht.add_run( str( xx.limit ) )
-                    ht = resulttable.cell( xcord + 1 ,4 ).paragraphs[ 0 ]
+                    ht = resulttable.cell( xcord + 1 ,col_env ).paragraphs[ 0 ]
                     r0 = ht.add_run ( str ( xx.maxenv ).replace ( "." ,"," ) )
-                    ht = resulttable.cell( xcord + 1 ,5 ).paragraphs[ 0 ]
+                    ht = resulttable.cell( xcord + 1 ,col_trend ).paragraphs[ 0 ]
                     if str( xx.limit ) == 'Cl. D':  # TEGO DLA CZYTELNOSCI LEPIEJ ZROBIC FUNKCJE
                         try:
 
@@ -311,14 +312,14 @@ def drawtable_IM( document ,measlist ,connD ,report_number ):  # ):
                             xcord += 1
                         else:
                             xcord += 1
-                            resulttable.cell( xcord + 1 ,0 ).merge( resulttable.cell( xcord + 1 ,6 ) )
+                            resulttable.cell( xcord + 1 ,0 ).merge( resulttable.cell( xcord + 1 ,col_remark ))
                             ht = resulttable.cell( xcord + 1 ,0 ).paragraphs[ 0 ]
                             p0 = ht.add_run( 'TUBEDZIEWYKRES' )
                             xcord += 1
                         break
                     except:  # OSTATNIA LINIA TABELI
                         xcord += 1
-                        resulttable.cell( xcord + 1 ,0 ).merge( resulttable.cell( xcord + 1 ,6 ) )
+                        resulttable.cell( xcord + 1 ,0 ).merge( resulttable.cell( xcord + 1 ,col_remark ) )
                         ht = resulttable.cell( xcord + 1 ,0 ).paragraphs[ 0 ]
                         p0 = ht.add_run( 'TUBEDZIEWYKRES' )
 

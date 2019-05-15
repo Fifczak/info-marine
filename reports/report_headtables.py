@@ -85,10 +85,10 @@ def standard_info_table ( connD ,document ,rn_ ):
     r0.bold = True
     r0.font.name = 'Calibri'
     section = document.sections[ 0 ]
-    footer = section.footer
-    footer.add_paragraph( shipstr + ' ' + rn_ )
-    footer.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    footer.vertical_alignment = WD_ALIGN_VERTICAL.TOP
+    # footer = section.footer
+    # footer.add_paragraph( shipstr + ' ' + rn_ )
+    # footer.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    # footer.vertical_alignment = WD_ALIGN_VERTICAL.TOP
 
 
 rntxt = '1999-2019'
