@@ -238,7 +238,7 @@ def remarks(connD):
 
 					measdate = str(q_run(connD, querry)[0][0])
 
-					if line.var.get() == 1: sendflag = 'True'
+					if line.var.get() == 1 or line.var2.get() == 1: sendflag = 'True'
 					else: sendflag = 'False'
 					if line.var2.get() == 1: remflag = 'True'
 					else: remflag = 'False'

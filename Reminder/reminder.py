@@ -45,10 +45,11 @@ def remindershow():
             self.name = ''
             self.id = ''
             self.lastraport = ''
+            self.lastfullnumber = ''
             self.lastraportdate =''
             self.senddate = ''
             self.requestdate = ''
-
+            self.lastfullyear = ''
 
 
     def getships(evt):
@@ -112,6 +113,9 @@ def remindershow():
             RequestDateL = tk.Label(detWindow, text="Request date:").grid(column = 0, row = 5)
             RequestDate = tk.Label(detWindow, text= str(devlist[index].requestdate)).grid(column = 1, row = 5)
 
+            textfield = tk.Text(remWindow, width=20, height=20)
+
+            textfield.insert(INSERT, q_run(connD,'select remcom from reminder where '))
 
 
             detWindow.mainloop()
@@ -121,10 +125,13 @@ def remindershow():
         parent = q_run(connD,querry)[0][0]
 
         ss = (q_run(connD, "select raport_number,min(date) from measurements_low where parent =" + str(
-            parent) + " group by raport_number order by min desc limit 1"))[0]
-        lastfullrn = ss[0]
-        lastfulldate = ss[1]
-        print(lastfullrn, lastfulldate)
+            parent) + " group by raport_number order by min desc"))
+
+        for rep in ss:
+            if len(rep[0]) == 9:
+                lastfulldate = rep[1]
+                break
+
         querry = "SELECT dss.id, CASE WHEN dss.id ~E'^\\\d+$' THEN	(select name from devices where cast(devices.id as text)\
              =  dss.id limit 1) ELSE (select id from ds_structure where id  =  dss.id limit 1) END as sortint, dss.sort FROM ds_structure\
               as dss where dss.parent = " + str(parent)
@@ -136,11 +143,12 @@ def remindershow():
 
         querry = """
         
-select ml.id,ml.raport_number,min(ml.date),rem.send_date,rem.request_date
+select ml.id,ml.raport_number,min(ml.date),har.send_raport_koniec,rem.request_date
 from measurements_low as ml
 left join reminder as rem on ml.id = rem.id and ml.raport_number = rem.raport_number 
+left join harmonogram as har on ml.raport_number = har.report_number  
 where ml.parent = """ + str(parent) + """
-group by ml.id,ml.raport_number,rem.request_date,rem.send_date order by ml.id,ml.raport_number desc
+group by ml.id,ml.raport_number,rem.request_date,har.send_raport_koniec order by ml.id,ml.raport_number desc
         
         """
 
@@ -151,20 +159,24 @@ group by ml.id,ml.raport_number,rem.request_date,rem.send_date order by ml.id,ml
         querry ="select id,raport_number from reminder where status is null and parent = " + str(parent)
         remindertbl = q_run(connD, querry)
 
-        print(querry)
+
         p = 0
         devlist.clear()
         for line in results:
             for line2 in resultr:
+                fullrn = line2[1][:4] + '-' + line2[1][4:]
                 if str(line[0]) == str(line2[0]):
                     x = device()
                     x.name = str(line[1])
                     x.id = str(line2[0])
                     x.lastraport = str(line2[1])
+                    x.lastfullnumber = x.lastraport[:4]
+                    x.lastfullyear = x.lastraport[4:]
                     x.lastraportdate = datetime.datetime.strptime(str(line2[2]), '%Y-%m-%d').date()
+                    sdate = str(line2[3])[:10]
                     if str(line2[3]) == "None":pass
-                    else: x.senddate = datetime.datetime.strptime(str(line2[3]), '%Y-%m-%d').date()
-                    if str(line2[3]) == "None": pass
+                    else: x.senddate = datetime.datetime.strptime(str(sdate), '%Y-%m-%d').date()
+                    if str(line2[4]) == "None": pass
                     else:x.requestdate = datetime.datetime.strptime(str(line2[4]), '%Y-%m-%d').date()
                     devlistbox.insert(END, results[p][1])
 
@@ -179,6 +191,7 @@ group by ml.id,ml.raport_number,rem.request_date,rem.send_date order by ml.id,ml
                                     devlistbox.itemconfig(END, bg='Grey')
                                 else:
                                     x.status = 'REM'
+                                    print(x.requestdate)
                                     devlistbox.itemconfig(END, bg='Yellow')
 
 
@@ -231,31 +244,30 @@ Please be so kind and inform us whether taking vibration measurements is possibl
 
         textfield.insert(INSERT, devstr)
 
-        header2str = """
-        
-Could you also perform measurements of machinery missing from three months survey:
-        """
+        header2str = chr(10) + chr(10) + "Which was recommended to be controlled in our reports. "
         textfield.insert(INSERT, header2str)
-        devstr = ''
+
+        devlistnok = list()
         for line in devlist:
             if str(line.status) == 'NOK':
-                devstr += chr(10) + str('-') + str(line.name)
+                devlistnok.append(line)
+        print(len(devlistnok))
+        if len(devlistnok) == 0:
+            pass
+        else:
+            devstr = "Could you also perform measurements of machinery missing from three months survey:" + chr(10)
+            for line in devlistnok:
+                if str(line.status) == 'NOK':
+                    devstr += chr(10) + str('-') + str(line.name)
 
-
+        devstr += chr(10) + chr(10)
         textfield.insert(INSERT, devstr)
 
+
+        header3str ="We hope to receive your response soon, thank you in advance. "
+        textfield.insert(INSERT, header3str)
+
         textfield.pack(side=LEFT)
-
-
-
-
-
-
-
-
-
-
-
 
 
     remWindow = tk.Tk()
