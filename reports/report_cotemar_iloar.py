@@ -202,8 +202,8 @@ def createchart(host, username, password, id, rn, type):
 	it = 0
 	t =tp
 	maxf = 0 
-	
-	
+
+
 
 	if type == 'Env':
 		maxf = 800
@@ -521,7 +521,7 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		result_text = str(round(float(result[j][0]),3))
 		p=tableno.cell(5,1+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-		r=p.add_run(result_text)
+		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
 		if maxcord == j:
@@ -562,7 +562,7 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		result_text = str(round(float(result[j][0]),3))
 		p=tableno.cell(5,6+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-		r=p.add_run(result_text)
+		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
 		if maxcord == j:
@@ -600,7 +600,7 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		result_text = str(round(float(result[j][0]),3))
 		p=tableno.cell(7,1+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-		r=p.add_run(result_text)
+		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
 		if maxcord == j:
@@ -632,7 +632,7 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		result_text = str(round(float(result[j][0]),3))
 		p=tableno.cell(7,6+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-		r=p.add_run(result_text)
+		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
 		if maxcord == j:
@@ -662,7 +662,7 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		result_text = str(round(float(result[j][0]),3))
 		p=tableno.cell(8,1+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-		r=p.add_run(result_text)
+		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
 		if maxcord == j:
@@ -703,7 +703,7 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		result_text = str(round(float(result[j][0]),3))
 		p=tableno.cell(8,6+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-		r=p.add_run(result_text)
+		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
 		if maxcord == j:
@@ -740,7 +740,7 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		result_text = str(round(float(result[j][0]),3))
 		p=tableno.cell(10,1+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-		r=p.add_run(result_text)
+		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
 		if maxcord == j:
@@ -772,7 +772,7 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		result_text = str(round(float(result[j][0]),3))
 		p=tableno.cell(10,6+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-		r=p.add_run(result_text)
+		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
 		if maxcord == j:
