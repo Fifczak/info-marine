@@ -209,6 +209,7 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                     measno += 1
 
         def readmarvib():
+
             a = filedialog.askopenfilename()
             # a = 'C:\Overmind\data\hara.csv'
             f = open(a, "r")
@@ -239,6 +240,7 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 
                             if cols[1] == 'eMeaDisplacement':
                                 continue
+
                             if cols[1] == 'eMeaVelocity':  ########### START RMS VELOCITY
 
                                 iter += 1
@@ -283,8 +285,7 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                                         if cols2[0] == 'RMS':
                                             x.overall = round(float(cols2[1]), 3)
                                             measflag = 0
-                                            measlist.append(
-                                                x)  ##########################################################################
+                                            measlist.append(x)
                                             break
                                         if iterb == iter + 1000:
                                             measflag = 0
@@ -336,8 +337,7 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                                                 x.date = str(cols2[1] + '-' + cols2[3] + '-' + cols2[5])
                                         if cols2[0] == 'PK':
                                             x.overall = round(float(cols2[1]), 3)
-                                            measlist.append(
-                                                x)  ##########################################################################
+                                            measlist.append(x)
                                             break
                                         if iterb == iter + 1000:
                                             measflag = 0
@@ -352,7 +352,6 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                                 # iter += 1
                                 continue
                             if cols[1] == 'eMeaFourierTransform':  ###########START FFT
-
                                 iter += 1
                                 x.mode = 'FFT'
                                 x.domain = 'FFT'
@@ -403,6 +402,8 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                                                 maxF = 1600
                                             elif cols2[1] == '5':
                                                 maxF = 3200
+                                            elif cols2[1] == '6':
+                                                maxF = 6400
                                             x.start = (maxF / 1600)
                                             x.increment = x.start
                                             x.end = maxF
@@ -421,6 +422,7 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                                                 x.type = 'Env'
                                                 x.unit = '[m/s2]'
                                             measlist.append(x)
+
 
                                             break
                                         if iterb == iter + 1000:
@@ -661,6 +663,38 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 
         def upload():
             #Window.destroy()
+            def recountoverall(id,rn):
+                querry = "SELECT point,value from measurements_low where raport_number = '" + str(rn) + "' and id = " + str(id) + " and type = 'RMS' group by point,value"
+
+                pointslist = q_run(connD, querry)
+
+                for point in pointslist:
+                    x = []
+                    querry = "SELECT chart from meascharts where report_number = '" + str(rn) + "' and id = " + str(
+                        id) + " and type = 'Vel'  and domain = 'FFT' and point = '" + str(point[0]) + "'"
+                    chartstr = q_run(connD, querry)[0][0]
+                    chartstrlist = chartstr.split(";")
+                    for line in chartstrlist:
+                        x.append(float(line))
+
+                    xlen = int(len(x) - 2)
+                    tp = x[0]
+                    dt = (x[1] / xlen)
+                    x = x[2:]
+
+                    sumVal = 0
+
+                    freq = float(tp)
+                    for m in x:
+                        if freq > 5 and freq < 1000:  ## TUTAJ BEDZIE TRZEBA ZROVBC ZMIENNE ZAKRESY W ZALEZNOSCI OD STATKU / URZADZENIA / NORMY
+                            sumVal += pow(m, 2)
+                        freq += float(dt)
+                    overall = round(sqrt(sumVal), 3)
+                    querry = "UPDATE measurements_low set value = "+str(overall)+" where raport_number = '" + str(
+                        rn) + "' and id = " + str(id) + " and type = 'RMS' and point = '" + str(point[0]) + "'"
+                    q_run(connD,querry)
+
+
             pbar = tk.Tk()
             pbar.title("Uploading Measurements")
             progress_bar = ttk.Progressbar(pbar, orient='horizontal', lengt=286, mode='determinate')
@@ -695,6 +729,7 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 
                 if i.mode == 'Overall':
                     OveCount += 1
+
                     querry = "INSERT INTO measurements_low(parent,id, point, raport_number, date, type, unit, value) VALUES (" + str(
                         parent) + "," + str(i.id) + ",'" + str(i.point) + "','" + str(rnumber) + "','" + str(
                         i.date) + "','" + str(i.type) + "','" + str(i.unit) + "','" + str(i.overall) + "')"
@@ -705,6 +740,16 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                     del chartstr
                 except:
                     x = 1
+
+            if str(parent) == '54': #ILOAR
+                listaid = ['18117', '18115', '18113', '18123', '18121', '18105', '18103', '18101', '18111', '18109','18107']
+                p = 0
+                for id in listaid:
+                    p += 1
+                    recountoverall(id,rnumber)
+                    progress_bar['value'] = p
+                    progress_bar.update()
+
             pbar.destroy()
             querry = "select dev_in from harmonogram where report_number ='" + str(rnumber) + "' limit 1"
             devins = q_run(connD, querry)
@@ -785,7 +830,7 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
         mylist.config(width=100)
         mylist.bind('<Double-Button>', onselect2)
         ycord = 0
-        print(measlist)
+
         for x in measlist:
 
             mylist.insert(END,
@@ -840,4 +885,4 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 # 'Vibscanner'
 # 'Marvib'
 # 'ezThomas'
-read_measurement_file('Marvib','testuser','testuser','192.168.10.243','2016-2018', '15')
+read_measurement_file('Marvib','testuser','info','192.168.10.243','2009-2019', '54')
