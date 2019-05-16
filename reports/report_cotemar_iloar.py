@@ -33,6 +33,25 @@ import psycopg2
 tk=Tk()
 document = Document('C:\\overmind\\Data\\base.docx')
 
+def q_run(connD, querry):
+	username = connD[0]
+	password = connD[1]
+	host = connD[2]
+	kport = "5432"
+	kdb = "postgres"
+	#cs = ' host="localhost",database="postgres", user= "postgres" , password="info" '
+	cs = "dbname=%s user=%s password=%s host=%s port=%s"%(kdb,username,password,host,kport)
+	conn = None
+	conn = psycopg2.connect(str(cs))
+	cur = conn.cursor()
+	cur.execute(querry)
+	try:
+		result = cur.fetchall()
+		return result
+	except:
+		pass
+	conn.commit()
+	cur.close()
 
 ######################################
 #################STYLE################
@@ -128,57 +147,54 @@ font.italic = True
 #######DEFINICJE FUNKCJI#############
 ######################################
 def createchart(host, username, password, id, rn, type):
-
-	kport = "5432"
-	kdb = "postgres"
-	#cs = ' host="localhost",database="postgres", user= "postgres" , password="info" '
-	cs = "dbname=%s user=%s password=%s host=%s port=%s"%(kdb,username,password,host,kport)
-	conn = None
-	conn = psycopg2.connect(str(cs))
-	cur = conn.cursor()
-	querry = "select point from measurements_low where id = " + str(id) + " and raport_number = '" + str(rn) + "' and type = '" + str(type) + "' order by value desc limit 1;"
-	cur.execute(querry)
-	result = cur.fetchall()
-	conn.commit()
-	cur.close()	
-	maxPoint = result[0][0]
+	connD = [username,password,host]
+	querry = "select point from measurements_low where id = " + str(id) + " and raport_number = '" + str(rn) + "' order by value desc limit 1;"
+	maxPoint = q_run(connD,querry)[0][0]
+	
+	
+	X = []
+	Y = []
+	x = []
 	
 	if type == 'RMS':
 		type = 'Vel'
 	elif type == 'envelope P-K':
 		type = 'Env'
 	
-
-
-	if host == 'localhost':
-		querry = "select lo_export(measurements.chart, 'C:\\Overmind\\temp\\tempchart.csv') from measurements where id = " + str(id) + " and report_number = '" + str(rn) + "' and point = '"+ str(maxPoint) +"' and type = '" + str(type) + "' ;"	
-	if host == '192.168.10.243':
-		servpath = r'/home/filip/Public/tempchart.csv'
-		querry = "select lo_export(measurements.chart,'" + servpath + "') from measurements where id = '" + str(id) + "' and report_number = '" + str(rn) + "' and point = '"+ str(maxPoint) +"' and type = '" + str(type) + "' ;"	
-		
-	cur = conn.cursor()
-	cur.execute(querry)
-	result = cur.fetchall()
-	conn.commit()
-	cur.close()
-	#os.remove(spath_)
-	x = []
-	Y = []
-	if host == 'localhost':
-		while not os.path.exists(r'C:\\Overmind\\temp\\tempchart.csv'):
-			time.sleep(1)
-		try:	
-			x = np.loadtxt(r'C:\\Overmind\\temp\\tempchart.csv')
-		except:
-			messagebox.showinfo("Title", str(querry))
-	if host == '192.168.10.243':
-		servpath = r'\\192.168.10.243\Public\tempchart.csv'
-		while not os.path.exists(servpath):
-			time.sleep(1)
-		try:
-			x = np.loadtxt(servpath)
-		except:
-			messagebox.showinfo("Title", str(querry))
+	try:
+		querry = "select chart from meascharts where id = '" + str(id) + "' and report_number = '" + str(rn) + "' and point = '"+ str(maxPoint) +"' and domain = 'FFT' and type = 'Vel' ;"	
+		chartstr = q_run(connD, querry)[0][0]
+		chartstrlist = chartstr.split(";")		
+		for line in chartstrlist:
+			x.append(float(line))
+	except:
+		if host == 'localhost':
+			querry = "select lo_export(measurements.chart, 'C:\\Overmind\\temp\\tempchart.csv') from measurements where id = " + str(id) + " and report_number = '" + str(rn) + "' and point = '"+ str(maxPoint) +"' and type = '" + str(type) + "' ;"	
+		if host == '192.168.8.125':
+			servpath = r'/home/filip/Public/tempchart.csv'
+			querry = "select lo_export(measurements.chart,'" + servpath + "') from measurements where id = '" + str(id) + "' and report_number = '" + str(rn) + "' and point = '"+ str(maxPoint) +"' and type = '" + str(type) + "' ;"	
+			
+		result = q_run(connD,querry)
+		#os.remove(spath_)
+		if host == 'localhost':
+			while not os.path.exists(r'C:\\Overmind\\temp\\tempchart.csv'):
+				time.sleep(1)
+			try:	
+				x = np.loadtxt(r'C:\\Overmind\\temp\\tempchart.csv')
+			except:
+				messagebox.showinfo("Title", str(querry))
+		if host == '192.168.8.125':
+			servpath = r'\\192.168.8.125\Public\tempchart.csv'
+			while not os.path.exists(servpath):
+				time.sleep(1)
+			try:
+				x = np.loadtxt(servpath)
+			except:
+				messagebox.showinfo("Title", str(querry))
+				
+			
+				
+			
 	xlen = int(len(x) - 2)			
 	tp = x[0]
 	dt = (x[1] / xlen)
@@ -191,18 +207,20 @@ def createchart(host, username, password, id, rn, type):
 
 	if type == 'Env':
 		maxf = 800
-	
+		minf = 2
 	
 	
 	
 	if type == 'Vel':
 		if str(id) == '18100' or str(id) == '18102' or str(id) == '18104' or str(id) == '18106' or str(id) == '18108' or str(id) == '18110' or str(id) == '18112' or str(id) == '18114' or str(id) == '18116' or str(id) == '18118' or str(id) == '18120' or str(id) == '18122':
-			maxf = 200
+			maxf = 800#motor
+			minf = 10
 		if str(id) == '18101' or str(id) == '18103' or str(id) == '18105' or str(id) == '18107' or str(id) == '18109' or str(id) == '18111' or str(id) == '18113' or str(id) == '18115' or str(id) == '18117' or str(id) == '18119' or str(id) == '18121' or str(id) == '18123':
-			maxf = 800
+			maxf = 800 #gear
+			minf = 5
 	
 	for i in x:
-		if t < 4 :
+		if t < minf :
 			x[it] = 0
 			itmin = it
 		if t > (maxf) :
@@ -229,11 +247,14 @@ def createchart(host, username, password, id, rn, type):
 	axes.set_ylim([0,maxval * 1.1])
 	plt.savefig('C:\\overmind\\temp\\tempchart.png', dpi = 300, width = 10, color = 'black')
 
-	if host == 'localhost':
-		os.remove('C:\\Overmind\\temp\\tempchart.csv')
-	if host == '192.168.10.243':
-		servpath = r'\\192.168.10.243\Public\tempchart.csv'
-		os.remove(servpath)
+	try:
+		if host == 'localhost':
+			os.remove('C:\\Overmind\\temp\\tempchart.csv')
+		if host == '192.168.8.125':
+			servpath = r'\\192.168.8.125\Public\tempchart.csv'
+			os.remove(servpath)
+	except:
+		pass
 	return maxPoint
 	plt.close()
 
@@ -359,12 +380,12 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		result_text = str(round(float(result[j][0]),3))
 		p=tableno.cell(2,1+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-		r=p.add_run(result_text)
+		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
 		if maxcord == j:
 			r.bold = True
-		if result[j][0] < 18:
+		if result[j][0] < 7.1:
 			limittxt = 'In limit'
 		else:
 			limittxt = 'Out of limit'
@@ -400,12 +421,12 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		result_text = str(round(float(result[j][0]),3))
 		p=tableno.cell(2,6+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-		r=p.add_run(result_text)
+		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
 		if maxcord == j:
 			r.bold = True
-		if result[j][0] < 18:
+		if result[j][0] < 11.2:
 			limittxt = 'In limit'
 		else:
 			limittxt = 'Out of limit'
@@ -437,7 +458,7 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		result_text = str(round(float(result[j][0]),3))
 		p=tableno.cell(4,1+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-		r=p.add_run(result_text)
+		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
 		if maxcord == j:
@@ -469,7 +490,7 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		result_text = str(round(float(result[j][0]),3))
 		p=tableno.cell(4,6+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-		r=p.add_run(result_text)
+		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
 		if maxcord == j:
@@ -505,7 +526,7 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		r.font.size= Pt(9)
 		if maxcord == j:
 			r.bold = True
-		if result[j][0] < 18:
+		if result[j][0] < 7.1:
 			limittxt = 'In limit'
 		else:
 			limittxt = 'Out of limit'
@@ -546,7 +567,7 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		r.font.size= Pt(9)
 		if maxcord == j:
 			r.bold = True
-		if result[j][0] < 18:
+		if result[j][0] < 11.2:
 			limittxt = 'In limit'
 		else:
 			limittxt = 'Out of limit'
@@ -646,7 +667,7 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		r.font.size= Pt(9)
 		if maxcord == j:
 			r.bold = True
-		if result[j][0] < 18:
+		if result[j][0] < 7.1:
 			limittxt = 'In limit'
 		else:
 			limittxt = 'Out of limit'
@@ -687,7 +708,7 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		r.font.size= Pt(9)
 		if maxcord == j:
 			r.bold = True
-		if result[j][0] < 18:
+		if result[j][0] < 11.2:
 			limittxt = 'In limit'
 		else:
 			limittxt = 'Out of limit'
@@ -1047,7 +1068,7 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	l22.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	l22.paragraph_format.left_indent = Inches(0.25)
 	
-	t5 = document.add_paragraph('Following standards may applied for assessment:')
+	t5 = document.add_paragraph('Following standards are applied for assessment:')
 	t5.style = document.styles['text']
 	t5.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	
@@ -1211,14 +1232,14 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	
 	document.add_paragraph()
 	
-	l25 = document.add_paragraph('2.4.	Measurement results')
+	l25 = document.add_paragraph('2.5.	Measurement results')
 	l25.style = document.styles['listlvl2']
 	l25.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	l25.paragraph_format.left_indent = Inches(0.25)
 	
 	document.add_paragraph()
 	
-	t12 = document.add_paragraph('Below table are presented FFT spectrum of Velocity the highest point of each electric motor and gear part.')
+	t12 = document.add_paragraph('In below tables are presented RMS velocity values for all measured points of electric motor and gear part. Additionally, FFT graphs for highest values on electric motor and gear part are included.')
 	t12.style = document.styles['text']
 	t12.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	

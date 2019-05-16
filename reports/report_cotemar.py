@@ -1,28 +1,60 @@
+import sys
 import datetime
 import os
 import os.path
 import time
-from tkinter import *
-from tkinter import messagebox
-from tkinter.ttk import *
+
 
 import matplotlib.pyplot as plt
-import numpy as np
-import psycopg2
+
 from docx import Document
-from docx.enum.style import WD_STYLE_TYPE
-from docx.enum.table import WD_TABLE_ALIGNMENT
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.oxml import parse_xml
-from docx.oxml.ns import nsdecls
 from docx.shared import Inches
 from docx.shared import Pt
 from docx.shared import RGBColor
 
+from docx.enum.style import WD_STYLE_TYPE
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.text import WD_BREAK
+from docx.enum.text import WD_LINE_SPACING
+from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.text import WD_TAB_ALIGNMENT, WD_TAB_LEADER
+
+from tkinter import messagebox
+from tkinter import *
+from tkinter.ttk import *
+
+from docx.oxml.ns import nsdecls
+from docx.oxml import parse_xml
+
+import numpy as np	
+	
+import psycopg2
+
 tk=Tk()
 document = Document('C:\\overmind\\Data\\base.docx')
 
+def q_run(connD, querry):
+	username = connD[0]
+	password = connD[1]
+	host = connD[2]
+	kport = "5432"
+	kdb = "postgres"
+	#cs = ' host="localhost",database="postgres", user= "postgres" , password="info" '
+	cs = "dbname=%s user=%s password=%s host=%s port=%s"%(kdb,username,password,host,kport)
+	conn = None
+	conn = psycopg2.connect(str(cs))
+	cur = conn.cursor()
+	cur.execute(querry)
+	try:
+		result = cur.fetchall()
+		return result
+	except:
+		pass
+	conn.commit()
+	cur.close()
 
+	
+	
 ######################################
 #################STYLE################
 ######################################
@@ -68,14 +100,14 @@ font2.size = Pt(11)
 font2.bold = True
 font2.underline = True
 
-obj_charstyle = obj_styles.add_style('text',WD_STYLE_TYPE.PARAGRAPH)
-style = document.styles['text']
+obj_charstyle = obj_styles.add_style('textt1',WD_STYLE_TYPE.PARAGRAPH)
+style = document.styles['textt1']
 font = style.font
 font.name = 'Calibri'
 font.size = Pt(11)
 
-obj_charstyle = obj_styles.add_style('textB',WD_STYLE_TYPE.PARAGRAPH)
-style = document.styles['textB']
+obj_charstyle = obj_styles.add_style('texBtt1',WD_STYLE_TYPE.PARAGRAPH)
+style = document.styles['texBtt1']
 font = style.font
 font.name = 'Calibri'
 font.size = Pt(11)
@@ -102,50 +134,53 @@ font.italic = True
 #######DEFINICJE FUNKCJI#############
 ######################################
 def createchart(host, username, password, id, rn):
+	connD = [username,password,host]
 
-	kport = "5432"
-	kdb = "postgres"
-	#cs = ' host="localhost",database="postgres", user= "postgres" , password="info" '
-	cs = "dbname=%s user=%s password=%s host=%s port=%s"%(kdb,username,password,host,kport)
-	conn = None
-	conn = psycopg2.connect(str(cs))
-	cur = conn.cursor()
 	querry = "select point from measurements_low where id = " + str(id) + " and raport_number = '" + str(rn) + "' order by value desc limit 1;"
-	cur.execute(querry)
-	result = cur.fetchall()
-	conn.commit()
-	cur.close()	
-	maxPoint = result[0][0]
+	maxPoint = q_run(connD,querry)[0][0]
 	
-	if host == 'localhost':
-		querry = "select lo_export(measurements.chart, 'C:\\Overmind\\temp\\tempchart.csv') from measurements where id = " + str(id) + " and report_number = '" + str(rn) + "';"	
-	if host == '192.168.10.243':
-		servpath = r'/home/filip/Public/tempchart.csv'
-		querry = "select lo_export(measurements.chart,'" + servpath + "') from measurements where id = '" + str(id) + "' and report_number = '" + str(rn) + "' and point = '"+ str(result[0][0]) +"';"	
-		
-	cur = conn.cursor()
-	cur.execute(querry)
-	result = cur.fetchall()
-	conn.commit()
-	cur.close()
-	#os.remove(spath_)
+	
 	X = []
 	Y = []
-	if host == 'localhost':
-		while not os.path.exists(r'C:\\Overmind\\temp\\tempchart.csv'):
-			time.sleep(1)
-		try:	
-			x = np.loadtxt(r'C:\\Overmind\\temp\\tempchart.csv')
-		except:
-			messagebox.showinfo("Title", str(querry))
-	if host == '192.168.10.243':
-		servpath = r'\\192.168.10.243\Public\tempchart.csv'
-		while not os.path.exists(servpath):
-			time.sleep(1)
-		try:
-			x = np.loadtxt(servpath)
-		except:
-			messagebox.showinfo("Title", str(querry))
+	x = []
+	try:
+		querry = "select chart from meascharts where id = '" + str(id) + "' and report_number = '" + str(rn) + "' and point = '"+ str(maxPoint) +"' and domain = 'FFT' and type = 'Vel' ;"	
+		chartstr = q_run(connD, querry)[0][0]
+		chartstrlist = chartstr.split(";")		
+		for line in chartstrlist:
+			x.append(float(line))
+	
+	except:
+		if host == 'localhost':
+			querry = "select lo_export(measurements.chart, 'C:\\Overmind\\temp\\tempchart.csv') from measurements where id = " + str(id) + " and report_number = '" + str(rn) + "';"	
+		if host == '192.168.8.125':
+			servpath = r'/home/filip/Public/tempchart.csv'
+			querry = "select lo_export(measurements.chart,'" + servpath + "') from measurements where id = '" + str(id) + "' and report_number = '" + str(rn) + "' and point = '"+ str(result[0][0]) +"';"	
+			
+		q_run(connD,querry)
+		 #os.remove(spath_)
+		
+		
+		if host == 'localhost':
+			while not os.path.exists(r'C:\\Overmind\\temp\\tempchart.csv'):
+				time.sleep(1)
+			try:	
+				x = np.loadtxt(r'C:\\Overmind\\temp\\tempchart.csv')
+			except:
+				messagebox.showinfo("Title", str(querry))
+		if host == '192.168.8.125':
+			servpath = r'\\192.168.8.125\Public\tempchart.csv'
+			while not os.path.exists(servpath):
+				time.sleep(1)
+			try:
+				x = np.loadtxt(servpath)
+			except:
+				messagebox.showinfo("Title", str(querry))
+	
+	
+	
+	
+	
 	
 	xlen = int(len(x) - 2)			
 	tp = x[0]
@@ -154,18 +189,15 @@ def createchart(host, username, password, id, rn):
 	it = 0
 	t =tp
 	maxf = 0 
-	
-
-	
- 
 
 	if id == 17159 or id == 17161 or id == 17162 or id == 17163 or id == 17164 or id == 17165  or id == 18137 or id == 18127 or id == 18129 or id == 18131 or id == 18133 or id == 18135:
-		maxf= 200
+		maxf = 1000#motor
+		minf = 2
 	if id == 17160 or id == 17166 or id == 17167 or id == 17168 or id == 17169 or id == 17170 or id == 18138 or id == 18128 or id == 18130 or id == 18132 or id == 18134 or id == 18136:
-		maxf= 1000
-
+		maxf = 1000 #gear
+		minf = 5
 	for i in x:
-		if t < 4 :
+		if t < minf :
 			x[it] = 0
 		if t > maxf :
 			x[it] = 0
@@ -181,22 +213,31 @@ def createchart(host, username, password, id, rn):
 	axes = plt.gca()
 	
 	maxval = np.amax(x)
-	maxcord = (np.argmax(x) + 1) * dt
+	maxcord = (np.argmax(x) + 2) * dt
 	plt.plot([0, 1000], [maxval, maxval], lw=0.3, color = 'red')
 	plt.plot([maxcord, maxcord], [maxval, maxval * 1.1], lw=0.3)
 	axes.set_xlim([0,maxf])
 	axes.set_ylim([0,maxval * 1.1])
 	plt.savefig('C:\\overmind\\temp\\tempchart.png', dpi = 300, width = 10, color = 'black')
 	
-	if host == 'localhost':
-		os.remove('C:\\Overmind\\temp\\tempchart.csv')
-	if host == '192.168.10.243':
-		servpath = r'\\192.168.10.243\Public\tempchart.csv'
-		os.remove(servpath)
+	
+	try:
+		if host == 'localhost':
+			os.remove('C:\\Overmind\\temp\\tempchart.csv')
+		if host == '192.168.8.125':
+			servpath = r'\\192.168.8.125\Public\tempchart.csv'
+			os.remove(servpath)
+	except:
+		pass
+		
+		
+		
+		
+		
 	return maxPoint
 
 def resulttable(tn, host, username, password, tableno, id1, id2, rn):
-
+	connD = [username,password,host]
 	kport = "5432"
 	kdb = "postgres"
 
@@ -220,65 +261,66 @@ def resulttable(tn, host, username, password, tableno, id1, id2, rn):
 	
 	tableno.style = 'Table Grid'
 	tableno.alignment = WD_TABLE_ALIGNMENT.CENTER
-	tableno.cell(0,0).add_paragraph('Thruster: ' + str(tn + 1),'textB')
-	tableno.cell(0,0).add_paragraph('Load:','textB')
-	tableno.cell(0,0).add_paragraph('RPM:','textB')
-	tableno.cell(0,1).add_paragraph('Electric motor','textB')
+	tableno.cell(0,0).add_paragraph('Thruster: ' + str(tn + 1),'texBtt1')
+	tableno.cell(0,0).add_paragraph('Load:','texBtt1')
+	tableno.cell(0,0).add_paragraph('RPM:','texBtt1')
+	tableno.cell(0,1).add_paragraph('Electric motor','texBtt1')
 	tableno.cell(0,1).merge(tableno.cell(0,2).merge(tableno.cell(0,3).merge(tableno.cell(0,4).merge(tableno.cell(0,5)))))
-	tableno.cell(0,6).add_paragraph('Gear Part','textB')
+	tableno.cell(0,6).add_paragraph('Gear Part','texBtt1')
 	tableno.cell(0,6).merge(tableno.cell(0,7).merge(tableno.cell(0,8)))
-	tableno.cell(1,0).add_paragraph('Position of accelerometers','text')
+	tableno.cell(1,0).add_paragraph('Position of accelerometers','textt1')
 	tableno.rows[1].cells[0]._tc.get_or_add_tcPr().append(shading_elm_1)
 	
-	tableno.cell(1,1).add_paragraph('Mot Sup','text')
-	tableno.cell(1,1).add_paragraph('Proa','text')
-	tableno.cell(1,1).add_paragraph('H1','text')
+	tableno.cell(1,1).add_paragraph('Mot Sup','textt1')
+	tableno.cell(1,1).add_paragraph('Proa','textt1')
+	tableno.cell(1,1).add_paragraph('H1','textt1')
 	tableno.rows[1].cells[1]._tc.get_or_add_tcPr().append(shading_elm_2)
 	
-	tableno.cell(1,2).add_paragraph('Mot Sup','text')
-	tableno.cell(1,2).add_paragraph('Barbor','text')
-	tableno.cell(1,2).add_paragraph('HH1','text')
+	tableno.cell(1,2).add_paragraph('Mot Sup','textt1')
+	tableno.cell(1,2).add_paragraph('Barbor','textt1')
+	tableno.cell(1,2).add_paragraph('HH1','textt1')
 	tableno.rows[1].cells[2]._tc.get_or_add_tcPr().append(shading_elm_3)
 	
-	tableno.cell(1,3).add_paragraph('Mot Sup','text')
-	tableno.cell(1,3).add_paragraph('Proa','text')
-	tableno.cell(1,3).add_paragraph('H2','text')
+	tableno.cell(1,3).add_paragraph('Mot Sup','textt1')
+	tableno.cell(1,3).add_paragraph('Proa','textt1')
+	tableno.cell(1,3).add_paragraph('H2','textt1')
 	tableno.rows[1].cells[3]._tc.get_or_add_tcPr().append(shading_elm_4)
 	
-	tableno.cell(1,4).add_paragraph('Mot Sup','text')
-	tableno.cell(1,4).add_paragraph('Barbor','text')
-	tableno.cell(1,4).add_paragraph('HH2','text')
+	tableno.cell(1,4).add_paragraph('Mot Sup','textt1')
+	tableno.cell(1,4).add_paragraph('Barbor','textt1')
+	tableno.cell(1,4).add_paragraph('HH2','textt1')
 	tableno.rows[1].cells[4]._tc.get_or_add_tcPr().append(shading_elm_5)
 	
-	tableno.cell(1,5).add_paragraph('Mot Sup','text')
-	tableno.cell(1,5).add_paragraph('Ver','text')
-	tableno.cell(1,5).add_paragraph('V2','text')
+	tableno.cell(1,5).add_paragraph('Mot Sup','textt1')
+	tableno.cell(1,5).add_paragraph('Ver','textt1')
+	tableno.cell(1,5).add_paragraph('V2','textt1')
 	tableno.rows[1].cells[5]._tc.get_or_add_tcPr().append(shading_elm_6)
 	
-	tableno.cell(1,6).add_paragraph('Mot Sup','text')
-	tableno.cell(1,6).add_paragraph('Proa','text')
-	tableno.cell(1,6).add_paragraph('H3','text')
+	tableno.cell(1,6).add_paragraph('Mot Sup','textt1')
+	tableno.cell(1,6).add_paragraph('Proa','textt1')
+	tableno.cell(1,6).add_paragraph('H3','textt1')
 	tableno.rows[1].cells[6]._tc.get_or_add_tcPr().append(shading_elm_7)
 	
-	tableno.cell(1,7).add_paragraph('Mot Sup','text')
-	tableno.cell(1,7).add_paragraph('Proa','text')
-	tableno.cell(1,7).add_paragraph('HH3','text')
+	tableno.cell(1,7).add_paragraph('Mot Sup','textt1')
+	tableno.cell(1,7).add_paragraph('Proa','textt1')
+	tableno.cell(1,7).add_paragraph('HH3','textt1')
 	tableno.rows[1].cells[7]._tc.get_or_add_tcPr().append(shading_elm_8)
 	
-	tableno.cell(1,8).add_paragraph('Mot Sup','text')
-	tableno.cell(1,8).add_paragraph('Ver','text')
-	tableno.cell(1,8).add_paragraph('V3','text')
+	tableno.cell(1,8).add_paragraph('Mot Sup','textt1')
+	tableno.cell(1,8).add_paragraph('Ver','textt1')
+	tableno.cell(1,8).add_paragraph('V3','textt1')
 	tableno.rows[1].cells[8]._tc.get_or_add_tcPr().append(shading_elm_9)
 
 	maxcord = 0
 	maxval = 0
 	result = []
-	cur = conn.cursor()
+
 	querry = "select value from (select distinct ml.value, ml.point, pts.sort from measurements_low as ml RIGHT JOIN points as pts ON ml.id = pts.id and ml.point = pts.point where ml.id = " + str(id1) + " and ml.raport_number = '" + str(rn) + "' and ml.point IN (select point from points as pts where id = " + str(id1) + " order by sort)) as al order by al.sort"
-	cur.execute(querry)
-	result = cur.fetchall()
-	conn.commit()
-	cur.close()
+	#messagebox.showinfo("Title", str(querry))	
+
+	result = q_run(connD,querry)
+	#messagebox.showinfo("Title", str(result))	
+
 	
 	for j in range(5):
 		if result[j][0] > maxval:
@@ -296,7 +338,7 @@ def resulttable(tn, host, username, password, tableno, id1, id2, rn):
 		r.font.size= Pt(11)
 		if maxcord == j:
 			r.bold = True
-		if result[j][0] < 18:
+		if result[j][0] < 7.1:
 			limittxt = 'In limit'
 		else:
 			limittxt = 'Out of limit'
@@ -336,7 +378,7 @@ def resulttable(tn, host, username, password, tableno, id1, id2, rn):
 		r.font.size= Pt(11)
 		if maxcord == j:
 			r.bold = True
-		if result[j][0] < 18:
+		if result[j][0] < 11.2:
 			limittxt = 'In limit'
 		else:
 			limittxt = 'Out of limit'
@@ -346,28 +388,28 @@ def resulttable(tn, host, username, password, tableno, id1, id2, rn):
 		r.font.name = 'Calibri'
 		r.font.size= Pt(11)
 	
-	# tableno.cell(2,6).add_paragraph(str(result[0][0]),'text')
+	# tableno.cell(2,6).add_paragraph(str(result[0][0]),'textt1')
 	# if result[0][0] < 7:
-		# tableno.cell(3,6).add_paragraph('In Limit','text')
+		# tableno.cell(3,6).add_paragraph('In Limit','textt1')
 	# else:
-		# tableno.cell(3,6).add_paragraph('Out of limit','text')
-	# tableno.cell(2,7).add_paragraph(str(result[1][0]),'text')
+		# tableno.cell(3,6).add_paragraph('Out of limit','textt1')
+	# tableno.cell(2,7).add_paragraph(str(result[1][0]),'textt1')
 	# if result[1][0] < 7:
-		# tableno.cell(3,7).add_paragraph('In Limit','text')
+		# tableno.cell(3,7).add_paragraph('In Limit','textt1')
 	# else:
-		# tableno.cell(3,7).add_paragraph('Out of limit','text')
-	# tableno.cell(2,8).add_paragraph(str(result[2][0]),'text')
+		# tableno.cell(3,7).add_paragraph('Out of limit','textt1')
+	# tableno.cell(2,8).add_paragraph(str(result[2][0]),'textt1')
 	# if result[2][0] < 7:
-		# tableno.cell(3,8).add_paragraph('In Limit','text')
+		# tableno.cell(3,8).add_paragraph('In Limit','textt1')
 	# else:
-		# tableno.cell(3,8).add_paragraph('Out of limit','text')
+		# tableno.cell(3,8).add_paragraph('Out of limit','textt1')
 	
 	
 	
-	tableno.cell(2,0).add_paragraph('Overall velocity RMS (mm/s)','text')
+	tableno.cell(2,0).add_paragraph('Overall velocity RMS (mm/s)','textt1')
 	tableno.rows[2].cells[0]._tc.get_or_add_tcPr().append(shading_elm_10)
 	
-	tableno.cell(3,0).add_paragraph('Vibration Class','text')
+	tableno.cell(3,0).add_paragraph('Vibration Class','textt1')
 	tableno.rows[3].cells[0]._tc.get_or_add_tcPr().append(shading_elm_11)
 	
 
@@ -440,7 +482,7 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	table.cell(0,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
 	
-	table.cell(0,1).add_paragraph('INSERT CASE NUMBER','text')
+	table.cell(0,1).add_paragraph('INSERT CASE NUMBER','textt1')
 	table.cell(0,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 
 	
@@ -448,13 +490,13 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	table.cell(1,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
 	
-	table.cell(1,1).add_paragraph(rn_,'text')
+	table.cell(1,1).add_paragraph(rn_,'textt1')
 	table.cell(1,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
 	table.cell(2,0).add_paragraph('Date of measurement:','texthead')
 	table.cell(2,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
-	table.cell(2,1).add_paragraph('DATE','text')
+	table.cell(2,1).add_paragraph('DATE','textt1')
 	table.cell(2,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
 	
@@ -488,23 +530,19 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	elif id_ == '55':
 		platname = 'Neptuno'
 		
-	table2.cell(0,1).add_paragraph(str(platname),'text')		
+	table2.cell(0,1).add_paragraph(str(platname),'textt1')		
 	table2.cell(0,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
-	#IMO W zależności od id_
-	table2.cell(1,0).add_paragraph('The IMO Number:','texthead')
-	table2.cell(1,0).alignment = WD_ALIGN_PARAGRAPH.LEFT
 
-	if id_ == '55':
-		table2.cell(1,1).add_paragraph('9662136','text')
-		table2.cell(1,1).alignment = WD_ALIGN_PARAGRAPH.LEFT
-	else:
-		table2.cell(1, 1).add_paragraph('9704128', 'text')
-		table2.cell(1, 1).alignment = WD_ALIGN_PARAGRAPH.LEFT
+	table2.cell(1,0).add_paragraph('The IMO Number:','texthead')
+	table2.cell(1,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
+	
+	table2.cell(1,1).add_paragraph('9704128','textt1')
+	table2.cell(1,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
 	table2.cell(2,0).add_paragraph('Owner of platform:','texthead')
 	table2.cell(2,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
-	table2.cell(2,1).add_paragraph('Cotemar S.A. de C.V.','text')
+	table2.cell(2,1).add_paragraph('Cotemar S.A. de C.V.','textt1')
 	table2.cell(2,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 
 	table2.cell(3,0).add_paragraph('Main dimensions:','textheadU')
@@ -513,25 +551,25 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	table2.cell(4,0).add_paragraph('Length overall:','texthead')
 	table2.cell(4,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
-	table2.cell(4,1).add_paragraph('95m','text')
+	table2.cell(4,1).add_paragraph('95m','textt1')
 	table2.cell(4,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
 	table2.cell(5,0).add_paragraph('Breadth Extreme:','texthead')
 	table2.cell(5,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
-	table2.cell(5,1).add_paragraph('67m','text')
+	table2.cell(5,1).add_paragraph('67m','textt1')
 	table2.cell(5,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
 	table2.cell(6,0).add_paragraph('Deadweight:','texthead')
 	table2.cell(7,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
-	table2.cell(6,1).add_paragraph('13280t','text')
+	table2.cell(6,1).add_paragraph('13280t','textt1')
 	table2.cell(6,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 
 	table2.cell(7,0).add_paragraph('Propulsion: ','texthead')
 	table2.cell(7,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
-	table2.cell(7,1).add_paragraph('6 Thrusters','text')
+	table2.cell(7,1).add_paragraph('6 Thrusters','textt1')
 	table2.cell(7,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
 	document.add_page_break()
@@ -551,25 +589,25 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	document.add_paragraph()
 	
 	t1 = document.add_paragraph('Vibration measurement were performed in three axes.')
-	t1.style = document.styles['text']
+	t1.style = document.styles['textt1']
 	t1.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	
 	document.add_paragraph()
 	
 	t2 = document.add_paragraph('V – Vertical axis')
-	t2.style = document.styles['text']
+	t2.style = document.styles['textt1']
 	t2.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	
 	document.add_paragraph()
 	
 	t3 = document.add_paragraph('H – Transverse axis')
-	t3.style = document.styles['text']
+	t3.style = document.styles['textt1']
 	t3.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	
 	document.add_paragraph()
 	
 	t4 = document.add_paragraph('HH – Longitudinal axis')
-	t4.style = document.styles['text']
+	t4.style = document.styles['textt1']
 	t4.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	
 	#OBRAZEK KTORY WYKRZACZA WORDA
@@ -589,19 +627,19 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	l22.paragraph_format.left_indent = Inches(0.25)
 	
 	t5 = document.add_paragraph('Following standards are applied for assessment:')
-	t5.style = document.styles['text']
+	t5.style = document.styles['textt1']
 	t5.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	
 	document.add_paragraph()
 	
 	t6 = document.add_paragraph('ISO 10816 – 1	General guidelines')
-	t6.style = document.styles['text']
+	t6.style = document.styles['textt1']
 	t6.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	
 	document.add_paragraph()
 	
 	t7 = document.add_paragraph('DNV Rules of classification of ships. Part 6 Chapter 15')
-	t7.style = document.styles['text']
+	t7.style = document.styles['textt1']
 	t7.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	
 	document.add_paragraph()
@@ -623,19 +661,19 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	table3.cell(1,0).add_paragraph('Value:','texthead')
 	table3.cell(1,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
-	table3.cell(1,1).add_paragraph('Velocity','text')
+	table3.cell(1,1).add_paragraph('Velocity','textt1')
 	table3.cell(1,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
 	table3.cell(2,0).add_paragraph('Range:','texthead')
 	table3.cell(2,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
-	table3.cell(2,1).add_paragraph('2-1000 Hz','text')
+	table3.cell(2,1).add_paragraph('4-200 Hz','textt1')
 	table3.cell(2,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
 	table3.cell(3,0).add_paragraph('Limit:','texthead')
 	table3.cell(3,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
-	table3.cell(3,1).add_paragraph('18 mm/s','text')
+	table3.cell(3,1).add_paragraph('18 mm/s','textt1')
 	table3.cell(3,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
 	document.add_paragraph()
@@ -657,22 +695,20 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	table4.cell(1,0).add_paragraph('Value:','texthead')
 	table4.cell(1,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
-	table4.cell(1,1).add_paragraph('Velocity','text')
+	table4.cell(1,1).add_paragraph('Velocity','textt1')
 	table4.cell(1,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
 	table4.cell(2,0).add_paragraph('Range:','texthead')
 	table4.cell(2,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
-	table4.cell(2,1).add_paragraph('5-1000 Hz','text')
+	table4.cell(2,1).add_paragraph('4-1000 Hz','textt1')
 	table4.cell(2,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
 	table4.cell(3,0).add_paragraph('Limit:','texthead')
 	table4.cell(3,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
-	table4.cell(3,1).add_paragraph('7 mm/s','text')
-	table4.cell(3,1).alignment = WD_ALIGN_PARAGRAPH.LEFT
-
-	
+	table4.cell(3,1).add_paragraph('7 mm/s','textt1')
+	table4.cell(3,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
 	document.add_page_break()
 	l23 = document.add_paragraph('2.3.	Measurement equipment')
@@ -683,13 +719,13 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	document.add_paragraph()
 	
 	t8 = document.add_paragraph('WBK18  8-channel dynamic signal condition modules')
-	t8.style = document.styles['text']
+	t8.style = document.styles['textt1']
 	t8.alignment = WD_ALIGN_PARAGRAPH.LEFT
 
 	document.add_paragraph()
 	
 	t10 = document.add_paragraph('eZ – TOMAS (Total Online Monitoring and Analysis Software)')
-	t10.style = document.styles['text']
+	t10.style = document.styles['textt1']
 	t10.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	
 	document.add_paragraph()
@@ -703,22 +739,22 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	for cell in table5.columns[1].cells:
 		cell.width = Inches(1.7)
 		
-	table5.cell(0,0).add_paragraph('Window:','text')
+	table5.cell(0,0).add_paragraph('Window:','textt1')
 	table5.cell(0,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
-	table5.cell(0,1).add_paragraph('Hanning','text')
+	table5.cell(0,1).add_paragraph('Hanning','textt1')
 	table5.cell(0,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
-	table5.cell(1,0).add_paragraph('Range:','text')
+	table5.cell(1,0).add_paragraph('Range:','textt1')
 	table5.cell(1,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
-	table5.cell(1,1).add_paragraph('2Hz-1kHz','text')
+	table5.cell(1,1).add_paragraph('2Hz-1kHz','textt1')
 	table5.cell(1,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
-	table5.cell(2,0).add_paragraph('F resolution:','text')
+	table5.cell(2,0).add_paragraph('F resolution:','textt1')
 	table5.cell(2,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
-	table5.cell(2,1).add_paragraph('0,16 Hz','text')
+	table5.cell(2,1).add_paragraph('0,16 Hz','textt1')
 	table5.cell(2,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
 	document.add_paragraph()
@@ -731,7 +767,7 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	document.add_paragraph()
 	
 	t11 = document.add_paragraph('Measurement were performed during normal operation of platform.')
-	t11.style = document.styles['text']
+	t11.style = document.styles['textt1']
 	t11.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	
 	document.add_paragraph()
@@ -742,9 +778,9 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	l25.paragraph_format.left_indent = Inches(0.25)
 	
 	document.add_paragraph()
-	#tekst na podstawie 1963-2019
+	
 	t12 = document.add_paragraph('In below tables are presented RMS velocity values for all measured points of electric motor and gear part. Additionally, FFT graphs for highest values on electric motor and gear part are included.')
-	t12.style = document.styles['text']
+	t12.style = document.styles['textt1']
 	t12.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	
 	if id_ == '53':
@@ -764,8 +800,8 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 		tk.update_idletasks()
 	
 		document.add_page_break()
-		document.add_paragraph()
-		table6 = document.add_table(rows=4, cols=9)
+		# document.add_paragraph()
+		table6 = document.add_table(rows=4, cols=9)	
 		resulttable(j, host, username, password, table6, motors[j], thrusters[j], rn_)
 		chart = document.add_paragraph()
 		r = chart.add_run()
@@ -800,7 +836,7 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	l31.paragraph_format.left_indent = Inches(0.25)
 	document.add_paragraph()
 	t13 = document.add_paragraph('The vibration of 6 thruster (electric motors and gear parts) are on very low level. Analysis was performed only on vibration values. Oil analysis is not available.')
-	t13.style = document.styles['text']
+	t13.style = document.styles['textt1']
 	t13.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	document.add_paragraph()
 	l32 = document.add_paragraph('3.2.	Recommendation // SPRAWDZIC / UZUPEŁNIC PRZED WYSŁANIEM // ')
@@ -809,11 +845,11 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	l32.paragraph_format.left_indent = Inches(0.25)
 	document.add_paragraph()
 	t14 = document.add_paragraph('Next measurements should be done within three months period or earlier if necessary.')
-	t14.style = document.styles['text']
+	t14.style = document.styles['textt1']
 	t14.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	document.add_paragraph()
 	t15 = document.add_paragraph('This report is prepared in good faith based on measurement diagnostic done on available object and documentation submitted.')
-	t15.style = document.styles['text']
+	t15.style = document.styles['textt1']
 	t15.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	
 	document.add_paragraph()
@@ -823,7 +859,7 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	
 	fullname = getname(host, username, password)
 	t16 = document.add_paragraph(str(fullname[0][0]))
-	t16.style = document.styles['text']
+	t16.style = document.styles['textt1']
 	t16.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	
 	mydate = datetime.datetime.now()
