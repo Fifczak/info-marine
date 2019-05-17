@@ -48,9 +48,7 @@ def remindershow():
             self.lastfullnumber = ''
             self.lastraportdate =''
             self.senddate = ''
-            self.requestdate = ''
-            self.lastfullyear = ''
-
+            self.remcom = ''
 
     def getships(evt):
         w = evt.widget
@@ -113,23 +111,29 @@ def remindershow():
             RequestDateL = tk.Label(detWindow, text="Request date:").grid(column = 0, row = 5)
             RequestDate = tk.Label(detWindow, text= str(devlist[index].requestdate)).grid(column = 1, row = 5)
 
-            textfield = tk.Text(remWindow, width=20, height=20)
+            remtextfield = tk.Text(detWindow, width=20, height=20)
+            remtextfield.insert(INSERT, str(devlist[index].remcom))
+            remtextfield.grid(column=0, row=6, columnspan=2)
 
-            textfield.insert(INSERT, q_run(connD,'select remcom from reminder where '))
+
+
 
 
             detWindow.mainloop()
-        devlistbox.delete(0, 'end')
 
+
+
+        devlistbox.delete(0, 'end')
         querry = "select id from main where name = '" + str(shipname)+ "'"
         parent = q_run(connD,querry)[0][0]
 
-        ss = (q_run(connD, "select raport_number,min(date) from measurements_low where parent =" + str(
+        ss = (q_run(connD, "select raport_number,min(date),max(date) from measurements_low where parent =" + str(
             parent) + " group by raport_number order by min desc"))
 
         for rep in ss:
             if len(rep[0]) == 9:
                 lastfulldate = rep[1]
+                lastfulldatemax = rep[2]
                 break
 
         querry = "SELECT dss.id, CASE WHEN dss.id ~E'^\\\d+$' THEN	(select name from devices where cast(devices.id as text)\
@@ -138,25 +142,46 @@ def remindershow():
         results = q_run(connD, querry)
 
 
-
-
-
         querry = """
         
-select ml.id,ml.raport_number,min(ml.date),har.send_raport_koniec,rem.request_date
-from measurements_low as ml
-left join reminder as rem on ml.id = rem.id and ml.raport_number = rem.raport_number 
-left join harmonogram as har on ml.raport_number = har.report_number  
-where ml.parent = """ + str(parent) + """
-group by ml.id,ml.raport_number,rem.request_date,har.send_raport_koniec order by ml.id,ml.raport_number desc
-        
-        """
-
-
+            select ml.id,ml.raport_number,min(ml.date),har.send_raport_koniec,rem.request_date, rem.remcom, rem.status
+            from measurements_low as ml
+            left join reminder as rem on ml.id = rem.id and ml.raport_number = rem.raport_number 
+            left join harmonogram as har on ml.raport_number = har.report_number  
+            where ml.parent = """ + str(parent) + """ 
+            group by ml.id,ml.raport_number,rem.request_date,har.send_raport_koniec, rem.remcom, rem.status order by ml.id,ml.raport_number desc
+                    
+                    """
 
         resultr = q_run(connD, querry)
 
-        querry ="select id,raport_number from reminder where status is null and parent = " + str(parent)
+
+        ###################CROSSOWANIE TABELI REMINDER Z MEASUREMENTS_LOW
+        querry =  """select rem.id, rem.raport_number, cast(har.send_raport_koniec as date)
+
+            from reminder as rem
+            left join harmonogram as har on rem.raport_number = har.report_number and rem.parent = har.shipid
+            
+            where parent = """ + str(parent) + """ and status is null"""
+        remindertbl1 = q_run(connD, querry)
+
+
+        querry = "Select id from measurements_low where parent = " + str(parent) + " and date > '" + str(lastfulldatemax) + "' group by id"
+        newmeaslist = q_run(connD, querry)
+
+        for item in remindertbl1:
+            for item2 in newmeaslist:
+                if item[0] == item2[0]:
+                    querry = "UPDATE reminder set status = 2 where id = " + str(item[0]) + " and raport_number = '" + str(item[1]) + " '"
+                    q_run(connD, querry)
+                    print(querry)
+                    break
+        ######## ######## ######## ######## ######## ######## ########
+
+
+
+
+        querry ="select id,raport_number from reminder where status is distinct from 2 and parent = " + str(parent)
         remindertbl = q_run(connD, querry)
 
 
@@ -170,8 +195,7 @@ group by ml.id,ml.raport_number,rem.request_date,har.send_raport_koniec order by
                     x.name = str(line[1])
                     x.id = str(line2[0])
                     x.lastraport = str(line2[1])
-                    x.lastfullnumber = x.lastraport[:4]
-                    x.lastfullyear = x.lastraport[4:]
+                    x.remcom = str(line2[5])
                     x.lastraportdate = datetime.datetime.strptime(str(line2[2]), '%Y-%m-%d').date()
                     sdate = str(line2[3])[:10]
                     if str(line2[3]) == "None":pass
@@ -187,12 +211,8 @@ group by ml.id,ml.raport_number,rem.request_date,har.send_raport_koniec order by
                         x.status = 'OK'
                         for line3 in remindertbl:   #SZUKANIE REMINDEROW
                             if str(line3[0]) ==  str(line2[0]) and str(line3[1]) ==  str(line2[1]):
-                                if x.senddate == '':
-                                    devlistbox.itemconfig(END, bg='Grey')
-                                else:
-                                    x.status = 'REM'
-                                    print(x.requestdate)
-                                    devlistbox.itemconfig(END, bg='Yellow')
+                                x.status = 'REM'
+                                devlistbox.itemconfig(END, bg='Yellow')
 
 
 
@@ -240,7 +260,9 @@ Please be so kind and inform us whether taking vibration measurements is possibl
         for line in devlist:
             if str(line.status) == 'REM':
                 devstr += chr(10) + str('-') + str(line.name)
-
+                ## UZUPEŁNIANIE REMCOM DO PRZEMYSLENIA
+                # if str(line.remcom) != 'None':
+                #     devstr += "(" + str(line.remcom) + ")"
 
         textfield.insert(INSERT, devstr)
 
