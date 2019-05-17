@@ -89,13 +89,14 @@ def unknowremarks():
 	ButtonNo = tk.Button(marksendWindow,text = "NOT SENT",command = setno)
 	ButtonBack = tk.Button(marksendWindow,text = "BACK",command = back)
 	remarktext.delete(1.0,END)
-	remarktext.insert(INSERT, SendRemList[0][2])
+	try:
+		remarktext.insert(INSERT, SendRemList[0][2])
+	except:
+		print('Error: Empty SendRemList')
 	labelcount.pack()
 	remarktext.pack()
 	ButtonYes.pack()
 	ButtonNo.pack()	
 	ButtonBack.pack()	
 	marksendWindow.mainloop()
-
 unknowremarks()
-	

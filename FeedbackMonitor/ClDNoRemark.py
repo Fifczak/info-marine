@@ -8,7 +8,7 @@ import psycopg2
 import csv
 host = '192.168.10.243'
 username = 'testuser'
-password =  'testuser'
+password =  'info'
 connD = [username,password,host]
 
 
@@ -219,9 +219,9 @@ def ShipsApplication(ClDNoRemList):
 			except:
 				pass
 			MASTERmeasframe.pack(side = TOP, anchor=S)
-			measBframe.pack(side = TOP)
+			#measBframe.pack(side = TOP)
 
-			UploadButton = Button(measBframe, text = 'Upload and refresh',command = upload)
+			UploadButton = Button(MASTERmeasframe, text = 'Upload and refresh',command = upload)
 			UploadButton.pack()
 			remlist = list()
 			backRemList = list()
@@ -287,10 +287,11 @@ def ShipsApplication(ClDNoRemList):
 	
 	
 	MASTERmeasframe = Frame(root2,width=300,height=300)
-	measBframe = Canvas(MASTERmeasframe)#,yscrollcommand=rapmeasscrol.set,scrollregion=(0,0,500,500))
+	#measBframe = Canvas(MASTERmeasframe)#,yscrollcommand=rapmeasscrol.set,scrollregion=(0,0,500,500))
 	
 	
 	
 	
 	
 	root2.mainloop()	
+#ShipsApplication(ClDNoRem())

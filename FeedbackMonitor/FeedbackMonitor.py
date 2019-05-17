@@ -1,4 +1,4 @@
-import Monitor
+import ClDNoRemark
 import UnknowSentFlag
 import RemarksWithoutFeedbacksMonitor
 import psycopg2
@@ -145,7 +145,7 @@ def runprogram():
 
 
 	def unknowstateremarks():
-		querry = "select id,raport_number from remarks where sended is null order by raport_number, id"
+		querry = "select id,raport_number,remark from remarks where sended is null and raport_number is not null and id is not null and raport_number <> '' and remark <>'' order by raport_number, id"
 		nosendedlist = q_run(connD, querry)
 		return (nosendedlist)
 	def NoFdbRem():
@@ -196,7 +196,7 @@ def runprogram():
 
 
 	def run1():
-		Monitor.ShipsApplication(r1)
+		ClDNoRemark.ShipsApplication(r1)
 	def run2():
 		UnknowSentFlag.unknowremarks()
 	def run3():
