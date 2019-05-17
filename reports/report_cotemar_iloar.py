@@ -148,7 +148,7 @@ font.italic = True
 ######################################
 def createchart(host, username, password, id, rn, type):
 	connD = [username,password,host]
-	querry = "select point from measurements_low where id = " + str(id) + " and raport_number = '" + str(rn) + "' order by value desc limit 1;"
+	querry = "select point from measurements_low where id = " + str(id) + " and raport_number = '" + str(rn) + "' and type = '" + str(type) + "' order by value desc limit 1;"
 	maxPoint = q_run(connD,querry)[0][0]
 	
 	
@@ -162,7 +162,7 @@ def createchart(host, username, password, id, rn, type):
 		type = 'Env'
 	
 	try:
-		querry = "select chart from meascharts where id = '" + str(id) + "' and report_number = '" + str(rn) + "' and point = '"+ str(maxPoint) +"' and domain = 'FFT' and type = 'Vel' ;"	
+		querry = "select chart from meascharts where id = '" + str(id) + "' and report_number = '" + str(rn) + "' and point = '"+ str(maxPoint) +"' and domain = 'FFT' and type = '" + str(type) + "' ;"	
 		chartstr = q_run(connD, querry)[0][0]
 		chartstrlist = chartstr.split(";")		
 		for line in chartstrlist:
