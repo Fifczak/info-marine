@@ -8,8 +8,8 @@ import tkinter.ttk as ttk
 from tkinter import *
 
 def runprogram():
-	username = 'testuser '
-	password = 'testuser'
+	username = 'filipb'
+	password = '@infomarine'
 	host = '192.168.10.243'
 	connD = [username,password,host]
 	def q_run(connD, querry):

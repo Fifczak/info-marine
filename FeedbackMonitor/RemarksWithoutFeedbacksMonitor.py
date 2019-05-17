@@ -9,7 +9,7 @@ import csv
 
 host = '192.168.10.243'
 username = 'testuser '
-password = 'testuser'
+password = 'info'
 connD = [username, password, host]
 
 

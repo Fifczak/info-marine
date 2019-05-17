@@ -6,8 +6,8 @@ from tkinter import *
 
 
 
-username = 'gosiam'
-password = 'infog'
+username = 'testuser'
+password = 'info'
 host = '192.168.10.243'
 connD = [username,password,host]
 def q_run(connD, querry):
@@ -97,5 +97,5 @@ def unknowremarks():
 	ButtonBack.pack()	
 	marksendWindow.mainloop()
 
-	
+unknowremarks()
 	
