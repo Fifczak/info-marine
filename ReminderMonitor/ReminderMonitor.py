@@ -65,9 +65,6 @@ order by har.lp desc
 		mainlist = q_run(connD, mainquerry)
 
 		self.Lbox1 = tk.Listbox(self.rmwWindow)
-		self.rclick = RightClick(self.Lbox1)
-		self.Lbox1.bind('<Button-3>', self.rclick.popup)
-
 		self.Lbox2 = tk.Listbox(self.rmwWindow)
 		self.Lbox3 = tk.Listbox(self.rmwWindow)
 		self.Lbox4 = tk.Listbox(self.rmwWindow)
