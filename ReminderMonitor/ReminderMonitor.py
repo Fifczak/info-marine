@@ -32,6 +32,10 @@ def q_run(connD, querry):
 		cur.close()
 
 
+
+
+
+
 class reminder_monitor_window:
 
 	def __init__(self):
@@ -43,41 +47,77 @@ left join (select raport_number from remarks group by raport_number) as remrn on
 left join (select raport_number from feedbacks group by raport_number) as fdbrn on ml.raport_number = fdbrn.raport_number
 left join (select raport_number from reminder group by raport_number) as remindrn on ml.raport_number = remindrn.raport_number
 left join (select raport_number from reminder where status = 1 group by raport_number) as remsend on ml.raport_number = remsend.raport_number
-group by ml.raport_number, remrn.raport_number, fdbrn.raport_number, remindrn.raport_number,remsend.raport_number
-order by ml.raport_number desc
+left join (select lp,report_number from harmonogram) as har on ml.raport_number = har.report_number
 
+where har.lp is not null
+
+group by ml.raport_number, remrn.raport_number, fdbrn.raport_number, remindrn.raport_number,remsend.raport_number,har.lp
+
+order by har.lp desc
 
 		"""
 		self.rmwWindow = tk.Tk()
 		self.rmwWindow.title("Reminder monitor")
-		self.Lab1 = tk.Label(self.rmwWindow, text="Remarks").grid(column=0, row=0)
-		self.Lab2 = tk.Label(self.rmwWindow, text="Feedbacks").grid(column=1, row=0)
-		self.Lab3 = tk.Label(self.rmwWindow, text="Reminder").grid(column=2, row=0)
-		self.Lab4 = tk.Label(self.rmwWindow, text="Reminder sent").grid(column=3, row=0)
+		self.Lab1 = tk.Label(self.rmwWindow, text="Remarks")
+		self.Lab2 = tk.Label(self.rmwWindow, text="Feedbacks")
+		self.Lab3 = tk.Label(self.rmwWindow, text="Reminder")
+		self.Lab4 = tk.Label(self.rmwWindow, text="Reminder sent")
 		mainlist = q_run(connD, mainquerry)
-		self.Lbox1 = tk.Listbox(self.rmwWindow,width=0)
-		self.Lbox2 = tk.Listbox(self.rmwWindow,width=0)
-		self.Lbox3 = tk.Listbox(self.rmwWindow,width=0)
-		self.Lbox4 = tk.Listbox(self.rmwWindow,width=0)
+
+		self.Lbox1 = tk.Listbox(self.rmwWindow)
+		self.rclick = RightClick(self.Lbox1)
+		self.Lbox1.bind('<Button-3>', self.rclick.popup)
+
+		self.Lbox2 = tk.Listbox(self.rmwWindow)
+		self.Lbox3 = tk.Listbox(self.rmwWindow)
+		self.Lbox4 = tk.Listbox(self.rmwWindow)
 
 		for line in mainlist:
+
 			self.Lbox1.insert(END, line[0])
 			if str(line[1]) == 'None': self.Lbox1.itemconfig(END, bg='Red')
 			else: self.Lbox1.itemconfig(END, bg='Green')
-			self.Lbox2.insert(END, line[0])
-			if str(line[2]) == 'None': self.Lbox2.itemconfig(END, bg='Red')
-			else: self.Lbox2.itemconfig(END, bg='Green')
-			self.Lbox3.insert(END, line[0])
-			if str(line[3]) == 'None': self.Lbox3.itemconfig(END, bg='Red')
-			else: self.Lbox3.itemconfig(END, bg='Green')
-			self.Lbox4.insert(END, line[0])
-			if str(line[4]) == 'None': self.Lbox4.itemconfig(END, bg='Red')
-			else: self.Lbox4.itemconfig(END, bg='Green')
 
-		self.Lbox1.grid(column=0, row=1)
-		self.Lbox2.grid(column=1, row=1)
-		self.Lbox3 .grid(column=2, row=1)
-		self.Lbox4.grid(column=3, row=1)
+
+			self.Lbox2.insert(END, line[0])
+			if str(line[1]) == 'None': self.Lbox2.itemconfig(END, bg='Grey')
+			else:
+				if str(line[2]) == 'None': self.Lbox2.itemconfig(END, bg='Red')
+				else: self.Lbox2.itemconfig(END, bg='Green')
+
+
+			self.Lbox3.insert(END, line[0])
+			if str(line[1]) == 'None': self.Lbox3.itemconfig(END, bg='Grey')
+			else:
+				if str(line[3]) == 'None': self.Lbox3.itemconfig(END, bg='Red')
+				else: self.Lbox3.itemconfig(END, bg='Green')
+
+
+			self.Lbox4.insert(END, line[0])
+			if str(line[1]) == 'None': self.Lbox4.itemconfig(END, bg='Grey')
+			else:
+				if str(line[4]) == 'None': self.Lbox4.itemconfig(END, bg='Red')
+				else: self.Lbox4.itemconfig(END, bg='Green')
+
+
+
+
+		self.Lab1.pack(side=LEFT,anchor = N)
+		self.Lbox1.pack(side=LEFT, anchor = S, fill=Y)
+
+		self.Lab2.pack(side=LEFT,anchor = N)
+		self.Lbox2.pack(side=LEFT, anchor=S, fill=Y)
+
+		self.Lab3.pack(side=LEFT,anchor = N)
+		self.Lbox3.pack(side=LEFT, anchor=S, fill=Y)
+
+		self.Lab4.pack(side=LEFT,anchor = N)
+		self.Lbox4.pack(side=LEFT, anchor=S, fill=Y)
+
+
+
+
+
 		self.rmwWindow.mainloop()
 
 

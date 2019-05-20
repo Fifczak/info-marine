@@ -38,10 +38,376 @@ def q_run(connD, querry):
 
 
 def remindershow():
+    class reminderwindow:
+
+        def __init__(self):
+            devlist = list()
+            def getships(evt):
+                w = evt.widget
+                index = int(w.curselection()[0])
+                shipname = w.get(index)
+                makeships(shipname)
+
+            def makeships(shnm):
+                querry = "select name from main where parent =(select id from main where name = '" + str(
+                    shnm) + "' limit 1) order by name"
+                ships = q_run(connD, querry)
+                self.Shiplistbox.delete(0, 'end')
+
+                for line in ships:
+                    self.Shiplistbox.insert(END, line[0])
+
+            def getdevs(evt):
+                w = evt.widget
+                index = int(w.curselection()[0])
+
+                shipn.name = w.get(index)
+                makedevs("Y")
+
+            def setquaterly(evt):
+                w = evt.widget
+                index = int(w.curselection()[0])
+                raportno = w.get(index)
+                querry = "select raport_number,min(date),max(date) from measurements_low where raport_number ='" + str(
+                    raportno) + "' group by raport_number order by min desc"
+                dates = q_run(connD, querry)
+
+                shipn.lastfulldatemin = dates[0][1]
+                shipn.lastfulldatemax = dates[0][2]
+                makedevs("N")
+
+            def makedevs(check1):
+
+                def devremdet(evt):
+                    def datepick(ob):
+                        def print_sel():
+                            ob.requestdate = str(cal.selection_get())
+                            ob.dateLabel.configure(text=ob.requestdate)
+                            root.destroy()
+
+                        root = Tk()
+                        root.title("Calendar")
+                        s = ttk.Style(root)
+                        s.theme_use('clam')
+                        top = tk.Toplevel(root)
+                        cal = Calendar(top,
+                                       font="Arial 14", selectmode='day',
+                                       cursor="hand1", year=2019, month=4, day=15)
+                        cal.pack(fill="both", expand=True)
+                        ttk.Button(top, text="ok", command=print_sel).pack()
+                        root.mainloop()
+
+                    def dontsend(status):
+                        print(status)
+
+                    # class RightClick:
+                    #     def __init__(self, master):
+                    #         # create a popup menu
+                    #         self.aMenu = tk.Menu(master, tearoff=0)
+                    #         self.aMenu.add_command(label='Delete', command=self.delete)
+                    #         self.aMenu.add_command(label='Say Hello', command=self.hello)
+                    #
+                    #         self.tree_item = ''
+                    #
+                    #     def delete(self):
+                    #         if self.tree_item:
+                    #             app.tree.delete(self.tree_item)
+                    #
+                    #     def hello(self):
+                    #         print('hello!')
+                    #
+                    #     def popup(self, event):
+                    #         self.aMenu.post(event.x_root, event.y_root)
+                    #         self.tree_item = app.tree.focus()
+
+                    class details_window():
+                        def __init__(self):
+                            self.detWindow = tk.Tk()
+                            self.detWindow.title("Reminder details")
+
+                            self.LabName = tk.Label(self.detWindow, text=str(devlist[index].name)).grid(column=0, row=0)
+                            self.LabId = tk.Label(self.detWindow, text=str(devlist[index].id)).grid(column=1, row=0)
+                            self.LabLastRNL = tk.Label(self.detWindow, text="Last report:").grid(column=0, row=2)
+                            self.LabLastRN = tk.Label(self.detWindow, text=str(devlist[index].lastraport)).grid(
+                                column=1,
+                                row=2)
+
+                            self.LabLastRDateL = tk.Label(self.detWindow, text="Last date:").grid(column=0, row=3)
+                            self.LabLastRDate = tk.Label(self.detWindow, text=str(devlist[index].lastraportdate)).grid(
+                                column=1, row=3)
+
+                            self.SendDateL = tk.Label(self.detWindow, text="Send date:").grid(column=0, row=4)
+                            self.SendDate = tk.Label(self.detWindow, text=str(devlist[index].senddate))
+                            self.SendDate.bind('<Double-Button-1>', datepick)
+                            self.SendDate.grid(column=1, row=4)
+                            self.RequestDateL = tk.Label(self.detWindow, text="Request date:").grid(column=0, row=5)
+                            self.RequestDate = tk.Label(self.detWindow, text=str(devlist[index].requestdate)).grid(
+                                column=1,
+                                row=5)
+                            self.var = IntVar()
+
+
+                            self.sendbutton = tk.Button(self.detWindow, text='TEST',
+                                                        command=lambda status=self.var.get(): dontsend())
+                            self.sendbutton.grid(column=1, row=6)
+
+                            self.remtextfield = tk.Text(self.detWindow, width=20, height=20)
+                            self.remtextfield.insert(INSERT, str(devlist[index].remcom))
+                            self.remtextfield.grid(column=0, row=7, columnspan=2)
+
+                    w = evt.widget
+                    index = int(w.curselection()[0])
+                    W = details_window()
+
+                    W.detWindow.mainloop()
+
+                def check_new_measurements():
+                    ###################CROSSOWANIE TABELI REMINDER Z MEASUREMENTS_LOW
+                    querry = """select rem.id, rem.raport_number, cast(har.send_raport_koniec as date)
+
+                             from reminder as rem
+                             left join harmonogram as har on rem.raport_number = har.report_number and rem.parent = har.shipid
+
+                             where parent = """ + str(parent) + """ and status is null"""
+                    remindertbl1 = q_run(connD, querry)
+
+                    querry = "Select id from measurements_low where parent = " + str(parent) + " and date > '" + str(
+                        shipn.lastfulldatemax) + "' group by id"
+                    newmeaslist = q_run(connD, querry)
+
+                    for item in remindertbl1:
+                        for item2 in newmeaslist:
+                            if item[0] == item2[0]:
+                                querry = "UPDATE reminder set status = 2 where id = " + str(
+                                    item[0]) + " and raport_number = '" + str(item[1]) + "'"
+                                q_run(connD, querry)
+                                print(querry)
+                                break
+                    ######## ######## ######## ######## ######## ######## ########
+
+                def lastfulldate():
+                    ss = (
+                        q_run(connD,
+                              "select raport_number,min(date),max(date) from measurements_low where parent =" + str(
+                                  parent) + " group by raport_number order by min desc"))
+
+                    for rep in ss:
+                        if len(rep[0]) == 9:
+                            shipn.lastfulldatemin = rep[1]
+                            shipn.lastfulldatemax = rep[2]
+                            break
+                    lfd = [shipn.lastfulldatemin, shipn.lastfulldatemax]
+                    return lfd
+
+                def preQuerrys():
+                    self.devlistbox.delete(0, 'end')
+                    querry = "select id from main where name = '" + str(shipn.name) + "'"
+                    print(querry)
+                    parent = q_run(connD, querry)[0][0]
+
+                    querry = "SELECT dss.id, CASE WHEN dss.id ~E'^\\\d+$' THEN	(select name from devices where cast(devices.id as text)\
+                             =  dss.id limit 1) ELSE (select id from ds_structure where id  =  dss.id limit 1) END as sortint, dss.sort FROM ds_structure\
+                              as dss where dss.parent = " + str(parent)
+                    results = q_run(connD, querry)
+
+                    querry = """
+
+                            select ml.id,ml.raport_number,min(ml.date),har.send_raport_koniec,rem.request_date, rem.remcom, rem.status
+                            from measurements_low as ml
+                            left join reminder as rem on ml.id = rem.id and ml.raport_number = rem.raport_number 
+                            left join harmonogram as har on ml.raport_number = har.report_number  
+                            where ml.parent = """ + str(parent) + """ 
+                            group by ml.id,ml.raport_number,rem.request_date,har.send_raport_koniec, rem.remcom, rem.status order by ml.id,ml.raport_number desc
+
+                                    """
+
+                    resultr = q_run(connD, querry)
+
+                    answerQuerrys = [parent, results, resultr]
+                    return answerQuerrys
+
+                def builddevlist(remindertbl):
+                    p = 0
+                    devlist.clear()
+                    for line in results:
+                        for line2 in resultr:
+                            fullrn = line2[1][:4] + '-' + line2[1][4:]
+                            if str(line[0]) == str(line2[0]):
+                                x = device()
+                                x.name = str(line[1])
+                                x.id = str(line2[0])
+                                x.lastraport = str(line2[1])
+                                x.remcom = str(line2[5])
+                                x.lastraportdate = datetime.datetime.strptime(str(line2[2]), '%Y-%m-%d').date()
+                                sdate = str(line2[3])[:10]
+                                if str(line2[3]) == "None":
+                                    pass
+                                else:
+                                    x.senddate = datetime.datetime.strptime(str(sdate), '%Y-%m-%d').date()
+                                if str(line2[4]) == "None":
+                                    pass
+                                else:
+                                    x.requestdate = datetime.datetime.strptime(str(line2[4]), '%Y-%m-%d').date()
+                                self.devlistbox.insert(END, results[p][1])
+                                print(shipn.lastfulldatemin)
+                                if x.lastraportdate >= shipn.lastfulldatemin:
+                                    self.devlistbox.itemconfig(END, bg='Green')
+                                    x.status = 'OK'
+                                    for line3 in remindertbl:  # SZUKANIE REMINDEROW
+                                        if str(line3[0]) == str(line2[0]) and str(line3[1]) == str(line2[1]):
+                                            x.status = 'REM'
+                                            self.devlistbox.itemconfig(END, bg='Yellow')
+
+
+
+                                else:
+                                    self.devlistbox.itemconfig(END, bg='Red')
+                                    x.status = 'NOK'
+                                devlist.append(x)
+                                break
+
+                        p += 1
+                    self.devlistbox.bind('<Double-Button>', devremdet)
+
+                def buildreportlist():
+                    querry = "select raport_number from measurements_low where parent =(select id from main where name = '" + str(
+                        shipn.name) + "' limit 1) group by raport_number order by raport_number desc"
+                    reportlist = q_run(connD, querry)
+                    self.Reportlistbox.delete(0, 'end')
+
+                    for line in reportlist:
+                        self.Reportlistbox.insert(END, line[0])
+
+                PQ = preQuerrys()
+                parent = PQ[0]
+                results = PQ[1]
+                resultr = PQ[2]
+
+                if check1 == "Y":
+                    last = lastfulldate()
+                    shipn.lastfulldatemin = last[0]
+                    shipn.lastfulldatemax = last[1]
+                    check_new_measurements()
+
+                querry = "select id,raport_number from reminder where status is distinct from 2 and parent = " + str(
+                    parent)
+                remindertbl = q_run(connD, querry)
+
+                builddevlist(remindertbl)
+                buildreportlist()
+                makemessage()
+
+            def makemessage():
+                self.textfield.delete('1.0', END)
+                headerstr = """
+To: 
+
+Attn: 
+
+From: Info Marine
+
+Subject:  
+
+Our ref.: 
+
+Good day Sirs,
+
+Please be so kind and inform us whether taking vibration measurements is possible and - if yes, when we can expect data for following equipment:
+
+                    """
+                self.textfield.insert(INSERT, headerstr)
+
+                devstr = ''
+                for line in devlist:
+                    if str(line.status) == 'REM':
+                        devstr += chr(10) + str('-') + str(line.name)
+                        ## UZUPEŁNIANIE REMCOM DO PRZEMYSLENIA
+                        # if str(line.remcom) != 'None':
+                        #     devstr += "(" + str(line.remcom) + ")"
+
+                self.textfield.insert(INSERT, devstr)
+
+                header2str = chr(10) + chr(10) + "Which was recommended to be controlled in our reports. "
+                self.textfield.insert(INSERT, header2str)
+
+                devlistnok = list()
+                for line in devlist:
+                    if str(line.status) == 'NOK':
+                        devlistnok.append(line)
+                print(len(devlistnok))
+                if len(devlistnok) == 0:
+                    pass
+                else:
+                    devstr = "Could you also perform measurements of machinery missing from three months survey:" + chr(
+                        10)
+                    for line in devlistnok:
+                        if str(line.status) == 'NOK':
+                            devstr += chr(10) + str('-') + str(line.name)
+
+                devstr += chr(10) + chr(10)
+                self.textfield.insert(INSERT, devstr)
+
+                header3str = "We hope to receive your response soon, thank you in advance. "
+                self.textfield.insert(INSERT, header3str)
+                self.sendbutton.pack(side=TOP)
+                self.textfield.pack(side=LEFT)
+
+            self.remWindow = tk.Tk()
+            self.remWindow.title("Reminder")
+
+            self.Ownerlistbox = Listbox(self.remWindow)
+            self.Ownerlistbox.config(width=0)
+            self.Ownerlistbox.bind('<Double-Button>', getships)
+            self.Shiplistbox = Listbox(self.remWindow)
+            self.Shiplistbox.config(width=0)
+            self.Shiplistbox.bind('<Double-Button>', getdevs)
+            self.Reportlistbox = Listbox(self.remWindow)
+            self.Reportlistbox.config(width=0)
+            self.Reportlistbox.bind('<Double-Button>', setquaterly)
+            self.devlistbox = Listbox(self.remWindow)
+            self.devlistbox.config(width=0)
+            self.rclick = RightClick(self.devlistbox)
+            self.devlistbox.bind('<Button-3>', self.rclick.popup)
+
+            self.sendbutton = tk.Button(text='Send')
+            self.textfield = tk.Text(self.remWindow, width=100, height=60)
+
+            querry = "select name,id from main where parent = 1 order by name"
+            resultrr = q_run(connD, querry)
+            for line in resultrr:
+                self.Ownerlistbox.insert(END, line[0])
+
+            self.Ownerlistbox.pack(side=LEFT, fill=BOTH)
+            self.Shiplistbox.pack(side=LEFT, fill=BOTH)
+            self.devlistbox.pack(side=LEFT, fill=BOTH)
+            self.Reportlistbox.pack(side=LEFT, fill=BOTH)
+            self.remWindow.mainloop()
+
+
+    class RightClick:
+        def __init__(self, master):
+            # create a popup menu
+            self.aMenu = tk.Menu(master, tearoff=0)
+            self.aMenu.add_command(label="Dont't send", command=self.dontsend)
+            #self.aMenu.add_command(label='Say Hello', command=self.hello)
+
+            self.tree_item = ''
+
+        def dontsend(self):
+            print(str(master.devlistbox.par))
+            # if self.tree_item:
+            #     app.tree.delete(self.tree_item)
+
+
+
+        def popup(self, event):
+            self.aMenu.post(event.x_root, event.y_root)
+            #self.tree_item = .devlistbox.focus()
+
+
     class device:
         def __init__(self):
             self.status =''
-
             self.name = ''
             self.id = ''
             self.lastraport = ''
@@ -56,320 +422,21 @@ def remindershow():
             self.lastfulldatemin = ''
             self.lastfulldatemax = ''
     shipn = getshipname()
-    def getships(evt):
-        w = evt.widget
-        index = int(w.curselection()[0])
-        shipname = w.get(index)
-        makeships(shipname)
-    def makeships(shnm):
-        querry = "select name from main where parent =(select id from main where name = '" + str(
-            shnm) + "' limit 1) order by name"
-        ships = q_run(connD, querry)
-        Shiplistbox.delete(0, 'end')
-
-        for line in ships:
-            Shiplistbox.insert(END, line[0])
-    def getdevs(evt):
-        w = evt.widget
-        index = int(w.curselection()[0])
-
-        shipn.name = w.get(index)
-        makedevs("Y")
-    def setquaterly(evt):
-        w = evt.widget
-        index = int(w.curselection()[0])
-        raportno = w.get(index)
-        querry = "select raport_number,min(date),max(date) from measurements_low where raport_number ='" + str(
-                raportno) + "' group by raport_number order by min desc"
-        dates = q_run(connD,querry)
-
-
-        shipn.lastfulldatemin  = dates[0][1]
-        shipn.lastfulldatemax = dates[0][2]
-        makedevs("N")
-    def makedevs(check1):
-
-        def devremdet(evt):
-            def datepick(ob):
-                def print_sel():
-                    ob.requestdate = str(cal.selection_get())
-                    ob.dateLabel.configure(text=ob.requestdate)
-                    root.destroy()
-                root = Tk()
-                root.title("Calendar")
-                s = ttk.Style(root)
-                s.theme_use('clam')
-                top = tk.Toplevel(root)
-                cal = Calendar(top,
-                               font="Arial 14", selectmode='day',
-                               cursor="hand1", year=2019, month=4, day=15)
-                cal.pack(fill="both", expand=True)
-                ttk.Button(top, text="ok", command=print_sel).pack()
-                root.mainloop()
-
-            def changesend(status):
-                print(status)
-
-
-
-            class details_window:
-                def __init__(self):
-                    self.detWindow = tk.Tk()
-                    self.detWindow.title("Reminder details")
-
-                    self.LabName = tk.Label(self.detWindow,text =str(devlist[index].name)).grid(column = 0, row = 0)
-                    self.LabId   = tk.Label(self.detWindow,text =str(devlist[index].id)).grid(column = 1, row = 0)
-                    self.LabLastRNL  = tk.Label(self.detWindow,text ="Last report:").grid(column = 0, row = 2)
-                    self.LabLastRN = tk.Label(self.detWindow, text= str(devlist[index].lastraport)).grid(column = 1, row = 2)
-
-                    self.LabLastRDateL  = tk.Label(self.detWindow,text ="Last date:" ).grid(column = 0, row = 3)
-                    self.LabLastRDate = tk.Label(self.detWindow,text = str(devlist[index].lastraportdate)).grid(column = 1, row = 3)
-
-                    self.SendDateL = tk.Label(self.detWindow, text="Send date:").grid(column = 0, row = 4)
-                    self.SendDate = tk.Label(self.detWindow, text=str(devlist[index].senddate))
-                    self.SendDate.bind('<Double-Button-1>', datepick)
-                    self.SendDate.grid(column=1, row=4)
-                    self.RequestDateL = tk.Label(self.detWindow, text="Request date:").grid(column = 0, row = 5)
-                    self.RequestDate = tk.Label(self.detWindow, text= str(devlist[index].requestdate)).grid(column = 1, row = 5)
-                    self.var = IntVar()
-                    self.checksave = tk.Checkbutton(self.detWindow, text="Sent", variable=self.var,onvalue = 1, offvalue = 0, command = lambda status = self.var.get(): changesend(status))
-                    self.checksave.select()
-                    self.checksave.grid(column=0, row=6)
-
-                    self.sendbutton = tk.Button(self.detWindow,text='TEST', command=lambda status = self.var.get(): changesend(status))
-                    self.sendbutton.grid(column=1, row=6)
-
-
-                    self.remtextfield = tk.Text(self.detWindow, width=20, height=20)
-                    self.remtextfield.insert(INSERT, str(devlist[index].remcom))
-                    self.remtextfield.grid(column=0, row=7, columnspan=2)
-
-
-            w = evt.widget
-            index = int(w.curselection()[0])
-            W = details_window()
-
-
-            W.detWindow.mainloop()
-
-        def check_new_measurements():
-            ###################CROSSOWANIE TABELI REMINDER Z MEASUREMENTS_LOW
-            querry = """select rem.id, rem.raport_number, cast(har.send_raport_koniec as date)
-
-                 from reminder as rem
-                 left join harmonogram as har on rem.raport_number = har.report_number and rem.parent = har.shipid
-
-                 where parent = """ + str(parent) + """ and status is null"""
-            remindertbl1 = q_run(connD, querry)
-
-            querry = "Select id from measurements_low where parent = " + str(parent) + " and date > '" + str(
-                shipn.lastfulldatemax) + "' group by id"
-            newmeaslist = q_run(connD, querry)
-
-            for item in remindertbl1:
-                for item2 in newmeaslist:
-                    if item[0] == item2[0]:
-                        querry = "UPDATE reminder set status = 2 where id = " + str(
-                            item[0]) + " and raport_number = '" + str(item[1]) + "'"
-                        q_run(connD, querry)
-                        print(querry)
-                        break
-            ######## ######## ######## ######## ######## ######## ########
-        def lastfulldate():
-            ss = (q_run(connD, "select raport_number,min(date),max(date) from measurements_low where parent =" + str(
-                parent) + " group by raport_number order by min desc"))
-
-            for rep in ss:
-                if len(rep[0]) == 9:
-                    shipn.lastfulldatemin = rep[1]
-                    shipn.lastfulldatemax = rep[2]
-                    break
-            lfd = [shipn.lastfulldatemin,shipn.lastfulldatemax]
-            return lfd
-        def preQuerrys():
-            devlistbox.delete(0, 'end')
-            querry = "select id from main where name = '" + str(shipn.name)+ "'"
-            print(querry)
-            parent = q_run(connD,querry)[0][0]
-
-
-
-            querry = "SELECT dss.id, CASE WHEN dss.id ~E'^\\\d+$' THEN	(select name from devices where cast(devices.id as text)\
-                 =  dss.id limit 1) ELSE (select id from ds_structure where id  =  dss.id limit 1) END as sortint, dss.sort FROM ds_structure\
-                  as dss where dss.parent = " + str(parent)
-            results = q_run(connD, querry)
-
-
-            querry = """
-            
-                select ml.id,ml.raport_number,min(ml.date),har.send_raport_koniec,rem.request_date, rem.remcom, rem.status
-                from measurements_low as ml
-                left join reminder as rem on ml.id = rem.id and ml.raport_number = rem.raport_number 
-                left join harmonogram as har on ml.raport_number = har.report_number  
-                where ml.parent = """ + str(parent) + """ 
-                group by ml.id,ml.raport_number,rem.request_date,har.send_raport_koniec, rem.remcom, rem.status order by ml.id,ml.raport_number desc
-                        
-                        """
-
-            resultr = q_run(connD, querry)
-
-            answerQuerrys = [parent, results, resultr]
-            return answerQuerrys
-        def builddevlist(remindertbl):
-            p = 0
-            devlist.clear()
-            for line in results:
-                for line2 in resultr:
-                    fullrn = line2[1][:4] + '-' + line2[1][4:]
-                    if str(line[0]) == str(line2[0]):
-                        x = device()
-                        x.name = str(line[1])
-                        x.id = str(line2[0])
-                        x.lastraport = str(line2[1])
-                        x.remcom = str(line2[5])
-                        x.lastraportdate = datetime.datetime.strptime(str(line2[2]), '%Y-%m-%d').date()
-                        sdate = str(line2[3])[:10]
-                        if str(line2[3]) == "None":
-                            pass
-                        else:
-                            x.senddate = datetime.datetime.strptime(str(sdate), '%Y-%m-%d').date()
-                        if str(line2[4]) == "None":
-                            pass
-                        else:
-                            x.requestdate = datetime.datetime.strptime(str(line2[4]), '%Y-%m-%d').date()
-                        devlistbox.insert(END, results[p][1])
-                        print(shipn.lastfulldatemin)
-                        if x.lastraportdate >= shipn.lastfulldatemin:
-                            devlistbox.itemconfig(END, bg='Green')
-                            x.status = 'OK'
-                            for line3 in remindertbl:  # SZUKANIE REMINDEROW
-                                if str(line3[0]) == str(line2[0]) and str(line3[1]) == str(line2[1]):
-                                    x.status = 'REM'
-                                    devlistbox.itemconfig(END, bg='Yellow')
-
-
-
-                        else:
-                            devlistbox.itemconfig(END, bg='Red')
-                            x.status = 'NOK'
-                        devlist.append(x)
-                        break
-
-                p += 1
-            devlistbox.bind('<Double-Button>', devremdet)
-        def buildreportlist():
-            querry = "select raport_number from measurements_low where parent =(select id from main where name = '" + str(
-                shipn.name) + "' limit 1) group by raport_number order by raport_number desc"
-            reportlist = q_run(connD, querry)
-            Reportlistbox.delete(0, 'end')
-
-            for line in reportlist:
-                Reportlistbox.insert(END, line[0])
-
-        PQ = preQuerrys()
-        parent = PQ[0]
-        results = PQ[1]
-        resultr = PQ[2]
 
 
 
 
-        if check1 == "Y":
-            last = lastfulldate()
-            shipn.lastfulldatemin = last[0]
-            shipn.lastfulldatemax= last[1]
-            check_new_measurements()
-
-        querry ="select id,raport_number from reminder where status is distinct from 2 and parent = " + str(parent)
-        remindertbl = q_run(connD, querry)
-
-        builddevlist(remindertbl)
-        buildreportlist()
-        makemessage()
-    def makemessage():
-        textfield.delete('1.0', END)
-        headerstr = """
-To: 
-
-Attn: 
-
-From: Info Marine
-
-Subject:  
-
-Our ref.: 
-
-Good day Sirs,
-
-Please be so kind and inform us whether taking vibration measurements is possible and - if yes, when we can expect data for following equipment:
- 
-        """
-        textfield.insert(INSERT, headerstr)
-
-        devstr = ''
-        for line in devlist:
-            if str(line.status) == 'REM':
-                devstr += chr(10) + str('-') + str(line.name)
-                ## UZUPEŁNIANIE REMCOM DO PRZEMYSLENIA
-                # if str(line.remcom) != 'None':
-                #     devstr += "(" + str(line.remcom) + ")"
-
-        textfield.insert(INSERT, devstr)
-
-        header2str = chr(10) + chr(10) + "Which was recommended to be controlled in our reports. "
-        textfield.insert(INSERT, header2str)
-
-        devlistnok = list()
-        for line in devlist:
-            if str(line.status) == 'NOK':
-                devlistnok.append(line)
-        print(len(devlistnok))
-        if len(devlistnok) == 0:
-            pass
-        else:
-            devstr = "Could you also perform measurements of machinery missing from three months survey:" + chr(10)
-            for line in devlistnok:
-                if str(line.status) == 'NOK':
-                    devstr += chr(10) + str('-') + str(line.name)
-
-        devstr += chr(10) + chr(10)
-        textfield.insert(INSERT, devstr)
-
-
-        header3str ="We hope to receive your response soon, thank you in advance. "
-        textfield.insert(INSERT, header3str)
-        sendbutton.pack(side=TOP)
-        textfield.pack(side=LEFT)
-    remWindow = tk.Tk()
-    remWindow.title("Reminder")
-    devlist = list()
-    Ownerlistbox = Listbox(remWindow)
-    Ownerlistbox.config(width=0)
-    Ownerlistbox.bind('<Double-Button>', getships)
-    Shiplistbox = Listbox(remWindow)
-    Shiplistbox.config(width=0)
-    Shiplistbox.bind('<Double-Button>', getdevs)
-    Reportlistbox = Listbox(remWindow)
-    Reportlistbox.config(width=0)
-    Reportlistbox.bind('<Double-Button>', setquaterly)
-    devlistbox = Listbox(remWindow)
-    devlistbox.config(width=0)
-    sendbutton = tk.Button(text = 'Send')
-    textfield = tk.Text(remWindow, width=100, height=60)
-
-    querry = "select name,id from main where parent = 1 order by name"
-    resultrr = q_run(connD, querry)
-    for line in resultrr:
-        Ownerlistbox.insert(END, line[0])
 
 
 
 
-    Ownerlistbox.pack(side=LEFT, fill=BOTH)
-    Shiplistbox.pack(side=LEFT, fill=BOTH)
-    devlistbox.pack(side=LEFT, fill=BOTH)
-    Reportlistbox.pack(side=LEFT, fill=BOTH)
-    remWindow.mainloop()
+
+    WIN = reminderwindow()
+
+
+
+
+
 
 remindershow()
 
