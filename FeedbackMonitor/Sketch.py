@@ -49,22 +49,24 @@ def q_run(connD, querry):
 # where fdb.fdbflag  IS Null and fdb.documentdate >= '2018-01-01' and ml.parent is not null
 # group by fdb.raport_number,ml.parent
 # order by fdb.raport_number DESC"""
+# #
+# # parentlist  = q_run(connD,querry)
+# # for item in parentlist:
+# #
+# # 	rn = str(item[0]).strip()
+# # 	parent = str(item[1]).strip()
+# # 	querry = "Update feedbacks set parent = '" + str(parent) + "' where raport_number = '" + str(rn) + "'"
+# # 	print(querry)
+# # 	q_run(connD, querry)
 #
-# parentlist  = q_run(connD,querry)
-# for item in parentlist:
+# querry = """
+# select parent,id,_id_ from feedbacks where fdbflag  IS Null and documentdate >= '2018-01-01'   order by documentdate DESC, id DESC
+# """
 #
-# 	rn = str(item[0]).strip()
-# 	parent = str(item[1]).strip()
-# 	querry = "Update feedbacks set parent = '" + str(parent) + "' where raport_number = '" + str(rn) + "'"
-# 	print(querry)
-# 	q_run(connD, querry)
+# for line in q_run(connD, querry):
+# 	parent = line[0]
+# 	id = line[1]
+# 	lp = line[2]
+# 	print(line)
 
-querry = """
-select parent,id,_id_ from feedbacks where fdbflag  IS Null and documentdate >= '2018-01-01'   order by documentdate DESC, id DESC
-"""
 
-for line in q_run(connD, querry):
-	parent = line[0]
-	id = line[1]
-	lp = line[2]
-	print(line)

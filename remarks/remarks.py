@@ -134,7 +134,7 @@ def LogApplication(root):
 			remarks(connD)
 
 	makeWin()
-
+remlist = list()
 def remarks(connD):
 
 	querry = "select name,id from main where parent = 1 order by name"
@@ -232,7 +232,8 @@ def remarks(connD):
 		def upload():
 			c=0
 			for line in remlist:
-				if line.textfield.get("1.0", END).strip() != '':
+
+				if str(line.textfield.get("1.0", END)).strip() != '':
 					querry = "select date from measurements_low where id = " + str(
 						line.id) + " and raport_number = '" + str(line.rn) + "' limit 1"
 
@@ -301,7 +302,7 @@ def remarks(connD):
 
 		ttk.Label(header, text="Send date: " + str(senddate)).pack()
 		scrollable_body = Scrollable(body, width=32)
-		remlist = list()
+
 		for i in devices:
 			measCframe = tk.Frame(scrollable_body, height=2, width=32)
 			X = frame_reminder(measCframe,i,report)
