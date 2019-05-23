@@ -10,8 +10,8 @@ from tkinter import messagebox
 from postgresquerrys import *
 parent = 31
 username = 'filipb'
-password = ' ' ###########NIE DZIAŁA < TRZEBA ZMIENIC DODAWANIE FLAGI VISIBLE W PUNKTACH, I nie force dodawanie id
-host = 'localhost'
+password = '@infomarine' ###########NIE DZIAŁA < TRZEBA ZMIENIC DODAWANIE FLAGI VISIBLE W PUNKTACH, I nie force dodawanie id
+host = '192.168.10.243'
 connD = [username,password,host]
 	
 def ShowStructWindow(connD,parent):
@@ -212,7 +212,7 @@ values (""" + str(self.parent[p]) + ",'" + str(self.id[p]) + "','" +str(self.fee
 			for line in self.id:
 				progress_bar['value'] = p
 				progress_bar.update()
-				querry = "insert into points(id,point,sort) values ('" +str(line)+ "','" + str(self.point[p]) + "','" +str(self.sort[p]) + "')"
+				querry = "insert into points(id,point,sort,visible) values ('" +str(line)+ "','" + str(self.point[p]) + "','" +str(self.sort[p]) + "', True)"
 				q_run(connD,querry)
 				if str(self.bearing[p]) == 'None': self.bearing[p] = ''
 				if str(self.seal[p]) == 'None': self.seal[p] = ''
@@ -254,7 +254,7 @@ values (""" + str(self.parent[p]) + ",'" + str(self.id[p]) + "','" +str(self.fee
 			querry = "select parent from main where id =" + str(parent) 
 			self.ownerid = q_run(connD, querry)[0][0]
 			querry = "select shiptype, lenght, bradth, imo from shipsdata where shipid = " + str(parent) 
-			self.shiptype = q_run(connD, querry)[0][0]	
+			self.shiptype = q_run(connD, querry)[0][0]
 			self.length = q_run(connD, querry)[0][1]	
 			self.bradth = q_run(connD, querry)[0][2]
 			self.imo = q_run(connD, querry)[0][2]
@@ -440,20 +440,20 @@ values (""" + str(self.parent[p]) + ",'" + str(self.id[p]) + "','" +str(self.fee
 	print('przeduploadpoints')
 	y.uploadNewPoints()
 	
-	ml = measurements_low()
-	ml.getQuerrys()
-	rm = remarks()
-	rm.getQuerrys()
-	fd = feedbacks()
-	fd.getQuerrys()
-	
-	updateParentId(ml,x)
-	updateParentId(rm,x)
-	updateParentId(fd,x)
-	#ml.upload()
-	rm.upload()
-	fd.upload()
-	i=0
+	# ml = measurements_low()
+	# ml.getQuerrys()
+	# rm = remarks()
+	# rm.getQuerrys()
+	# fd = feedbacks()
+	# fd.getQuerrys()
+	#
+	# updateParentId(ml,x)
+	# updateParentId(rm,x)
+	# updateParentId(fd,x)
+	# #ml.upload()
+	# rm.upload()
+	# fd.upload()
+	# i=0
 	# for test in x.sort:
 		# print (str(x.sort[i])+' ID: '+str(x.copyid[i])+' NORM: '+str(x.copydrivenby[i]))
 		# i +=1

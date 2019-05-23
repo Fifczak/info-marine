@@ -38,31 +38,33 @@ def q_run(connD, querry):
 # 	q_run(connD, querry)
 #
 #
+#
+# querry ="""select fdb.raport_number,ml.parent
+# from feedbacks as fdb
+# left join (select parent, raport_number
+# 			from measurements_low
+# 			where raport_number <> ''
+# 			group by parent,raport_number
+# 			order by raport_number desc) as ml on fdb.raport_number = ml.raport_number
+# where fdb.fdbflag  IS Null and fdb.documentdate >= '2018-01-01' and ml.parent is not null
+# group by fdb.raport_number,ml.parent
+# order by fdb.raport_number DESC"""
+#
+# parentlist  = q_run(connD,querry)
+# for item in parentlist:
+#
+# 	rn = str(item[0]).strip()
+# 	parent = str(item[1]).strip()
+# 	querry = "Update feedbacks set parent = '" + str(parent) + "' where raport_number = '" + str(rn) + "'"
+# 	print(querry)
+# 	q_run(connD, querry)
 
 querry = """
-	select
-	fdb.parent, fdb.id, fdb._id_, mai.id, mai.name
-	from feedbacks as fdb
+select parent,id,_id_ from feedbacks where fdbflag  IS Null and documentdate >= '2018-01-01'   order by documentdate DESC, id DESC
+"""
 
-	left
-	join
-	devices as dev
-	on
-	fdb.id = dev.id
-	left
-	join
-	main as mai
-	on
-	dev.parent = mai.id
-
-	where
-	fdbflag
-	IS
-	Null and fdb.parent is null
-	"""
-noparenttable = q_run(connD,querry)
-for item in noparenttable:
-	print(item)
-	querry = "update feedbacks set parent = " + str(item[3]) + " where _id_ = " + str(item[2])
-	print(querry)
-	q_run(connD, querry)
+for line in q_run(connD, querry):
+	parent = line[0]
+	id = line[1]
+	lp = line[2]
+	print(line)
