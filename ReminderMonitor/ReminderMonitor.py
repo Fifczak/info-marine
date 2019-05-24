@@ -84,8 +84,8 @@ left join (select lp,report_number from harmonogram) as har on ml.raport_number 
 where har.lp is not null
 
 group by ml.raport_number, remrn.raport_number , fdbrn.raport_number , remindrn.raport_number , remsend.raport_number ,remrn.sended,har.lp
-order by ml.raport_number desc
---order by har.lp desc
+--order by ml.raport_number desc
+order by har.lp desc
 
 		"""
 		self.rmwWindow = tk.Tk()

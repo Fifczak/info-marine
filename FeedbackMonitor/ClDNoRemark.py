@@ -294,4 +294,4 @@ def ShipsApplication(ClDNoRemList):
 	
 	
 	root2.mainloop()	
-#ShipsApplication(ClDNoRem())
+ShipsApplication(ClDNoRem())
