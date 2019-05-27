@@ -155,6 +155,13 @@ def createfeedback(rn_,connD):
     querry = "select main.name, shd.imo, main2.name from main right join shipsdata as shd on main.id = shd.shipid right join main as main2 on main.parent = main2.id where main.id = (select shipid from reports where raport_number = '" + str(
         rn_) + "')"
     result = q_run(connD, querry)
+    print(len(result))
+    if len(result) == 0 :
+        querry = "select main.name, shd.imo, main2.name from main right join shipsdata as shd on main.id = shd.shipid right join main as main2 on main.parent = main2.id where main.id = (select shipid from harmonogram where report_number = '" + str(
+            rn_) + "')"
+        result = q_run(connD, querry)
+
+
     def headtable(document):
         username = connD[0]
         password = connD[1]
@@ -350,9 +357,9 @@ def createfeedback(rn_,connD):
                             limitstr = (countLimit(line[4], line[2]))
                             R = P.add_run(limitstr)
                     if limitstr == 'Cl. A':
-                        R.font.highlight_color = WD_COLOR_INDEX.BRIGHTGREEN
+                        R.font.highlight_color = WD_COLOR_INDEX.GREEN
                     if limitstr == 'Cl. B':
-                        R.font.highlight_color = WD_COLOR_INDEX.BRIGHTGREEN
+                        R.font.highlight_color = WD_COLOR_INDEX.GREEN
                     if limitstr == 'Cl. C':
                         R.font.highlight_color = WD_COLOR_INDEX.YELLOW
                     if limitstr == 'Cl. D':
@@ -680,9 +687,9 @@ group by ml.parent, ml.id,raport_number order by id) as ml
         body = ttk.Frame(MASTERmeasframe, width=1000,height = 1000)
         header.pack()
         body.pack(fill=BOTH)
-        UploadButton = Button(header, text='Upload and refresh', command=upload)
+        UploadButton = Button(header, text='Update remarks', command=upload)
         UploadButton.pack()
-        GetReportButton = Button(header, text='Get report', command=grabremarks)
+        GetReportButton = Button(header, text='Get remarks from vibration report', command=grabremarks)
         GetReportButton.pack()
         Makefdbrepbut = Button(header, text='Make feedback report', command= lambda rn = str(report), connD = connD : createfeedback(rn,connD))
 
