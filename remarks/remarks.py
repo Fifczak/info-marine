@@ -13,10 +13,21 @@ import numpy as num
 import tkinter as tkk
 from tkinter import filedialog
 import docx
+from docx.enum.table import WD_ALIGN_VERTICAL
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.text import WD_COLOR_INDEX
+from docx.shared import Pt
+from docx import Document
 
 
 
-connD=['testuser','info','192.168.10.243']
+
+
+
+
+
+
+#connD=['testuser','info','192.168.10.243']
 
 class Scrollable(ttk.Frame):
     """
@@ -76,77 +87,316 @@ def q_run(connD, querry):
     conn.commit()
     cur.close()
 
-def LogApplication(root):
-    var = IntVar()
+class LogApplication:
 
-    def makeWin():
-        title = tk.Label(root, text="Info Datasheet")  # TITLE
-        title.grid(row=0, column=2)
-        user_entry_label = tk.Label(root, text="Username: ")  # USERNAME LABEL
-        user_entry_label.grid(row=1, column=1)
-        user_entry = tk.Entry(root, text="Username: ")  # USERNAME ENTRY BOX
-        user_entry.grid(row=1, column=2)
-        pass_entry_label = tk.Label(root, text="Password: ")  # PASSWORD LABEL
-        pass_entry_label.grid(row=2, column=1)
-        pass_entry = tk.Entry(root, show="*")  # PASSWORD ENTRY BOX
-        pass_entry.grid(row=2, column=2)
+    def __init__(self):
+        self.root = Tk()
+        self.root.title("Log In")
+        self.title = tk.Label(self.root, text="Info Datasheet")  # TITLE
+        self.title.grid(row=0, column=2)
+        self.user_entry_label = tk.Label(self.root, text="Username: ")  # USERNAME LABEL
+        self.user_entry_label.grid(row=1, column=1)
+        self.user_entry = tk.Entry(self.root, text="Username: ")  # USERNAME ENTRY BOX
+        self.user_entry.grid(row=1, column=2)
+        self.pass_entry_label = tk.Label(self.root, text="Password: ")  # PASSWORD LABEL
+        self.pass_entry_label.grid(row=2, column=1)
+        self.pass_entry = tk.Entry(self.root, show="*")  # PASSWORD ENTRY BOX
+        self.pass_entry.grid(row=2, column=2)
+        try:
+            with open('C:\overmind\\temp\log.csv') as csvfile:
+                openfile = csv.reader(csvfile, delimiter=' ')
+                p = -1
+                for lines in openfile:
+                    p += 1
+                    if p == 0:
+                        self.user_entry.insert(0, str(lines[0]))
+                    if p == 1:
+                        self.pass_entry.insert(0, str(lines[0]))
+        except:
+            pass
+        self.var = IntVar()
+        self.checksave = tk.Checkbutton(self.root, text="Remember", variable=self.var)
+        self.checksave.grid(row=3, column=2)
+        self.sign_in_butt = Button(self.root, text="Sign In", command=lambda ue=self.user_entry, pe=self.pass_entry: self.logging_in(ue, pe))
+        self.sign_in_butt.grid(row=5, column=2)
+        self.root.mainloop()
 
-        with open('log.csv') as csvfile:
-            openfile = csv.reader(csvfile, delimiter=' ')
-            p = -1
-            for lines in openfile:
-                p += 1
-                if p == 0:
-                    user_entry.insert(0, str(lines[0]))
-                if p == 1:
-                    pass_entry.insert(0, str(lines[0]))
-
-        var = IntVar()
-        checksave = tk.Checkbutton(root, text="Remember", variable=var)
-        checksave.grid(row=3, column=2)
-        sign_in_butt = Button(root, text="Sign In", command=lambda ue=user_entry, pe=pass_entry: logging_in(ue, pe))
-        sign_in_butt.grid(row=5, column=2)
-
-    def logging_in(user_entry, pass_entry):
+    def logging_in(self,user_entry, pass_entry):
         user_get = user_entry.get()  # Retrieve Username
         pass_get = pass_entry.get()  # Retrieve Password
-        if bool(var.get()) == True:
-            config = Path('log.csv')
-            with open('log.csv', 'w', newline='') as csvfile:
+        if bool(self.var.get()) == True:
+           # config = Path('C:\overmind\\temp\log.csv')
+            with open('C:\overmind\\temp\log.csv', 'w+' ,newline='') as csvfile:
                 filewriter = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
                 filewriter.writerow([user_get])
                 filewriter.writerow([pass_get])
-        connD[0] = user_get
-        connD[1] = pass_get
+        connD = [user_get, pass_get, '192.168.10.243']
+
+
         querry = "SELECT current_user"
-        try:
-            usercheck = q_run(connD, querry)  # PYINSTALLER ma problemy gdzies tu
+        usercheck = ''
 
-        except:
-            pass
-        if usercheck:
-            root.destroy()
-            # print(usercheck[0])
-            querry = "select name,id from main where parent =1 order by name"
-            ownerlist = q_run(connD, querry)
+        usercheck = q_run(connD, querry)  # PYINSTALLER ma problemy gdzies tu
 
-            querry = "select name,id,parent from main where parent <> 1 order by name"
-            shiplist = q_run(connD, querry)
+
+        if usercheck != '':
+            self.root.destroy()
+
 
             remarks(connD)
 
-    makeWin()
 remlist = list()
-
-
 remlistIN = list()
+
+
+
+def createfeedback(rn_,connD):
+    document = Document('C:\\overmind\\Data\\base.docx')
+    querry = "select main.name, shd.imo, main2.name from main right join shipsdata as shd on main.id = shd.shipid right join main as main2 on main.parent = main2.id where main.id = (select shipid from reports where raport_number = '" + str(
+        rn_) + "')"
+    result = q_run(connD, querry)
+    def headtable(document):
+        username = connD[0]
+        password = connD[1]
+        host = connD[2]
+
+
+        shipstr = result[0][0]
+
+        headtable = document.add_table(rows=2, cols=3)  # trzeba usunąć enter przed
+        headtable.style = 'Table Grid'
+
+        headtable.cell(0, 0).merge(headtable.cell(0, 1).merge(headtable.cell(0, 2)))
+        ht = headtable.cell(0, 0).paragraphs[0]
+        ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r0 = ht.add_run()
+        r0.text = 'Work done after vibration diagnostic report '
+        r0.font.name = 'Calibri'
+        r0.font.size = Pt(12)
+        r1 = ht.add_run(rn_)
+        r1.bold = True
+        r1.font.name = 'Calibri'
+
+        ht = headtable.cell(1, 0).paragraphs[0]
+        ht.alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+        r0 = ht.add_run('Project: ')
+        r0.font.name = 'Calibri'
+        r1 = ht.add_run(shipstr)
+        r1.bold = True
+        r1.font.name = 'Calibri'
+
+        imostr = str(result[0][1])
+        ht = headtable.cell(1, 0).add_paragraph()
+        r0 = ht.add_run('IMO no: ')
+        r0.font.name = 'Calibri'
+        r1 = ht.add_run(imostr)
+        r1.font.name = 'Calibri'
+        r1.bold = True
+
+        ownerstr = str(result[0][2])
+        ht = headtable.cell(1, 0).add_paragraph()
+        r0 = ht.add_run('Ordered by: ')
+        r0.font.name = 'Calibri'
+        r1 = ht.add_run(ownerstr)
+        r1.bold = True
+        r1.font.name = 'Calibri'
+        ht = headtable.cell(1, 1).paragraphs[0]
+        r0 = ht.add_run('Date of measurement: ')
+        r0.font.name = 'Calibri'
+        headtable.cell(1, 1).add_paragraph()
+
+        ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        ht.vertical_alignment = WD_ALIGN_PARAGRAPH.CENTER
+        ht = headtable.cell(1, 1).add_paragraph()
+
+        ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        ht.vertical_alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r0 = ht.add_run('XXXX-XX-XX')
+        r0.bold = True
+        r0.font.name = 'Calibri'
+        ht = headtable.cell(1, 2).paragraphs[0]
+        ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r0 = ht.add_run('Place of measurement:')
+        r0.font.name = 'Calibri'
+
+        headtable.cell(1, 2).add_paragraph()
+        ht = headtable.cell(1, 2).add_paragraph()
+        ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r0 = ht.add_run('During normal operation')
+        r0.bold = True
+        r0.font.name = 'Calibri'
+        section = document.sections[0]
+        document.add_paragraph()
+    def feedbacktable():
+
+        def countLimit(standard, value):
+            limSrt = 'NOPE'
+            for limNo in limits:
+                if str(limNo[0]) == str(standard):
+                    if value <= float(limNo[3]):  # IF LIM1
+                        limSrt = str(limNo[2])
+                        break
+                    else:
+                        if value <= float(limNo[5]):  # IF LIM2
+                            limSrt = str(limNo[4])
+                            break
+                        else:
+                            if value <= float(limNo[7]):  # IF LIM3
+                                limSrt = str(limNo[6])
+                                break
+                            else:
+                                limSrt = str(limNo[8])
+                                break
+            return limSrt
+
+        querry = """select dev.name, rem.remark,ml.max,ml.date,dev.norm
+    from remarks as rem
+    left join devices as dev on rem.id = dev.id
+    left join (select id,raport_number,date,max(value)
+               from measurements_low
+               where type = 'RMS'
+               group by id,raport_number,date) as ml on rem.id = ml.id and rem.raport_number = ml.raport_number
+    where rem.raport_number = '""" + str(rn_) + """' and rem.sended = True"""
+
+        remarklist = q_run(connD,querry)
+
+        querry = """select standard,
+        						limit_1_value,limit_1_name,
+        						limit_2_value,limit_2_name,
+        						limit_3_value,limit_3_name,
+        						limit_4_value,limit_4_name,
+        					envflag
+        				from standards"""
+        limits = q_run(connD, querry)
+
+
+        rws = (len(remarklist)) + 1
+
+        feedbacktable = document.add_table(rows=rws, cols=7)  # trzeba usunąć enter przed
+        feedbacktable.style = 'Table Grid'
+
+        ht = feedbacktable.cell(0, 0).paragraphs[0]
+        ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r0 = ht.add_run('Machine name')
+        r0.font.name = 'Calibri'
+        r0.font.size = Pt(8)
+        r0.font.bold = True
+
+        ht = feedbacktable.cell(0, 1).paragraphs[0]
+        ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r1 = ht.add_run('ISO' + chr(10) + 'Standard')
+        r1.font.name = 'Calibri'
+        r1.font.size = Pt(8)
+        r1.font.bold = True
+
+        ht = feedbacktable.cell(0, 2).paragraphs[0]
+        ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r2 = ht.add_run('Measurement date')
+        r2.font.name = 'Calibri'
+        r2.font.size = Pt(8)
+        r2.font.bold = True
+
+        ht = feedbacktable.cell(0, 3).paragraphs[0]
+        ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r3 = ht.add_run('Remarks and suggestions')
+        r3.font.name = 'Calibri'
+        r3.font.size = Pt(8)
+        r3.font.bold = True
+
+        ht = feedbacktable.cell(0, 4).paragraphs[0]
+        ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r4 = ht.add_run('Date of' + chr(10) + 'corrective'  + chr(10) + 'action done')
+        r4.font.name = 'Calibri'
+        r4.font.size = Pt(8)
+        r4.font.bold = True
+
+        ht = feedbacktable.cell(0, 5).paragraphs[0]
+        ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r5 = ht.add_run('Work done on board' + chr(10) + 'vessel' + chr(10) + 'after vibration diagnostic' + chr(10) +'report')
+        r5.font.name = 'Calibri'
+        r5.font.size = Pt(8)
+        r5.font.bold = True
+
+        ht = feedbacktable.cell(0, 6).paragraphs[0]
+        ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r6 = ht.add_run('Engineers' + chr(10) + 'observations on wear' + chr(10) + 'items of equipment')
+        r6.font.name = 'Calibri'
+        r6.font.size = Pt(8)
+        r6.font.bold = True
+
+        c = -1
+        r = 0
+
+        for line in remarklist:
+            r +=1
+            c =-1
+            line = list(line)
+            for element in line:
+                c += 1
+
+                if c == 0:
+                    P = feedbacktable.cell(r, c).paragraphs[0]
+                    R = P.add_run(element)
+
+
+                elif c == 1:
+                    P = feedbacktable.cell(r, 3).paragraphs[0]
+                    R = P.add_run(element)
+                elif c == 2:
+                    P = feedbacktable.cell(r, 1).paragraphs[0]
+                    for limitline in limits:
+                        if str(line[4]) == str(limitline[0]):
+                            limitstr = (countLimit(line[4], line[2]))
+                            R = P.add_run(limitstr)
+                    if limitstr == 'Cl. A':
+                        R.font.highlight_color = WD_COLOR_INDEX.BRIGHTGREEN
+                    if limitstr == 'Cl. B':
+                        R.font.highlight_color = WD_COLOR_INDEX.BRIGHTGREEN
+                    if limitstr == 'Cl. C':
+                        R.font.highlight_color = WD_COLOR_INDEX.YELLOW
+                    if limitstr == 'Cl. D':
+                        R.font.highlight_color = WD_COLOR_INDEX.RED
+
+                elif c == 3:
+
+                    P = feedbacktable.cell(r, 2).paragraphs[0]
+                    R = P.add_run(str(element))
+                else:
+                    pass
+
+                R.font.name = 'Calibri'
+                R.font.size = Pt(8)
+                R.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+
+    headtable(document)
+    feedbacktable()
+    document.add_paragraph()
+    document.add_paragraph()
+    E = document.add_paragraph()
+    R = E.add_run('……………………………………………')
+    R.bold = False
+    R.font.name = 'Times New Roman'
+    R.font.size = Pt(10)
+    E.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    E = document.add_paragraph()
+    R = E.add_run('(CE in Charge)                 .')
+    R.bold = False
+    R.font.name = 'Times New Roman'
+    R.font.size = Pt(10)
+    E.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    document.save('C:\overmind\Reports\\' + str(result[0][0]) + ' - feedback for vibration report ' + str(rn_) + '.docx' )
+
+
 def grabremarks():
     class remark:
         def __init__(self):
             self.name = ''
             self.remark = ''
 
-    document = docx.Document(docx='C:\Overmind\REPORT0-2019.docx')
+    a = filedialog.askopenfilename()
+    document = docx.Document(docx=a)
     t=-1
     tableflag = False
     rt = list()
@@ -192,13 +442,18 @@ def grabremarks():
                 if (str(rem.name)).strip() != '' and (str(rem.remark)).strip() != '':
                     if (str(rem.name)).strip() != (str(rem.remark)).strip():
                         remlistIN.append(rem)
-                        print((str(rem.name)).strip() + ': ' +  (str(rem.remark)).strip())
+
             except:
                 pass
+
+    for line2 in remlist:
         for line in remlistIN:
-            for line2 in remlist:
-                if (str(line2.name)).strip() == (str(line.name)).strip():
-                    line2.textfield.insert(INSERT, str(line.remark))
+            if (str(line2.name)).strip() == (str(line.name)).strip():
+                remarkstr = str(line.remark)
+                print(remarkstr)
+                line2.textfield.insert(INSERT,remarkstr )
+            #break
+
 def remarks(connD):
 
     querry = "select name,id from main where parent = 1 order by name"
@@ -259,11 +514,17 @@ def remarks(connD):
         for line in reports:
             Reportlistbox.insert(END, line[0])
 
+
     def getdevices(evt):
         w = evt.widget
         index = int(w.curselection()[0])
         report = w.get(index)
         putdevices(report)
+
+    remtable = q_run(connD, """select rem.id, rem.raport_number, rem.remark, rem.sended, remi.request_date
+from remarks as rem
+left join reminder as remi on rem.id = remi.id and rem.raport_number = remi.raport_number
+group by rem.id, rem.raport_number, rem.remark, rem.sended, remi.request_date""")
 
     class frame_reminder:
         def __init__(self, measCframe,dev,rn):
@@ -274,62 +535,132 @@ def remarks(connD):
             self.nameLabel = tk.Label(measCframe,text= self.name)
             self.nameLabel.pack(side = LEFT)
             self.textfield = tk.Text(measCframe, width=50, height=2)
+            try:
+                remarktext = self.getrem(str(self.id), str(self.rn))
+
+                remark__ = remarktext[0]
+                sended__ = remarktext[1]
+                request_date__ = remarktext[2]
+
+                if str(remark__) == 'None': remark__ = ''
+                self.textfield.insert(INSERT, str(remark__))
+            except:
+                remark__ = ''
+                sended__ = 'None'
+                request_date__ = 'None'
+
             self.textfield.pack(side=LEFT)
+
+
+
 
             self.var = tk.IntVar(value=0)
             self.check = ttk.Checkbutton(measCframe, text='Sent', variable=self.var)
-            self.check.pack(side=LEFT)
+
+            if str(sended__) == 'True':
+                self.var.set(1)
             self.var2 = tk.IntVar(value=0)
+            self.dateLabel = tk.Label(measCframe, text="")
+
+            if str(request_date__) != 'None':
+                self.var2.set(1)
+                self.dateLabel.configure(text=request_date__)
+                self.requestdate = str(request_date__)
+            self.check.pack(side=LEFT)
+
             self.check2 = ttk.Checkbutton(measCframe, text='Reminder', variable=self.var2,command = lambda remO = self: datepick(remO))
+            # if str(remarktext[2]) != 'None':
+            #     self.var2.set(1)
             self.check2.pack(side=LEFT)
             measCframe.pack(side=TOP, fill=BOTH, expand=True)
 
-            self.dateLabel = tk.Label(measCframe,text= "")
+
+
             self.dateLabel.pack(side = LEFT)
 
             self.requestdate = ''
             self.datevar = tk.StringVarVarvalue="2000-01-01"
 
-        #command = lambda ue=user_entry, pe=pass_entry: logging_in(ue, pe)
+        def getrem(self,id,rn):
+            for line in remtable:
+
+                if str(line[0]) == str(id) and str(line[1]) == str(rn):
+                    ans = [str(line[2]),str(line[3]),str(line[4])]
+
+                    return ans
+                    break
+
+            pass
+
+
+
+
 
     def putdevices(report):
+
+
         def upload():
+
+            querry = """select rem.id, rem.sended, remi.request_date
+            from remarks as rem
+            left join reminder as remi on rem.id = remi.id and rem.raport_number = remi.raport_number
+            where rem.raport_number ='""" + str(report) + "'group by rem.id, rem.sended, remi.request_date"
+            remidlist = q_run(connD, querry)
+
             c=0
+
             for line in remlist:
 
                 if str(line.textfield.get("1.0", END)).strip() != '':
+
                     querry = "select date from measurements_low where id = " + str(
                         line.id) + " and raport_number = '" + str(line.rn) + "' limit 1"
-
-                    measdate = str(q_run(connD, querry)[0][0])
+                    try:
+                        measdate = str(q_run(connD, querry)[0][0])
+                    except:
+                        measdate ='1989-08-06'
 
                     if line.var.get() == 1 : sendflag = 'True'
                     else: sendflag = 'False'
                     if line.var2.get() == 1: remflag = 'True'
                     else: remflag = 'False'
-                    querry = "INSERT INTO REMARKS(id,raport_number,remark,parent,documentdate,sended,reminder) VALUES (" + str(
-                        line.id) + ",'" + str(line.rn) + "','" + str(
-                        (line.textfield.get("1.0", END)).strip()) + "'," + str(line.parent) + ",'" + str(
-                        measdate) +"'," + str(sendflag) + "," + str(remflag) + ")"
-                    q_run(connD, querry)
 
+                    idlist = list(row[0] for row in remidlist)
 
-                    if remflag == 'True':
-                        querry = "INSERT INTO REMINDER(parent,raport_number,request_date,remcom,id) VALUES (" + str(
-                            line.parent) + ",'" + str(line.rn) + "','" + str(
-                            line.requestdate) + "','" + str(line.textfield.get("1.0", END)).strip() + "'," + str(
-                            line.id) + ")"
+                    if line.id in idlist:
+                        querry = "UPDATE REMARKS SET remark ='"+ str((line.textfield.get("1.0", END)).strip()) +  \
+                            "',sended = " + str(sendflag) + " where id = " + str(line.id) +  " and raport_number = '" + str(line.rn) + "'"
+
                         q_run(connD, querry)
+                        if remflag == 'True': ### ZROBIC SPRAWDZANIE ZE JESLI NIE MA TO ROBI INSERTA
+                            querry = "UPDATE REMINDER SET request_date = '" + str(line.dateLabel['text']) + "' where id = " + str(
+                            line.id) + " and raport_number = '" + str(line.rn) + "'"
 
+                            q_run(connD, querry)
+                    else:
 
+                        querry = "INSERT INTO REMARKS(id,raport_number,remark,parent,documentdate,sended,reminder) VALUES (" + str(
+                            line.id) + ",'" + str(line.rn) + "','" + str(
+                            (line.textfield.get("1.0", END)).strip()) + "'," + str(line.parent) + ",'" + str(
+                            measdate) +"'," + str(sendflag) + "," + str(remflag) + ")"
 
+                        q_run(connD, querry)
+                        if remflag == 'True':
+                            querry = "INSERT INTO REMINDER(parent,raport_number,request_date,remcom,id) VALUES (" + str(
+                                line.parent) + ",'" + str(line.rn) + "'," + str(
+                                line.requestdate) + ",'" + str(line.textfield.get("1.0", END)).strip() + "'," + str(
+                                line.id) + ")"
 
+                            q_run(connD, querry)
                     c+=1
             messagebox.showinfo("Title", 'Upload done: ' + str(c))
 
         querry = """select dev.name ,ml.id,ml.parent
-			from measurements_low as ml 
-			left join (select parent,sort, cast(id as int) as id from ds_structure where id ~E'^\\\d+$') as dss on ml.id =dss.id
+			from (select ml.parent, id, max(value),raport_number
+from measurements_low as ml 
+where raport_number = '""" + str(report) + """'
+group by ml.parent, ml.id,raport_number order by id) as ml 
+			left join (select parent,sort, cast(id as int) as id from ds_structure where id ~E'^\\\d+$') as dss on ml.id =dss.id and ml.parent = dss.parent
 			left join devices as dev on ml.id =dev.id
 			where ml.raport_number = '""" + str(report) + """' 
 				group by ml.id,dss.sort,dev.name,ml.parent
@@ -353,8 +684,9 @@ def remarks(connD):
         UploadButton.pack()
         GetReportButton = Button(header, text='Get report', command=grabremarks)
         GetReportButton.pack()
+        Makefdbrepbut = Button(header, text='Make feedback report', command= lambda rn = str(report), connD = connD : createfeedback(rn,connD))
 
-
+        Makefdbrepbut.pack()
 
         try:
             querry = "Select send_raport_koniec from harmonogram where report_number = '" + str(report) + "'"
@@ -366,7 +698,7 @@ def remarks(connD):
 
         ttk.Label(header, text="Send date: " + str(senddate)).pack()
         scrollable_body = Scrollable(body, width=32)
-
+        remlist.clear()
         for i in devices:
             measCframe = tk.Frame(scrollable_body, height=2, width=32)
             X = frame_reminder(measCframe,i,report)
@@ -409,7 +741,7 @@ def remarks(connD):
 # root.title("Login")
 # root.geometry("200x120")
 # LogApplication(root)  # The frame is inside the widgit
-remarks(connD)
+LogApplication()
 
 #remindershow()
 

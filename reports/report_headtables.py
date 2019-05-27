@@ -17,13 +17,7 @@ def standard_info_table ( connD ,document ,rn_ ):
     print( shipstr )
     headtable = document.add_table( rows=2 ,cols=3 )  # trzeba usunąć enter przed
     headtable.style = 'Table Grid'
-    # querry='select reporttype from main where name="%s"'%(shipstr)
-    # conn=psycopg2.connect(dbname='postgres',user='postgres',password='info')
-    # cur=conn.cursor()
-    # cur.execute(querry)
-    # parent_=cur.fetchall()
 
-    # headtable.style = 'Table Grid'
     headtable.cell( 0 ,0 ).merge( headtable.cell( 0 ,1 ).merge( headtable.cell( 0 ,2 ) ) )
     ht = headtable.cell( 0 ,0 ).paragraphs[ 0 ]
     ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
