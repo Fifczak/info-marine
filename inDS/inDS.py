@@ -95,7 +95,7 @@ def Login():
 			shipid = tree.item(tree.selection()[0]).get('values')[0]
 			#print(tree.item(tree.selection()[0]).get('values')[0])
 			#print(tree.item(ident[0]).get(values))
-			ShowDatasheet(connD,shipid)
+			Datasheet(connD,shipid)
 
 			
 		root2 = tk.Tk()

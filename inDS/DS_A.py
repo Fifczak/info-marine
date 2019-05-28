@@ -10,10 +10,71 @@ from tkinter import *
 from tkinter import ttk 
 
 
+class LogApplication:
+
+    def __init__(self):
+        self.root = Tk()
+        self.root.title("Log In")
+        self.title = tk.Label(self.root, text="Info Datasheet")  # TITLE
+        self.title.grid(row=0, column=2)
+        self.user_entry_label = tk.Label(self.root, text="Username: ")  # USERNAME LABEL
+        self.user_entry_label.grid(row=1, column=1)
+        self.user_entry = tk.Entry(self.root, text="Username: ")  # USERNAME ENTRY BOX
+        self.user_entry.grid(row=1, column=2)
+        self.pass_entry_label = tk.Label(self.root, text="Password: ")  # PASSWORD LABEL
+        self.pass_entry_label.grid(row=2, column=1)
+        self.pass_entry = tk.Entry(self.root, show="*")  # PASSWORD ENTRY BOX
+        self.pass_entry.grid(row=2, column=2)
+        try:
+            with open('C:\overmind\\temp\log.csv') as csvfile:
+                openfile = csv.reader(csvfile, delimiter=' ')
+                p = -1
+                for lines in openfile:
+                    p += 1
+                    if p == 0:
+                        self.user_entry.insert(0, str(lines[0]))
+                    if p == 1:
+                        self.pass_entry.insert(0, str(lines[0]))
+        except:
+            pass
+        self.var = IntVar()
+        self.checksave = tk.Checkbutton(self.root, text="Remember", variable=self.var)
+        self.checksave.grid(row=3, column=2)
+        self.sign_in_butt = Button(self.root, text="Sign In", command=lambda ue=self.user_entry, pe=self.pass_entry: self.logging_in(ue, pe))
+        self.sign_in_butt.grid(row=5, column=2)
+        self.root.mainloop()
+
+    def logging_in(self,user_entry, pass_entry):
+        user_get = user_entry.get()  # Retrieve Username
+        pass_get = pass_entry.get()  # Retrieve Password
+        if bool(self.var.get()) == True:
+           # config = Path('C:\overmind\\temp\log.csv')
+            with open('C:\overmind\\temp\log.csv', 'w+' ,newline='') as csvfile:
+                filewriter = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
+                filewriter.writerow([user_get])
+                filewriter.writerow([pass_get])
+        connD = [user_get, pass_get, '192.168.10.243']
 
 
-def ShowDatasheet(connD,parent):
+        querry = "SELECT current_user"
+        usercheck = ''
+
+        usercheck = q_run(connD, querry)  # PYINSTALLER ma problemy gdzies tu
+
+
+        if usercheck != '':
+            self.root.destroy()
+
+
+            Datasheet(connD)
+
+class Datasheet(connD,parent):
 	limits = list()
+
+	def __init__(self):
+		pass
+
+
 	def loadquerrys():
 		querry1 = "select raport_number from measurements_low where parent = " + str(parent) + " group by raport_number order by raport_number DESC "
 		resultr = q_run(connD, querry1)
@@ -45,8 +106,6 @@ def ShowDatasheet(connD,parent):
 		limits = q_run(connD,querry)
 		
 		return([resultr,results,resultm,resultmc,resultrem,resultfed,limits])
-		
-		
 	def countLimit(standard,value):
 		value = float(value)
 		
@@ -70,7 +129,6 @@ def ShowDatasheet(connD,parent):
 			return limStr
 		except:
 			print('Limit count error')
-	
 	def onselect(evt):
 		w = evt.widget
 		index = int(w.curselection()[0])

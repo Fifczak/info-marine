@@ -541,6 +541,7 @@ group by rem.id, rem.raport_number, rem.remark, rem.sended, remi.request_date"""
             self.parent =dev[2]
             self.nameLabel = tk.Label(measCframe,text= self.name)
             self.nameLabel.pack(side = LEFT)
+
             self.textfield = tk.Text(measCframe, width=50, height=2)
             try:
                 remarktext = self.getrem(str(self.id), str(self.rn))
@@ -558,7 +559,7 @@ group by rem.id, rem.raport_number, rem.remark, rem.sended, remi.request_date"""
 
             self.textfield.pack(side=LEFT)
 
-
+            self.textfield = tk.Text(measCframe, width=50, height=2)
 
 
             self.var = tk.IntVar(value=0)
