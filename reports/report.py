@@ -11,9 +11,9 @@ from report_shipdata import getshipsdata ,shipdata
 from report_standards import legend_IM ,standards
 from report_styles import loadstyles
 
-username = 'testuser'
-password = 'info'
-host = '192.168.10.243'
+username = 'krystiank'
+password = 'pjbfov'
+host = 'localhost'
 connD = [ username ,password ,host ]
 
 

@@ -92,6 +92,8 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                     WTFparam = 0.5  # //DLA AURORY
                 y.overall = round(sqrt(sumVal) * WTFparam, 3)
 
+                print(y.point,y.routename,y.overall,y.domain)
+
                 if str(self.type) == 'Env':
                     y.type = 'envelope P-K'
                 elif str(self.type) == 'Vel':
@@ -150,6 +152,13 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 
             def get_measdomain(measno):
                 measdomain = list();
+                if str(parent)=='48':
+                    if measno == '1004' or measno == '1007':
+                        measdomain.append(
+                            'FFT'), measdomain.append('Vel'), measdomain.append('[mm/s]')
+                    elif measno == '1018':
+                        measdomain.append('FFT'), measdomain.append('Env'), measdomain.append('[m/s2]')
+
 
                 if str(parent) == '103':
                     if measno == '1004' or measno == '1007' or measno == '1025' or measno == '1059':
@@ -189,9 +198,9 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                     x.routename = (get_route_name(lines[xcord]))[0]
                     x.point = (get_route_name(lines[xcord]))[1]
                 if line == '#Setupnumber':
-                    x.domain = (get_measdomain(lines[xcord]))[0]
-                    x.type = (get_measdomain(lines[xcord]))[1]
-                    x.unit = (get_measdomain(lines[xcord]))[2]
+                    x.domain = (get_measdomain(lines[xcord]))
+                    x.type = (get_measdomain(lines[xcord]))
+                    x.unit = (get_measdomain(lines[xcord]))
 
                 if line == '#Date':
                     x.date = get_date(lines[xcord])
@@ -885,4 +894,4 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 # 'Vibscanner'
 # 'Marvib'
 # 'ezThomas'
-read_measurement_file('Marvib','testuser','info','192.168.10.243','2009-2019', '54')
+read_measurement_file('Vibscanner','testuser','info','192.168.10.243','2060-2019', '48')
