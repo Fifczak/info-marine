@@ -512,10 +512,11 @@ def remarks(connD):
         report = w.get(index)
         putdevices(report)
 
-    remtable = q_run(connD, """select rem.id, rem.raport_number, rem.remark, rem.sended, remi.request_date
+    remtable = q_run(connD, """select rem.id, rem.raport_number, rem.remark, rem.sended, remi.request_date, fdb.feedback
 from remarks as rem
 left join reminder as remi on rem.id = remi.id and rem.raport_number = remi.raport_number
-group by rem.id, rem.raport_number, rem.remark, rem.sended, remi.request_date""")
+left join feedbacks as fdb on rem.id = fdb.id and rem.raport_number = fdb.raport_number
+group by rem.id, rem.raport_number, rem.remark, rem.sended, remi.request_date, fdb.feedback""")
 
     class frame_reminder:
         def __init__(self, measCframe,dev,rn):
@@ -527,15 +528,20 @@ group by rem.id, rem.raport_number, rem.remark, rem.sended, remi.request_date"""
             self.nameLabel.pack(side = LEFT)
 
             self.textfield = tk.Text(measCframe, width=50, height=2)
+            self.textfield2 = tk.Text(measCframe, width=50, height=2)
             try:
                 remarktext = self.getrem(str(self.id), str(self.rn))
 
                 remark__ = remarktext[0]
                 sended__ = remarktext[1]
                 request_date__ = remarktext[2]
+                feedback__ = remarktext[3]
 
                 if str(remark__) == 'None': remark__ = ''
                 self.textfield.insert(INSERT, str(remark__))
+                if str(feedback__) == 'None': feedback__ = ''
+                self.textfield2.insert(INSERT, str(feedback__))
+
             except:
                 remark__ = ''
                 sended__ = 'None'
@@ -556,7 +562,7 @@ group by rem.id, rem.raport_number, rem.remark, rem.sended, remi.request_date"""
             if str(request_date__) != 'None':
                 self.var2.set(1)
                 self.dateLabel.configure(text=request_date__)
-                self.requestdate = str(request_date__)
+                self.requestdate = str("'" + str(request_date__) +"'")
             self.check.pack(side=LEFT)
 
             self.check2 = ttk.Checkbutton(measCframe, text='Reminder', variable=self.var2,command = lambda remO = self: datepick(remO))
@@ -572,14 +578,14 @@ group by rem.id, rem.raport_number, rem.remark, rem.sended, remi.request_date"""
             self.requestdate = ''
             self.datevar = tk.StringVarVarvalue="2000-01-01"
 
-            self.textfield2 = tk.Text(measCframe, width=50, height=2)
+
             self.textfield2.pack(side=LEFT)
 
         def getrem(self,id,rn):
             for line in remtable:
 
                 if str(line[0]) == str(id) and str(line[1]) == str(rn):
-                    ans = [str(line[2]),str(line[3]),str(line[4])]
+                    ans = [str(line[2]),str(line[3]),str(line[4]),str(line[5])]
 
                     return ans
                     break
@@ -624,10 +630,20 @@ group by rem.id, rem.raport_number, rem.remark, rem.sended, remi.request_date"""
 
                         q_run(connD, querry)
                         if remflag == 'True': ### ZROBIC SPRAWDZANIE ZE JESLI NIE MA TO ROBI INSERTA
-                            querry = "UPDATE REMINDER SET request_date = '" + str(line.dateLabel['text']) + "' where id = " + str(
-                            line.id) + " and raport_number = '" + str(line.rn) + "'"
 
-                            q_run(connD, querry)
+                            if str(line.requestdate) != '':
+                                querry = "UPDATE REMINDER SET request_date = '" + str(
+                                    line.dateLabel['text']) + "' where id = " + str(
+                                    line.id) + " and raport_number = '" + str(line.rn) + "'"
+
+                                q_run(connD, querry)
+                            else:
+                                messagebox.showinfo("Brak", 'Upload aborted. No request date. Please fill ' + str(
+                                    line.name) + ' requestdate')
+                                break
+
+
+
                     else:
 
                         querry = "INSERT INTO REMARKS(id,raport_number,remark,parent,documentdate,sended,reminder) VALUES (" + str(
@@ -637,14 +653,20 @@ group by rem.id, rem.raport_number, rem.remark, rem.sended, remi.request_date"""
 
                         q_run(connD, querry)
                         if remflag == 'True':
-                            querry = "INSERT INTO REMINDER(parent,raport_number,request_date,remcom,id) VALUES (" + str(
-                                line.parent) + ",'" + str(line.rn) + "'," + str(
-                                line.requestdate) + ",'" + str(line.textfield.get("1.0", END)).strip() + "'," + str(
-                                line.id) + ")"
+                            if str(line.requestdate) != '':
 
-                            q_run(connD, querry)
+                                querry = "INSERT INTO REMINDER(parent,raport_number,request_date,remcom,id) VALUES (" + str(
+                                    line.parent) + ",'" + str(line.rn) + "','" + str(
+                                    line.requestdate) + "','" + str(line.textfield.get("1.0", END)).strip() + "'," + str(
+                                    line.id) + ")"
+
+                                q_run(connD, querry)
+                            else:
+                                messagebox.showinfo("Brak", 'Upload aborted. No request date. Please fill ' + str(line.name) + ' requestdate')
+                                break
+
                     c+=1
-            messagebox.showinfo("Title", 'Upload done: ' + str(c))
+            messagebox.showinfo("Finish", 'Upload done: ' + str(c))
 
         querry = """select dev.name ,ml.id,ml.parent
 			from (select ml.parent, id, max(value),raport_number
