@@ -19,16 +19,6 @@ from docx.enum.text import WD_COLOR_INDEX
 from docx.shared import Pt
 from docx import Document
 
-
-
-
-
-
-
-
-
-#connD=['testuser','info','192.168.10.243']
-
 class Scrollable(ttk.Frame):
     """
        Make a frame scrollable with scrollbar on the right.
@@ -148,14 +138,12 @@ class LogApplication:
 remlist = list()
 remlistIN = list()
 
-
-
 def createfeedback(rn_,connD):
     document = Document('C:\\overmind\\Data\\base.docx')
     querry = "select main.name, shd.imo, main2.name from main right join shipsdata as shd on main.id = shd.shipid right join main as main2 on main.parent = main2.id where main.id = (select shipid from reports where raport_number = '" + str(
         rn_) + "')"
     result = q_run(connD, querry)
-    print(len(result))
+
     if len(result) == 0 :
         querry = "select main.name, shd.imo, main2.name from main right join shipsdata as shd on main.id = shd.shipid right join main as main2 on main.parent = main2.id where main.id = (select shipid from harmonogram where report_number = '" + str(
             rn_) + "')"
@@ -395,7 +383,6 @@ def createfeedback(rn_,connD):
     E.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     document.save('C:\overmind\Reports\\' + str(result[0][0]) + ' - feedback for vibration report ' + str(rn_) + '.docx' )
 
-
 def grabremarks():
     class remark:
         def __init__(self):
@@ -454,10 +441,12 @@ def grabremarks():
                 pass
 
     for line2 in remlist:
+
         for line in remlistIN:
             if (str(line2.name)).strip() == (str(line.name)).strip():
                 remarkstr = str(line.remark)
-                print(remarkstr)
+
+
                 line2.textfield.insert(INSERT,remarkstr )
             #break
 
@@ -487,9 +476,6 @@ def remarks(connD):
             ttk.Button(top, text="ok", command=print_sel).pack()
             root.mainloop()
 
-    #
-
-
     def getships(evt):
         w = evt.widget
         index = int(w.curselection()[0])
@@ -510,7 +496,6 @@ def remarks(connD):
         shipname = w.get(index)
         makereports(shipname)
 
-
     def makereports(shipname):
         querry = "select raport_number from measurements_low where parent = (select id from main where name = '" + str(shipname) +"' limit 1) group by raport_number order by raport_number DESC"
         reports = q_run(connD,querry)
@@ -520,7 +505,6 @@ def remarks(connD):
 
         for line in reports:
             Reportlistbox.insert(END, line[0])
-
 
     def getdevices(evt):
         w = evt.widget
@@ -559,7 +543,6 @@ group by rem.id, rem.raport_number, rem.remark, rem.sended, remi.request_date"""
 
             self.textfield.pack(side=LEFT)
 
-            self.textfield = tk.Text(measCframe, width=50, height=2)
 
 
             self.var = tk.IntVar(value=0)
@@ -589,6 +572,9 @@ group by rem.id, rem.raport_number, rem.remark, rem.sended, remi.request_date"""
             self.requestdate = ''
             self.datevar = tk.StringVarVarvalue="2000-01-01"
 
+            self.textfield2 = tk.Text(measCframe, width=50, height=2)
+            self.textfield2.pack(side=LEFT)
+
         def getrem(self,id,rn):
             for line in remtable:
 
@@ -599,9 +585,6 @@ group by rem.id, rem.raport_number, rem.remark, rem.sended, remi.request_date"""
                     break
 
             pass
-
-
-
 
 
     def putdevices(report):

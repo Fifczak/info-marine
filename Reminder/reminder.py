@@ -252,6 +252,8 @@ def remindershow():
 
                 W.detWindow.mainloop()
             def check_new_measurements():
+                ##TODO: jest problem z crossowaniem - lastfullreportdate jest zmienna od klikniecia, przemyslec jeszcze raz i zmienic funkcje => albo przeniesc do wgrywania
+
                 ###################CROSSOWANIE TABELI REMINDER Z MEASUREMENTS_LOW
                 querry = """select rem.id, rem.raport_number, cast(har.send_raport_koniec as date)
 

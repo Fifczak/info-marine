@@ -124,6 +124,9 @@ class Datasheet():
 		rmslist.config(width=7)
 		envlist = tk.Listbox(measframe)
 		envlist.config(width=7)
+		mcremark = tk.Text(measframe, height=10, width=20)
+		remark = tk.Text(measframe, height=10, width=20)
+		feedback = tk.Text(measframe, height=10, width=20)
 
 		for x in self.resultm:
 			if x[1] == reportno:
@@ -155,11 +158,17 @@ class Datasheet():
 
 					except:
 						envlist.insert(END, '-')
+					mcremark.bind('<Double-Button>',
+								  lambda event, id=x[0], rn=x[1]: self.onselectmcard(event, id, rn, connD, parent))
+					remark.bind('<Double-Button>',
+								  lambda event, id=x[0], rn=x[1]: self.onselectremark(event, id, rn, connD, parent))
+					feedback.bind('<Double-Button>',
+								  lambda event, id=x[0], rn=x[1]: self.onselectfeedback(event, id, rn, connD, parent))
 
-		mcremark = tk.Text(measframe, height=10, width=20)
-		mcremark.bind('<Double-Button>',self.onselectmcard)
-		remark = tk.Text(measframe, height=10, width=20)
-		feedback = tk.Text(measframe, height=10, width=20)
+
+
+		#lambda event, id = x[0], rn = x[1]: self.onselect2(event, id, rn, connD, parent)
+
 		# for x in self.resultmc:
 		# if (str(x[0])).strip() == (str(id)).strip():
 		# if (str(x[1])).strip() == (str(reportno[0])).strip():
@@ -256,10 +265,12 @@ class Datasheet():
 		querry = "select point from points where id = " + str(id) + " and sort = " + str(index +1)
 		point = q_run(connD, querry)[0][0]
 		self.ValENVwindow(connD, self, value, id, rn, point,parent)
-
-	def onselectmcard(self, evt):
+	def onselectmcard(self, evt, id, rn, connD,parent):
 		self.MCARDwindow(connD, self, id, rn, parent)
-
+	def onselectremark(self, evt, id, rn, connD,parent):
+		self.REMARKwindow(connD, self, id, rn, parent)
+	def onselectfeedback(self, evt, id, rn, connD,parent):
+		self.FEEDBACKwindow(connD, self, id, rn, parent)
 	def loadquerrys(self,parent,connD):
 		querry1 = "select raport_number from measurements_low where parent = " + str(
 			parent) + " group by raport_number order by raport_number DESC "
@@ -426,7 +437,10 @@ class Datasheet():
 		def __init__(self,connD, parentclass, id, rn, parent):#,connD, parentclass, value,id,rn,point,parent):
 			def updateMCARD():
 				try:
-					querry = "UPDATE measurements_low set value = "+str(self.Val.get("1.0",END))+",date = '"+str(self.ValDate.get("1.0",END))+"' where raport_number = '"+str(rn)+ "' and id = "+str(id)+" and type = 'envelope P-K' and point = '"+str(point) + "'"
+					querry = "UPDATE mcdata set mcremark = '"+str(self.MCREM.get("1.0",END))+"'," \
+					"documentdate = '"+str(self.DocDate.get("1.0",END))+"' " \
+					"where raport_number = '"+str(rn)+ "' and id = "+str(id)
+					print(querry)
 					q_run(connD,querry)
 					for widget in parentclass.meascanv.winfo_children():
 						widget.destroy()
@@ -439,22 +453,113 @@ class Datasheet():
 			self.window = tk.Tk()
 			self.window.title("CHANGE MCARD")
 			self.DocDate = tk.Text(self.window, height=1, width=12)
-			querry = "select mcremark, measdate from mcdata where " \
-					 "raport_number = '" + str() + "' and id = " + str() + " limit 1"
-
-			#self.DocDate.insert(END, value)
+			querry = "select mcremark, documentdate from mcdata where " \
+					 "raport_number = '" + str(rn) + "' and id = " + str(id) + " limit 1"
+			resmc = q_run(connD,querry)
 
 			self.MCREM = tk.Text(self.window, height=10, width=60)
-			#querry = "select date from measurements_low where raport_number = '"+str(rn)+ \
-			#			 "' and id = "+str(id)+" and type = 'envelope P-K' and point = '"+str(point)+"' limit 1"
-			#dat = q_run(connD,querry)
-			#self.MCREM.insert(END, dat)
+			try:
+				self.DocDate.insert(END, resmc[0][1])
+				self.MCREM.insert(END, resmc[0][0])
+			except:
+				pass
 			self.okbut = tk.Button(self.window,text = 'Change',command=updateMCARD, width=12)
 			self.DocDate.pack(side=TOP)
 			self.MCREM.pack(side=TOP)
 			self.okbut.pack(side=TOP)
 
 			self.window.mainloop()
+	class REMARKwindow():
+		def __init__(self,connD, parentclass, id, rn, parent):#,connD, parentclass, value,id,rn,point,parent):
+			def updateREM():
+				try:
+					if self.var1.get() == 1:
+						sendflag = 'True'
+					else:
+						sendflag = 'False'
+
+					querry = "UPDATE remarks set remark = '"+str(self.REM.get("1.0",END))+"'," \
+					"documentdate = '"+str(self.DocDate.get("1.0",END))+"', sended = " + str(sendflag) +  \
+					" where raport_number = '"+str(rn)+ "' and id = "+str(id)
+
+					q_run(connD,querry)
+					for widget in parentclass.meascanv.winfo_children():
+						widget.destroy()
+					parentclass.loadquerrys(parent, connD)
+					parentclass.make_frame_meas(Frame(parentclass.meascanv, height=2, bd=1), rn, id, connD,parent)
+					self.window.destroy()
+				except:
+					messagebox.showinfo("Error", str('UPDATE FAILED'))
+			self.window = tk.Tk()
+			self.window.title("CHANGE REMARK")
+			self.DocDate = tk.Text(self.window, height=1, width=12)
+
+			querry = "select remark, documentdate,sended from remarks where " \
+					 "raport_number = '" + str(rn) + "' and id = " + str(id) + " limit 1"
+
+			resmc = q_run(connD,querry)
+
+			self.REM = tk.Text(self.window, height=10, width=60)
+
+			self.var1 = IntVar(self.window )
+			self.var1.set(0)
+			print(str(resmc[0][2]))
+			if str(resmc[0][2]) == 'True':self.var1.set(1)
+
+			self.sended = tk.Checkbutton(self.window, text='Sent', variable=self.var1, onvalue=1, offvalue=0)
+
+
+
+			try:
+				self.DocDate.insert(END, resmc[0][1])
+				self.REM.insert(END, resmc[0][0])
+			except:
+				pass
+			self.okbut = tk.Button(self.window,text = 'Change',command=updateREM, width=12)
+			self.DocDate.pack(side=TOP)
+			self.REM.pack(side=TOP)
+			self.sended.pack(side=TOP)
+
+			self.okbut.pack(side=TOP)
+
+			self.window.mainloop()
+	class FEEDBACKwindow():
+		def __init__(self,connD, parentclass, id, rn, parent):#,connD, parentclass, value,id,rn,point,parent):
+			def updateFDB():
+				try:
+					querry = "UPDATE feedbacks set feedback = '"+str(self.FDB.get("1.0",END))+"'," \
+					"documentdate = '"+str(self.DocDate.get("1.0",END))+"' " \
+					"where raport_number = '"+str(rn)+ "' and id = "+str(id)
+					q_run(connD,querry)
+					for widget in parentclass.meascanv.winfo_children():
+						widget.destroy()
+					parentclass.loadquerrys(parent, connD)
+					parentclass.make_frame_meas(Frame(parentclass.meascanv, height=2, bd=1), rn, id, connD,parent)
+					self.window.destroy()
+				except:
+					messagebox.showinfo("Error", str('UPDATE FAILED'))
+
+			self.window = tk.Tk()
+			self.window.title("CHANGE FEEDBACK")
+			self.DocDate = tk.Text(self.window, height=1, width=12)
+			querry = "select feedback, documentdate from feedbacks where " \
+					 "raport_number = '" + str(rn) + "' and id = " + str(id) + " limit 1"
+			resmc = q_run(connD,querry)
+
+			self.FDB = tk.Text(self.window, height=10, width=60)
+			try:
+				self.DocDate.insert(END, resmc[0][1])
+				self.FDB.insert(END, resmc[0][0])
+			except:
+				pass
+			self.okbut = tk.Button(self.window,text = 'Change',command=updateFDB, width=12)
+			self.DocDate.pack(side=TOP)
+			self.FDB.pack(side=TOP)
+			self.okbut.pack(side=TOP)
+
+			self.window.mainloop()
+
+
 
 	limits = list()
 
@@ -496,5 +601,5 @@ class Datasheet():
 # Keeps the window open/running
 
 
-#LogApplication()
-Datasheet(['testuser','info','localhost'],79)
+LogApplication()
+#Datasheet(['testuser','info','localhost'],79)
