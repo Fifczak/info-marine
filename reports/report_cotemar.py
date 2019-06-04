@@ -3,7 +3,8 @@ import datetime
 import os
 import os.path
 import time
-
+from docx.enum.table import WD_ALIGN_VERTICAL
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 import matplotlib.pyplot as plt
 
@@ -855,21 +856,31 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	t15 = document.add_paragraph('This report is prepared in good faith based on measurement diagnostic done on available object and documentation submitted.')
 	t15.style = document.styles['textt1']
 	t15.alignment = WD_ALIGN_PARAGRAPH.LEFT
-	
+
 	document.add_paragraph()
 	t15 = document.add_paragraph('Report prepared by:                                                                                                                           Approved by:')
 	t15.style = document.styles['texthead']
 	t15.alignment = WD_ALIGN_PARAGRAPH.LEFT
-	
 	fullname = getname(host, username, password)
 	t16 = document.add_paragraph(str(fullname[0][0]))
 	t16.style = document.styles['textt1']
 	t16.alignment = WD_ALIGN_PARAGRAPH.LEFT
-	
+
+	section=document.sections[0]
+	#footer_='dianosticrepo'
+	footer = section.footer
+	stop=footer.add_paragraph( str(platname) + ' ' + rn_ )
+	stop.space_before=Pt(0)
+	stop.runs[0].font.name='Times New Roman'
+	stop.runs[0].font.size=Pt(12)
+	footer.alignment = WD_ALIGN_PARAGRAPH.LEFT
+	footer.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+	# footer_=section.footer
+	# footer_.text='diagnostrep'
 	mydate = datetime.datetime.now()
 	repdate = str(mydate.year) + '_' + str(mydate.month) + '_' + str(mydate.day)
-	
 	ini = getini(host, username, password)
+
 	
 	if id_ == '53':
 		document.save('C:\overmind\Reports\Diagnostic report Atlantis Platform ' + str(rn_) +'_' + str(ini[0][0]) + '_' + str(repdate) + '.docx')
