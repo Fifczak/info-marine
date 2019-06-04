@@ -533,12 +533,16 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 
             for column in range(worksheet.ncols):  # Tu szukamy pomiarów
 
-                if worksheet.cell(0, column).value == 'eZ-TOMAS Remote 8,0,40' or worksheet.cell(0,
+
+                if str(worksheet.cell(0, column).value).strip() == 'eZ-TOMAS Remote 8,0,40' or worksheet.cell(0,
                                                                                                  column).value == 'eZ-TOMAS 8,0,40':  # Znalezienie raport sheeta
+
                     DecDate = decodedate(worksheet.cell(2, column).value)
 
                     for row in range(worksheet.nrows):
+
                         if worksheet.cell(row, column).value == '1.   Frequency (Hz)':
+
                             for row2 in range(worksheet.nrows):  # Szukanie measstart
                                 if worksheet.cell(row + row2 + 1, column + 1).value == xlrd.empty_cell.value:
                                     measnumbers = row2
@@ -811,7 +815,7 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
             plt.show()
 
         def reload_lists():
-            Window.destroy()
+           # Window.destroy()
 
             window_crosstable()
 
@@ -855,6 +859,7 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
             if not measlist:
                 x = 1
             else:
+
                 upload()
                 messagebox.showinfo("Dialog", ("Measurements uploaded"))
                 try:
@@ -885,4 +890,4 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 # 'Vibscanner'
 # 'Marvib'
 # 'ezThomas'
-read_measurement_file('Marvib','testuser','info','192.168.10.243','2009-2019', '54')
+#read_measurement_file('ezThomas','testuser','info','192.168.10.243','TEST', '55')

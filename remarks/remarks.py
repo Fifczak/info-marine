@@ -408,9 +408,6 @@ def grabremarks():
                 c+=1
                 for paragraph in cell.paragraphs:
                     coord = [t,r,c]
-
-
-
                     if str(paragraph.text) == 'Machine name':
                         tableflag = True
                         namecol.append(c)
@@ -436,12 +433,9 @@ def grabremarks():
                 if (str(rem.name)).strip() != '' and (str(rem.remark)).strip() != '':
                     if (str(rem.name)).strip() != (str(rem.remark)).strip():
                         remlistIN.append(rem)
-
             except:
                 pass
-
     for line2 in remlist:
-
         for line in remlistIN:
             if (str(line2.name)).strip() == (str(line.name)).strip():
                 remarkstr = str(line.remark)
