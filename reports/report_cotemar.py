@@ -525,18 +525,22 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 	
 	if id_ == '53':
 		platname = 'Atlantis'
+		imo_='9704128'
 	elif id_ == '54':
-		platname = 'Iolar'
+		platname = 'Iolair'
+		imo_='7816070'
 	elif id_ == '55':
 		platname = 'Neptuno'
+		imo_='9662136'
 		
 	table2.cell(0,1).add_paragraph(str(platname),'textt1')		
 	table2.cell(0,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 
 	table2.cell(1,0).add_paragraph('The IMO Number:','texthead')
 	table2.cell(1,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
-	
-	table2.cell(1,1).add_paragraph('9704128','textt1')
+
+		
+	table2.cell(1,1).add_paragraph(str(imo_),'textt1')
 	table2.cell(1,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
 	
 	table2.cell(2,0).add_paragraph('Owner of platform:','texthead')
