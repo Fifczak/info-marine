@@ -92,7 +92,6 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                     WTFparam = 0.5  # //DLA AURORY
                 y.overall = round(sqrt(sumVal) * WTFparam, 3)
 
-
                 if str(self.type) == 'Env':
                     y.type = 'envelope P-K'
                 elif str(self.type) == 'Vel':
@@ -197,9 +196,9 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                     x.routename = (get_route_name(lines[xcord]))[0]
                     x.point = (get_route_name(lines[xcord]))[1]
                 if line == '#Setupnumber':
-                    x.domain = (get_measdomain(lines[xcord]))
-                    x.type = (get_measdomain(lines[xcord]))
-                    x.unit = (get_measdomain(lines[xcord]))
+                    x.domain = (get_measdomain(lines[xcord]))[0]
+                    x.type = (get_measdomain(lines[xcord]))[1]
+                    x.unit = (get_measdomain(lines[xcord]))[2]
 
                 if line == '#Date':
                     x.date = get_date(lines[xcord])
@@ -893,4 +892,4 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 # 'Vibscanner'
 # 'Marvib'
 # 'ezThomas'
-read_measurement_file('Vibscanner','testuser','info','192.168.10.243','2060-2019', '48')
+read_measurement_file('Marvib','testuser','info','192.168.10.243','2009-2019', '54')
