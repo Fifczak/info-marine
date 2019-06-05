@@ -92,7 +92,6 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                     WTFparam = 0.5  # //DLA AURORY
                 y.overall = round(sqrt(sumVal) * WTFparam, 3)
 
-                print(y.point,y.routename,y.overall,y.domain)
 
                 if str(self.type) == 'Env':
                     y.type = 'envelope P-K'
