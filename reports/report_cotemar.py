@@ -339,10 +339,14 @@ def resulttable(tn, host, username, password, tableno, id1, id2, rn):
 		r.font.size= Pt(11)
 		if maxcord == j:
 			r.bold = True
-		if result[j][0] < 7.1:
-			limittxt = 'In limit'
+		if result[j][0] < 2.3:
+			limittxt = 'Z. A'
+		elif result[j][0]>2.3 and result[j][0]<4.5:
+			limittxt='Z. B'
+		elif result[j][0]>4.5 and result[j][0]>7.1:
+			limittxt='Z. C'
 		else:
-			limittxt = 'Out of limit'
+			limittxt = 'Z. D'
 		p=tableno.cell(3,1+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(limittxt)
@@ -379,8 +383,10 @@ def resulttable(tn, host, username, password, tableno, id1, id2, rn):
 		r.font.size= Pt(11)
 		if maxcord == j:
 			r.bold = True
-		if result[j][0] < 11.2:
-			limittxt = 'In limit'
+		if result[j][0] < 4.5:
+			limittxt = 'Z. A'
+		elif result[j][0]>4.5 and result[j][0]<11.2:
+			limittxt='Z. B'
 		else:
 			limittxt = 'Out of limit'
 		p=tableno.cell(3,6+j).add_paragraph()
@@ -745,7 +751,7 @@ def makereport(username, password, host, rn_, id_): #AUTORUN!
 		cell.width = Inches(1.7)
 		
 	table5.cell(0,0).add_paragraph('Window:','textt1')
-	table5.cell(0,0).alignment = WD_ALIGN_PARAGRAPH.LEFT	
+	table5.cell(0,0).alignment = WD_ALIGN_PARAGRAPH.LEFT
 	
 	table5.cell(0,1).add_paragraph('Hanning','textt1')
 	table5.cell(0,1).alignment = WD_ALIGN_PARAGRAPH.LEFT	
