@@ -702,21 +702,18 @@ def makereport ( username ,password ,host ,rn_ ,id_ ):  # AUTORUN!
 
     table4.cell ( 1 ,0 ).add_paragraph ( 'Value:' ,'texthead' )
     table4.cell ( 1 ,0 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
+    velgear=table4.cell(1,1).add_paragraph('Velocity: ','textt1')
+    table4.cell(2,0).add_paragraph('Range: ','texthead')
+    table4.cell(2,1).add_paragraph('5-1000Hz','textt1')
+    velgear.add_run ().add_break ()
+    velgear.add_run ( 'Zone A:        0-4,5 mm/s' )
+    velgear.add_run ().add_break ()
+    velgear.add_run ( 'Zone B:        4,5-11,2 mm/s' )
+    velgear.add_run ().add_break ()
+    velgear.add_run ( 'Zone C:        above 11,2 mm/s' )
 
-    table4.cell ( 1 ,1 ).add_paragraph ( 'Velocity' ,'textt1' )
     table4.cell ( 1 ,1 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
-
-    table4.cell ( 2 ,0 ).add_paragraph ( 'Range:' ,'texthead' )
-    table4.cell ( 2 ,0 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
-
-    table4.cell ( 2 ,1 ).add_paragraph ( '4-1000 Hz' ,'textt1' )
-    table4.cell ( 2 ,1 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
-
-    table4.cell ( 3 ,0 ).add_paragraph ( 'Limit:' ,'texthead' )
-    table4.cell ( 3 ,0 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
-
-    table4.cell ( 3 ,1 ).add_paragraph ( '7 mm/s' ,'textt1' )
-    table4.cell ( 3 ,1 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
+    set_col_widths(table4)
 
     document.add_page_break ()
     l23 = document.add_paragraph ( '2.3.	Measurement equipment' )
