@@ -714,6 +714,22 @@ def makereport ( username ,password ,host ,rn_ ,id_ ):  # AUTORUN!
 
     table4.cell ( 1 ,1 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
     set_col_widths(table4)
+    document.add_paragraph('Legend according to vibration class','listlvl1')
+    limittablelegend=document.add_table(rows=5,cols=2)
+    limittablelegend.cell(0,0).paragraphs[0].add_run('Z. A').font.highlight_color=WD_COLOR_INDEX.GREEN
+    limittablelegend.cell(0,1).paragraphs[0].add_run('Newly commissioned')
+
+    limittablelegend.cell ( 1 ,0 ).paragraphs [ 0 ].add_run ( 'Z. B' ).font.highlight_color = WD_COLOR_INDEX.GREEN
+    limittablelegend.cell(1,1).paragraphs[0].add_run('Unrestricted')
+
+    limittablelegend.cell(2,0).paragraphs[0].add_run('Z. C').font.highlight_color=WD_COLOR_INDEX.YELLOW
+    limittablelegend.cell(2,1).paragraphs[0].add_run('Restricted long-term operation')
+
+    limittablelegend.cell(3,0).paragraphs[0].add_run('Z. D').font.highlight_color=WD_COLOR_INDEX.RED
+    limittablelegend.cell(3,1).paragraphs[0].add_run('High propability of damage, action requied')
+
+    limittablelegend.cell(4,0).paragraphs[0].add_run('Z. D').font.bold=True
+    limittablelegend.cell(4,1).paragraphs[0].add_run('Vibrations over the limits but actions are not requied.')
 
     document.add_page_break ()
     l23 = document.add_paragraph ( '2.3.	Measurement equipment' )
