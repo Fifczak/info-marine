@@ -33,7 +33,11 @@ import psycopg2
 
 tk = Tk ()
 document = Document ( 'C:\\overmind\\Data\\base.docx' )
-
+def set_col_widths(table):
+    widths = (Inches(1), Inches(5))
+    for row in table.rows:
+        for idx, width in enumerate(widths):
+            row.cells[idx].width = width
 
 def q_run ( connD ,querry ):
     username = connD [ 0 ]
@@ -665,22 +669,21 @@ def makereport ( username ,password ,host ,rn_ ,id_ ):  # AUTORUN!
 
     table3.cell ( 1 ,0 ).add_paragraph ( 'Value:' ,'texthead' )
     table3.cell ( 1 ,0 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
-
-    table3.cell ( 1 ,1 ).add_paragraph ( 'Velocity' ,'textt1' )
+    table3.cell(2,0).add_paragraph('Range: ','texthead')
+    table3.cell(2,1).add_paragraph('2-1000Hz','textt1')
+    vel=table3.cell ( 1 ,1 ).add_paragraph ( 'Velocity' ,'textt1' )
     table3.cell ( 1 ,1 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
+    vel.add_run().add_break()
+    vel.add_run('Zone A:        0-2,3 mm/s')
+    vel.add_run ().add_break ()
+    vel.add_run('Zone B:        2,3-4,5 mm/s')
+    vel.add_run ().add_break ()
+    vel.add_run('Zone C:        4,5-7,1 mm/s')
+    vel.add_run ().add_break ()
+    vel.add_run('Zone D:        above 7,1 mm/s')
 
-    table3.cell ( 2 ,0 ).add_paragraph ( 'Range:' ,'texthead' )
-    table3.cell ( 2 ,0 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
-
-    table3.cell ( 2 ,1 ).add_paragraph ( '4-200 Hz' ,'textt1' )
-    table3.cell ( 2 ,1 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
-
-    table3.cell ( 3 ,0 ).add_paragraph ( 'Limit:' ,'texthead' )
-    table3.cell ( 3 ,0 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
-
-    table3.cell ( 3 ,1 ).add_paragraph ( '18 mm/s' ,'textt1' )
-    table3.cell ( 3 ,1 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
-
+    table3.cell ( 1 ,1 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
+    set_col_widths ( table3 )
     document.add_paragraph ()
 
     table4 = document.add_table ( rows=4 ,cols=2 )
