@@ -34,7 +34,7 @@ import psycopg2
 tk = Tk ()
 document = Document ( 'C:\\overmind\\Data\\base.docx' )
 def set_col_widths(table):
-    widths = (Inches(1), Inches(5))
+    widths = (Inches(0.6), Inches(5))
     for row in table.rows:
         for idx, width in enumerate(widths):
             row.cells[idx].width = width
@@ -726,10 +726,12 @@ def makereport ( username ,password ,host ,rn_ ,id_ ):  # AUTORUN!
     limittablelegend.cell(2,1).paragraphs[0].add_run('Restricted long-term operation')
 
     limittablelegend.cell(3,0).paragraphs[0].add_run('Z. D').font.highlight_color=WD_COLOR_INDEX.RED
-    limittablelegend.cell(3,1).paragraphs[0].add_run('High propability of damage, action requied')
+    limittablelegend.cell(3,1).paragraphs[0].add_run('High probability of damage, action required')
 
     limittablelegend.cell(4,0).paragraphs[0].add_run('Z. D').font.bold=True
-    limittablelegend.cell(4,1).paragraphs[0].add_run('Vibrations over the limits but actions are not requied.')
+    limittablelegend.cell(4,1).paragraphs[0].add_run('Vibrations over the limits but actions are not required.')
+
+    set_col_widths ( limittablelegend )
 
     document.add_page_break ()
     l23 = document.add_paragraph ( '2.3.	Measurement equipment' )
