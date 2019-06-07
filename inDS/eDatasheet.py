@@ -124,9 +124,9 @@ class Datasheet():
 		rmslist.config(width=7)
 		envlist = tk.Listbox(measframe)
 		envlist.config(width=7)
-		mcremark = tk.Text(measframe, height=10, width=20)
-		remark = tk.Text(measframe, height=10, width=20)
-		feedback = tk.Text(measframe, height=10, width=20)
+		mcremark = tk.Text(measframe, width=20)
+		remark = tk.Text(measframe, width=20)
+		feedback = tk.Text(measframe, width=20)
 
 		for x in self.resultm:
 			if x[1] == reportno:
@@ -192,12 +192,12 @@ class Datasheet():
 					break
 
 		rButton.pack()
-		pointlist.pack(side=LEFT)
-		rmslist.pack(side=LEFT)
-		envlist.pack(side=LEFT)
-		mcremark.pack(side=LEFT)
-		remark.pack(side=LEFT)
-		feedback.pack(side=LEFT)
+		pointlist.pack(side=LEFT, fill=Y)
+		rmslist.pack(side=LEFT, fill=Y)
+		envlist.pack(side=LEFT, fill=Y)
+		mcremark.pack(side=LEFT, fill=Y)
+		remark.pack(side=LEFT, fill=Y)
+		feedback.pack(side=LEFT, fill=Y)
 
 		measframe.pack(side=LEFT, fill=tk.BOTH, expand=True)
 	def countLimit(self,standard, value):
@@ -592,14 +592,14 @@ class Datasheet():
 		self.devicetype.pack(side=TOP)
 		self.devicemodel.pack(side=TOP)
 		self.raportlist.pack(side=TOP)
-		self.MASTERmeasframe = Canvas(self.Fwindow,width=300,height=300, xscrollcommand=devicesscrollbarX.set)
+		self.MASTERmeasframe = Canvas(self.Fwindow,width=300, xscrollcommand=devicesscrollbarX.set)
 		devicesscrollbarX.config(command=self.MASTERmeasframe.xview)
-		self.MASTERmeasframe.pack(side=LEFT)
+		self.MASTERmeasframe.pack(side=LEFT, fill=Y)
 		self.Fwindow.mainloop()
 
 
 # Keeps the window open/running
 
 
-LogApplication()
-#Datasheet(['testuser','info','localhost'],79)
+#LogApplication()
+Datasheet(['testuser','info','localhost'],79)

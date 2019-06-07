@@ -9,8 +9,9 @@ from tkinter.filedialog import askopenfilename
 from tkinter import Tk
 from tkinter import filedialog
 import psycopg2
-username = 'gosiam'
-password = 'infog'
+
+username = 'testuser'
+password = 'info'
 host = '192.168.10.243'
 connD = [username,password,host]
 
@@ -36,12 +37,15 @@ def q_run(connD, querry):
 	conn.commit()
 	cur.close()	
 
+measlist = list()
+
 def Harvester():
 	class DataFrame(object):
 		def __init__(self):
 			self.id = ''
 			self.rn = ''
 			self.measdate = ''
+			self.point = ''
 			self.rms = ''
 			self.env = ''
 
@@ -74,14 +78,45 @@ def Harvester():
 			progress_bar.update()
 			if (worksheet.cell(x, 0).value).isnumeric() == True:
 				for radj in range(1,checkpointsno(x)):
-					print (worksheet.cell(x, 1).value)
-					print (worksheet.cell(x +radj, 7).value)
-					print('RMS')
+					if (worksheet.cell(x + radj, 8).value) != '':
+						rms = DataFrame()
+						rms.id = (worksheet.cell(x, 0).value)
+						rms.rn = (worksheet.cell(0, 8).value)
+						rms.measdate = ((str(datetime.datetime(*xlrd.xldate_as_tuple(worksheet.cell(x , 8).value, workbook.datemode))))[:10])
+						rms.point = (worksheet.cell(x +radj, 7).value)
+						rms.rms = (worksheet.cell(x + radj, 8).value)
+						measlist.append(rms)
+					if (worksheet.cell(x + radj, 9).value) != '':
+						env = DataFrame()
+						env.id = (worksheet.cell(x, 0).value)
+						env.rn = (worksheet.cell(0, 8).value)
+						env.measdate = (
+						(str(datetime.datetime(*xlrd.xldate_as_tuple(worksheet.cell(x, 8).value, workbook.datemode))))[
+						:10])
+						env.point = (worksheet.cell(x + radj, 7).value)
+						env.env = (worksheet.cell(x + radj, 9).value)
+						measlist.append(env)
 
-			#dFrame.rn = str((worksheet.cell(0, ((x * 5) + 8))).value)
+		progress_bar['maximum'] = len(measlist)
+		x=0
+		for item in measlist:
+			x+=1
+			progress_bar['value'] = x
+			progress_bar.update()
+			if item.rms != '':
 
+				querry = "INSERT INTO MEASUREMENTS_LOW (id, raport_number,point,type,unit,date,value)" \
+						 " VALUES(" + str(item.id) + ",'" + str(item.rn) + "','" + str(item.point) +"','"\
+						 "RMS','[mm/s]','" + str(item.measdate) + "'," + str(item.rms) +")"
+				q_run(connD,querry)
+				
 
-
+			if item.env !='':
+				querry = "INSERT INTO MEASUREMENTS_LOW (id, raport_number,point,type,unit,date,value)" \
+						 " VALUES(" + str(item.id) + ",'" + str(item.rn) + "','" + str(item.point) + "','" \
+																									 "envelope P-K','[m/s2]','" + str(
+					item.measdate) + "'," + str(item.env) + ")"
+				q_run(connD, querry)
 
 	Harvest()
 Harvester()

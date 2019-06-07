@@ -1,4 +1,5 @@
 import os
+
 import time
 
 from docx import Document
@@ -6,7 +7,9 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from report_devicetable import devicetable
 from report_frontpages import *
 from report_headtables import *
+
 from report_resulttables import prepare_IM ,drawtable_IM ,trendresults
+
 from report_shipdata import getshipsdata ,shipdata
 from report_standards import legend_IM ,standards
 from report_styles import loadstyles
