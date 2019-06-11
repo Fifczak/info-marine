@@ -891,17 +891,15 @@ def makereport ( username ,password ,host ,rn_ ,id_ ):  # AUTORUN!
     t16.style = document.styles [ 'textt1' ]
     t16.alignment = WD_ALIGN_PARAGRAPH.LEFT
 
-    #section = document.sections [ 0 ]
-    # footer_='dianosticrepo'
-    #footer = section.footer
-    #stop = footer.add_paragraph ( str ( platname ) + ' ' + rn_ )
-    #stop.space_before = Pt ( 0 )
-    #stop.runs [ 0 ].font.name = 'Times New Roman'
-    #stop.runs [ 0 ].font.size = Pt ( 12 )
-    #footer.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    #footer.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-    # footer_=section.footer
-    # footer_.text='diagnostrep'
+    section = document.sections [ 0 ]
+    footer = section.footer.paragraphs [ 0 ]
+    footer.add_run ( 'Diagnostic report ' + str ( platname ) + ' Platform ' + str ( rn_ ) )
+    footer.runs [ 0 ].font.name = 'Times New Roman'
+    footer.runs [ 0 ].font.size = Pt ( 12 )
+    footer.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    footer.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+    footer_ = section.footer
+    footer_.text = 'diagnostrep'
     mydate = datetime.datetime.now ()
     repdate = str ( mydate.year ) + '_' + str ( mydate.month ) + '_' + str ( mydate.day )
     ini = getini ( host ,username ,password )
@@ -916,6 +914,4 @@ def makereport ( username ,password ,host ,rn_ ,id_ ):  # AUTORUN!
         document.save ( 'C:\overmind\Reports\Diagnostic report Neptuno Platform ' + str ( rn_ ) + '_' + str (
             ini [ 0 ] [ 0 ] ) + '_' + str ( repdate ) + '.docx' )
 
-
-
-makereport ( 'testuser' ,'info' ,'192.168.10.243' ,'2065-2019' ,'55' )
+# makereport ( 'testuser' ,'info' ,'192.168.10.243' ,'2065-2019' ,'55' )
