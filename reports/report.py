@@ -1,22 +1,30 @@
 import os
-
 import time
-
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from report_devicetable import devicetable
-from report_frontpages import *
-from report_headtables import *
-
+import psycopg2
+from report_styles import loadstyles
+from report_headtables import standard_info_table
+from report_frontpages import standard_with_pms
 from report_resulttables import prepare_IM ,drawtable_IM ,trendresults
 
-from report_shipdata import getshipsdata ,shipdata
-from report_standards import legend_IM ,standards
-from report_styles import loadstyles
 
-username = 'krystiank'
-password = 'pjbfov'
-host = 'localhost'
+
+# from report_devicetable import devicetable
+
+
+#
+#
+#
+# from report_shipdata import getshipsdata ,shipdata
+# from report_standards import legend_IM ,standards
+
+
+username = 'testuser'
+password = 'info'
+host = '192.168.10.243'
+rn_ = '2043U3-2019'
+
 connD = [ username ,password ,host ]
 
 
@@ -34,40 +42,46 @@ def getname ( host ,username ,password ) :
     conn.commit ()
     cur.close ()
     return result[ 0 ][ 0 ]
-def q_run ( connD ,querry ):
-    username = connD[ 0 ]
-    password = connD[ 1 ]
-    # cs = (host="localhost"  , dbname="postgres" , user= "postgres" , password="info")
-    # cs = "dbname=%s user=%s password=%s host=%s port=%s"%(kdb,username,password,host,kport)
-    conn = psycopg2.connect ( host="localhost" ,dbname="postgres" ,user="postgres" ,password="info" )
-    cur = conn.cursor ()
-    cur.execute ( querry )
-    try:
-        result = cur.fetchall ()
-        return result
-    except:
-        pass
-    conn.commit ()
-    cur.close ()
+
+def q_run(connD, querry):
+	username = connD[0]
+	password = connD[1]
+	host = connD[2]
+	kport = "5432"
+	kdb = "postgres"
+	# cs = ' host="localhost",database="postgres", user= "postgres" , password="info" '
+	cs = "dbname=%s user=%s password=%s host=%s port=%s" % (kdb, username, password, host, kport)
+	conn = None
+	conn = psycopg2.connect(str(cs))
+	cur = conn.cursor()
+	cur.execute(querry)
+	try:
+		result = cur.fetchall()
+		return result
+	except:
+		pass
+	conn.commit()
+	cur.close()
 
 
-rn_ = '1987-2019'
 querry = "Select parent from measurements_low where raport_number = '" + rn_ + "' limit 1"
-parent = q_run ( connD ,querry )
+print(querry)
+parent = (q_run ( connD ,querry ))[0][0]
+print(connD)
+print(parent)
 querry = """select 
 					 ml.id, ml.raport_number, dev.name,  max(ml.value) as RMS, ml2.max as Envelope, dev.norm ,ml.date, dev.drivenby,dss.sort
 					from measurements_low as ml
 					left join (select 
 								 ml.id, ml.raport_number,  max(ml.value)
 								 from measurements_low as ml
-								 where type = 'envelope P-K' and parent = """ + str ( parent[ 0 ][ 0 ] ) + """
+								 where type = 'envelope P-K' and parent = """ + str ( parent ) + """
 								 group by id,raport_number order by raport_number DESC) as ml2 on ml.id = ml2.id and ml.raport_number = ml2.raport_number
 					 left join devices as dev on ml.id = dev.id
 					 left join(select cast (id as integer), sort from ds_structure where id ~E'^\\\d+$' ) as dss on ml.id = dss.id
-					 where ml.type = 'RMS' and ml.parent = """ + str ( parent[ 0 ][ 0 ] ) + """
+					 where ml.type = 'RMS' and ml.parent = """ + str ( parent) + """
 					 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,ml.date,dev.drivenby,dss.sort order by raport_number DESC"""
 reportresults = q_run ( connD ,querry )
-
 
 def getTrend ( self ):
     trendlist = list ()
@@ -79,18 +93,10 @@ def getTrend ( self ):
                 if newdate < mydate:
                     trendlist.append ( str ( line[ 3 ] ) )  # VAL
                     trendlist.append ( str ( line[ 6 ] ) )  # DATE
-
                     change = abs ( (float ( line[ 3 ] ) - float ( self.maxval )) / float ( line[ 3 ] ) )
-
-                    if change <= 0.05:
-                        TREND = 'C'
-
-                    if float ( line[ 3 ] ) < float ( self.maxval ):
-                        TREND = 'U'
-
-                    if float ( line[ 3 ] ) > float ( self.maxval ):
-                        TREND = 'D'
-
+                    if change <= 0.05:TREND = 'C'
+                    if float ( line[ 3 ] ) < float ( self.maxval ):TREND = 'U'
+                    if float ( line[ 3 ] ) > float ( self.maxval ):TREND = 'D'
                     trendlist.append ( TREND )  # TREND=> U-UP, D-DOWN, C-CONST
                     break
     self.trend = trendlist
@@ -108,8 +114,6 @@ def makereport ( connD ,rn_ ):
     username = connD[ 0 ]
     password = connD[ 1 ]
     host = connD[ 2 ]
-    # PRZYGOTOWANIE TEMPLATA DO GENEROWANIA RAPORTU
-    # dodana formatka do remontowej
     if fileformattype == 1:
         filepath = 'C:\\overmind\\Data\\baseIM.docx'
     if fileformattype == 2:
@@ -119,14 +123,15 @@ def makereport ( connD ,rn_ ):
     document = Document ( filepath )
     loadstyles ( document )
     rn_ = str ( rn_ )
-    # wybór headtable IM/Kamtro
     if headtabletype == 1:
         standard_info_table ( connD ,document ,rn_ )
+    if frontpagetype == 1:
         standard_with_pms ( document )
-        standards ( document )
-        legend_IM ( document )
-        prepare_IM ( connD ,report_number )
-        measlist = prepare_IM ( connD ,rn_ )
+        ### HASZUJE DLA SZYBSZEJ PRACY (POTEM TRZEBA TO ROZKMINIC
+        # standards ( document )
+        # legend_IM ( document )
+
+
         respar = document.add_paragraph ( 'Results' )
         respar.runs[ 0 ].bold = True
         respar.runs[ 0 ].font.name = 'Times New Roman'
@@ -135,12 +140,13 @@ def makereport ( connD ,rn_ ):
         resrun = respar.add_run (
             "In table are presented only readings with max. RMS results for each device equipment:" )
         resrun.font.size = Pt ( 11 )
+        measlist = prepare_IM(connD, rn_)
         drawtable_IM ( document ,measlist ,connD ,report_number )
         document.add_paragraph ()
-        trendresults ( document )
-        devicetable ( document )
-        getshipsdata ( parent )
-        shipdata ( document )
+        # trendresults ( document )
+        # devicetable ( document )
+        # getshipsdata ( parent )
+        # shipdata ( document )
 
 
 
@@ -196,5 +202,5 @@ def makereport ( connD ,rn_ ):
     # appr.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     document.save ( 'C:\overmind\Reports\GSR ' + rn_ + '.docx' )
 
-makereport ( connD ,'1987-2019' )
-os.startfile ( 'C:\overmind\Reports\GSR 1987-2019.docx' )
+makereport ( connD ,str( rn_ ) )
+#os.startfile ( 'C:\overmind\Reports\GSR 1987-2019.docx' )

@@ -1,15 +1,14 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import *
+from tkinter import messagebox
 import psycopg2
 import datetime as dt
-
 import numpy as np
 import matplotlib
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-#import matplotlib.backends.tkagg as tkagg
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 matplotlib.use("TkAgg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
@@ -18,8 +17,6 @@ username = 'testuser'
 password = 'info'
 host = 'localhost'
 connD = [username,password,host]
-
-
 def q_run(connD, querry):
     username = connD[0]
     password = connD[1]
@@ -39,93 +36,46 @@ def q_run(connD, querry):
         pass
     conn.commit()
     cur.close()
-
-
 class trendchart:
-    def __init__(self):
-        self.chartwindow = tk.Tk()
-        self.chartwindow.title("Trend Chart")
-        self.chartcanvas = tk.Canvas(self.chartwindow, width=800, height=300)
-        self.controlframe = tk.Frame(self.chartwindow)
-        Vals = self.trendresults()
-        self.drawplot(Vals[0],Vals[1])
-        self.chartwindow.mainloop()
-    def trendresults(self):
-        def gettrendresults():
-            querry = "select raport_number,max(value),max(date) from measurements_low where id = 5008 and type = 'RMS' group by raport_number order by raport_number desc"
-            return q_run(connD, querry)
-        dates = list()
-        vals = list()
-        raps = list()
-        for line in gettrendresults():
-            dates.append(line[2].strftime('%m/%d/%Y'))
-            vals.append(line[1])
-            raps.append(line[0])
-        x = [dt.datetime.strptime(d, '%m/%d/%Y').date() for d in dates]
-        y = vals
-        z = raps
-        ans = [x,y,z]
-        return ans
-    def drawplot(self,x,y):
-        plt.plot(x, y)
-        plt.gcf().autofmt_xdate()
-        plt.savefig('trendchart.png', dpi=60, width=1000)
-        gif1 = PhotoImage(file='trendchart.png')
-
-        self.chartcanvas.create_image(50, 10, image=gif1, anchor=NW)
-
-        self.chartcanvas.pack()
-
-    def trendlabels(self):
-        for item in raports:
-            Dlabel = tk.Label(self.controlframe, text=str(item[2].strftime('%m/%d/%Y'))).pack()
-            Dlabel = tk.Label(self.controlframe, text=str(item[1])).pack()
-        self.controlframe.pack()
-
-        print('xxx')
-
-
-class trendchart2:
-
-
-    def __init__(self,wdw):
-
-        def trendresults():
+    def __init__(self,ids):
+        def trendresults(devid):
             def gettrendresults():
-                querry = "select raport_number,max(value),max(date) from measurements_low where id = 5008 and type = 'RMS' group by raport_number order by raport_number desc"
-                return q_run(connD, querry)
 
+
+                querry ="select ml.raport_number,max(ml.value),max(ml.date),dev.name from measurements_low as ml"\
+                        " left join devices as dev on ml.id = dev.id" \
+                        " where ml.id =" + str(devid) + " and ml.type = 'RMS' group by ml.raport_number,dev.name order by ml.raport_number desc"
+
+                return q_run(connD, querry)
             dates = list()
             vals = list()
             reps = list()
+            names = list()
+            dates.clear()
+            vals.clear()
+            reps.clear()
+            names.clear()
             for line in gettrendresults():
                 dates.append(line[2].strftime('%m/%d/%Y'))
                 vals.append(line[1])
                 reps.append(line[0])
+                names.append(line[3])
             x = [dt.datetime.strptime(d, '%m/%d/%Y').date() for d in dates]
             y = vals
             z = reps
-            ans = [x, y, z]
+            n = names
+            ans = [x, y, z,n]
             return ans
-
-        def draw(x,y):
-            f = Figure(figsize=(10, 5), dpi=100)
-            a = f.add_subplot(111)
-            a.plot(x, y)
+        def draw(x,y,a,name):
+            a.plot(x, y, label=str(name[0]))
+            a.axhline(y=.5, xmin=0.25, xmax=0.75)
+            a.legend(loc='upper center', bbox_to_anchor=(0.5, -0.17), ncol=5,frameon=False)
             f.autofmt_xdate()
-            canvas = FigureCanvasTkAgg(f, wdw)
-
-            canvas.draw()
-            canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
-
-            toolbar = NavigationToolbar2Tk(canvas, wdw)
-            toolbar.update()
-            canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-
-        def details(VALS):
+        def details(VALS,id_,name):
             VALS = list(map(list, zip(*VALS)))
             LL = (len(VALS))
-            detailFrame = tk.Frame(wdw)
+            detailFrame = tk.Frame(self.wdw, bd=1, relief=SUNKEN)
+            nameLabel = tk.Label(detailFrame, text=str(name)).grid(column = 0, row = 0)
             detailFrame.pack()
             coll = -1
             for line in VALS:
@@ -133,53 +83,114 @@ class trendchart2:
                 datelabel = tk.Label(detailFrame, text=str(line[0]))
                 replabel = tk.Label(detailFrame, text=str(line[2]))
                 vallabel = tk.Label(detailFrame, text=str(line[1]))
-
-
                 datelabel.grid(column = LL - coll, row = 0,pady=5, padx=5)
                 replabel.grid(column = LL - coll, row = 1,pady=5, padx=5)
                 vallabel.grid(column = LL - coll, row = 2,pady=5, padx=5)
-            button1 = ttk.Button(wdw, text="Back to Home",
-                                 command=lambda: controller.show_frame(StartPage))
-            button1.pack()
+            button1 = tk.Button(detailFrame, text='Details', command=lambda: calldatasheet(self,id_,name))
+            button1.grid(column = LL+1,row=0,rowspan = 3)
+        def calldatasheet(parentclass,id_,name):
+            datasheet(ids,parentclass,id_,self,name)
+        def controlbuttons():
+            butlab = tk.Frame(self.wdw)
+            button2 = tk.Button(butlab, text = 'OK')
+            butlab.pack(side = TOP)
+            button2.pack(side= RIGHT)
+        self.wdw  = tk.Tk()
+        self.wdw.title("Trend Chart")
+        f = Figure(figsize=(12, 3.5), dpi=100)
+        a = f.add_subplot(1, 1, 1)
+        canvas = FigureCanvasTkAgg(f, self.wdw)
+        toolbar = NavigationToolbar2Tk(canvas, self.wdw)
+        toolbar.update()
+        canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        VALS =list()
+        for i in ids:
+            VALS = trendresults(i)
+            draw(VALS[0],VALS[1],a,VALS[3])
+            querry = "select name from devices where id = " + str(i)
+            name = list(q_run(connD,querry))[0][0]
+            details(VALS,i,name)
+        controlbuttons()
+        self.wdw.mainloop()
+class ValRMSwindow():
+    def updateRMS(self,_id_,parentclass,grandparentclass,id_,chartframe):
+        querry = "UPDATE measurements_low set value = " + str(self.Val.get("1.0", END)) + " where _id_ = " + str(_id_)
+        q_run(connD, querry)
+        grandparentclass.quit()
+        self.window.destroy()
+        querry = "select name from devices where id = " + str(id_)
+        name = list(q_run(connD, querry))[0][0]
+        datasheet(ids,chartframe,id_,chartframe,name)
+    def __init__(self, connD, parentclass, _id_,grandparentclass,id_,chartframe):
+        self.window = tk.Tk()
+        self.window.title("CHANGE RMS")
+        self.Val = tk.Text(self.window, height=1, width=12)
+        querry = "select value,devices.name, ml.raport_number, ml.point "\
+                "from measurements_low as ml left join devices on ml.id = devices.id   where _id_ = " + str(_id_)
+        ans = list(q_run(connD, querry))
+        value = ans[0][0]
+        self.Name = tk.Label(self.window, text = ans[0][1])
+        self.RN = tk.Label(self.window, text=ans[0][2])
+        self.Point = tk.Label(self.window, text=ans[0][3])
+        self.Val.insert(END, ans[0][0])
+        self.okbut = tk.Button(self.window, text='UPDATE', command=lambda:self.updateRMS(_id_,self,grandparentclass,id_,chartframe), width=12)
+        self.Name.pack(side=TOP)
+        self.RN.pack(side = TOP)
+        self.Point.pack(side=TOP)
+        self.Val.pack(side=TOP)
+        self.okbut.pack(side=TOP)
+        self.window.mainloop()
+class measBut:
+    def changeWindow(self,_id_):
+        print(_id_)
+    def __init__(self,dsFrame,r,c,val,_id_,parentclass,id_,chartframe):
+        self._id = _id_
+        self.lab = tk.Button(dsFrame,text = str(val),command = lambda : ValRMSwindow(connD,self,_id_,parentclass,id_,chartframe), width = 15)
+        #command = lambda ue=self.user_entry, pe=self.pass_entry: self.logging_in(ue, pe))
+        #self.lab.bind("<ButtonRelease-1>",changeWindow(self._id))
+        self.lab.grid(row=r, column=c)
+class datasheet:
+    def quit(self):
+        self.DSW.destroy()
+    def refresh (self,ids,parentclass):
+        parentclass.wdw.destroy()
+        self.quit()
+        trendchart(ids)
+        chartwindow.mainloop()
+    def __init__(self,ids,parentclass,id_,chartframe,name):
+        self.DSW = tk.Tk()
+        self.DSW.title("Datasheet")
+        querry = """select ml.raport_number,ml.point, ml.value,ml.date,dev.name, ml._id_ from measurements_low as ml
+                    left join devices as dev on ml.id = dev.id
+                    left join points as pt on ml.id = pt.id and ml.point = pt.point
+                    where ml.id = """ +str(id_) +   """ and ml.type = 'RMS' 
+                    group by ml.raport_number,ml.point, dev.name,ml.value,ml.date ,pt.sort , ml._id_
+                    order by ml.raport_number ,pt.sort  """
+        dsd = q_run(connD,querry)
+        RapList = list()
+        PointList = list()
+        for line in dsd:
+            if line[0] not in RapList:
+                RapList.append(line[0])
+            if line[1] not in PointList:
+                PointList.append(line[1])
+        namelabel = tk.Label(self.DSW, text=str(name)).pack()
+        dsFrame = tk.Frame(self.DSW)
+        c =0
+        for line in RapList:
+            c+=1
+            tk.Label(dsFrame, text = line).grid(row = 0, column = c)
+            r = 0
+            for line2 in PointList:
+                r +=1
+                tk.Label(dsFrame, text=line2).grid(row=r, column=0)
+                for seekVal in dsd:
+                    if str(line) == str(seekVal[0]) and str(line2) == str(seekVal[1]):
+                        x = measBut(dsFrame,r,c,seekVal[2],seekVal[5],self,id_,chartframe)
+        dsFrame.pack()
+        okbutton = tk.Button(self.DSW,text = 'Reload Chart', command = lambda:self.refresh(ids,parentclass)).pack()
+        self.DSW.mainloop()
+# ids = ['5045','5046']
+# trendchart(ids)
 
-
-        VALS = trendresults()
-        draw(VALS[0],VALS[1])
-        details(VALS)
-
-
-
-
-
-
-
-
-chartwindow = tk.Tk()
-chartwindow.title("Trend Chart")
-trendchart2(chartwindow)
-chartwindow.mainloop()
-
-
-# class PageThree(tk.Frame):
-#
-# 	def __init__(self, parent, controller):
-# 		tk.Frame.__init__(self, parent)
-# 		label = tk.Label(self, text="Graph Page!", font=LARGE_FONT)
-# 		label.pack(pady=10, padx=10)
-#
-# 		button1 = ttk.Button(self, text="Back to Home",
-# 							 command=lambda: controller.show_frame(StartPage))
-# 		button1.pack()
-#
-# 		f = Figure(figsize=(5, 5), dpi=100)
-# 		a = f.add_subplot(111)
-# 		a.plot([1, 2, 3, 4, 5, 6, 7, 8], [5, 6, 1, 3, 8, 9, 3, 5])
-#
-# 		canvas = FigureCanvasTkAgg(f, self)
-# 		canvas.draw()
-# 		canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
-#
-# 		toolbar = NavigationToolbar2Tk(canvas, self)
-# 		toolbar.update()
-# 		canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 

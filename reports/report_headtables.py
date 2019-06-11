@@ -85,8 +85,6 @@ def standard_info_table ( connD ,document ,rn_ ):
     # footer.vertical_alignment = WD_ALIGN_VERTICAL.TOP
 
 
-rntxt = '1999-2019'
-
 
 # tabela początkowa kamtro
 def standard_Kamtro_table ( document ):

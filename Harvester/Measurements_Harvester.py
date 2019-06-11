@@ -76,6 +76,7 @@ def Harvester():
 			x+=1
 			progress_bar['value'] = x
 			progress_bar.update()
+
 			if (worksheet.cell(x, 0).value).isnumeric() == True:
 				for radj in range(1,checkpointsno(x)):
 					if (worksheet.cell(x + radj, 8).value) != '':

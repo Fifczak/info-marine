@@ -570,8 +570,10 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                                     x.chart.append(
                                         round(float(worksheet.cell(measstart + chartiter, column + row2).value), 3))
                                     x.end = worksheet.cell(measstart + chartiter, column).value
-                                    chartlist.append(
-                                        round(float(worksheet.cell(measstart + chartiter, column + row2 + 1).value), 3))
+                                    try:
+                                        chartlist.append(
+                                            round(float(worksheet.cell(measstart + chartiter, column + row2 + 1).value), 3))
+                                    except:chartlist.append(0)
                                 x.chart = chartlist
                                 measlist.append(x)
                                 measlist.append(countoverall(x))
@@ -892,4 +894,4 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 # 'Vibscanner'
 # 'Marvib'
 # 'ezThomas'
-read_measurement_file('Marvib','testuser','info','192.168.10.243','2009-2019', '54')
+read_measurement_file('ezThomas','testuser','info','192.168.10.243','2038-2019', '53')

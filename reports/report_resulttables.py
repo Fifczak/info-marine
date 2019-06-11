@@ -152,7 +152,6 @@ def prepare_IM( connD ,report_number ):  # RETURN MEASLIST
     return measlist
     maxval
 
-
 def drawtable_IM( document ,measlist ,connD ,report_number ):  # ):
 
     querry = "Select parent from measurements_low where raport_number = '" + str( report_number ) + "' limit 1"
