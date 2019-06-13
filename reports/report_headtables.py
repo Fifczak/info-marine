@@ -9,12 +9,12 @@ def standard_info_table ( connD ,document ,rn_ ):
     username = connD[ 0 ]
     password = connD[ 1 ]
     host = connD[ 2 ]
-    querry = "select main.name, shd.imo, main2.name from main right join shipsdata as shd on main.id = shd.shipid right join main as main2 on main.parent = main2.id where main.id = (select shipid from reports where raport_number = '1987-2019')"
+    querry = "select main.name, shd.imo, main2.name from main right join shipsdata as shd on main.id = shd.shipid right join main as main2 on main.parent = main2.id where main.id = (select shipid from harmonogram where report_number = '" + str(rn_) + "')"
     result = q_run( connD ,querry )
 
-    print( str( result ) + 'rn: ' + str( rn_ ) )
+
     shipstr = result[ 0 ][ 0 ]
-    print( shipstr )
+
     headtable = document.add_table( rows=2 ,cols=3 )  # trzeba usunąć enter przed
     headtable.style = 'Table Grid'
 

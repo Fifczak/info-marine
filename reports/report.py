@@ -1,31 +1,23 @@
 import os
 import time
 from docx import Document
+from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import psycopg2
 from report_styles import loadstyles
 from report_headtables import standard_info_table
 from report_frontpages import standard_with_pms
-from report_resulttables import prepare_IM ,drawtable_IM ,trendresults
+from report_resulttables import prepare_IM ,drawtable_IM_chart_PMS ,trendresults
 
 
 
 # from report_devicetable import devicetable
-
-
-#
-#
-#
 # from report_shipdata import getshipsdata ,shipdata
 # from report_standards import legend_IM ,standards
 
 
-username = 'testuser'
-password = 'info'
-host = '192.168.10.243'
-rn_ = '2043U3-2019'
 
-connD = [ username ,password ,host ]
+
 
 
 def getname ( host ,username ,password ) :
@@ -42,7 +34,6 @@ def getname ( host ,username ,password ) :
     conn.commit ()
     cur.close ()
     return result[ 0 ][ 0 ]
-
 def q_run(connD, querry):
 	username = connD[0]
 	password = connD[1]
@@ -64,84 +55,99 @@ def q_run(connD, querry):
 	cur.close()
 
 
-querry = "Select parent from measurements_low where raport_number = '" + rn_ + "' limit 1"
-print(querry)
-parent = (q_run ( connD ,querry ))[0][0]
-print(connD)
-print(parent)
-querry = """select 
-					 ml.id, ml.raport_number, dev.name,  max(ml.value) as RMS, ml2.max as Envelope, dev.norm ,ml.date, dev.drivenby,dss.sort
-					from measurements_low as ml
-					left join (select 
-								 ml.id, ml.raport_number,  max(ml.value)
-								 from measurements_low as ml
-								 where type = 'envelope P-K' and parent = """ + str ( parent ) + """
-								 group by id,raport_number order by raport_number DESC) as ml2 on ml.id = ml2.id and ml.raport_number = ml2.raport_number
-					 left join devices as dev on ml.id = dev.id
-					 left join(select cast (id as integer), sort from ds_structure where id ~E'^\\\d+$' ) as dss on ml.id = dss.id
-					 where ml.type = 'RMS' and ml.parent = """ + str ( parent) + """
-					 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,ml.date,dev.drivenby,dss.sort order by raport_number DESC"""
-reportresults = q_run ( connD ,querry )
-
-def getTrend ( self ):
-    trendlist = list ()
-    for line in reportresults:
-        if str ( line[ 0 ] ) == str ( self.id ):
-            if str ( line[ 1 ] ) != str ( report_number ):
-                newdate = time.strptime ( str ( line[ 6 ] ) ,"%Y-%m-%d" )
-                mydate = time.strptime ( str ( self.date ) ,"%Y-%m-%d" )
-                if newdate < mydate:
-                    trendlist.append ( str ( line[ 3 ] ) )  # VAL
-                    trendlist.append ( str ( line[ 6 ] ) )  # DATE
-                    change = abs ( (float ( line[ 3 ] ) - float ( self.maxval )) / float ( line[ 3 ] ) )
-                    if change <= 0.05:TREND = 'C'
-                    if float ( line[ 3 ] ) < float ( self.maxval ):TREND = 'U'
-                    if float ( line[ 3 ] ) > float ( self.maxval ):TREND = 'D'
-                    trendlist.append ( TREND )  # TREND=> U-UP, D-DOWN, C-CONST
-                    break
-    self.trend = trendlist
-    return measlist
-
-
-# TRZEBA PRZEMYSLEC W JAKI SPOSOB BĘDĄ WYBIERANE DANE DO TWORZENIA RAPORTÓW
-fileformattype = 1  # 1 - IM; 2 - KAMTRO ; 3-Stocznia Remontowa
-headtabletype = 1  # 1 - IM; 2 - KAMTRO; 3 - stocznia remontowa
-frontpagetype = 1
-resulttable = 1  # 1 - IM; 2-remontowa
-report_number = '1987-2019'
 
 def makereport ( connD ,rn_ ):
-    username = connD[ 0 ]
-    password = connD[ 1 ]
-    host = connD[ 2 ]
-    if fileformattype == 1:
+    rn_ = str(rn_)
+    #############################################################################################
+    ############################ 0.USTALANIE SKŁADOWYCH DO RAPORTU ##############################
+    #############################################################################################
+
+    querry = "select reporttype from main where id = (select shipid from harmonogram where report_number = '"+str(rn_)+"')"
+    reporttype = list(q_run(connD,querry))[0][0]
+
+    # fileformattype = 1  # 1 - IM; 2 - KAMTRO ; 3-Stocznia Remontowa
+    # headtabletype = 1  # 1 - IM; 2 - KAMTRO; 3 - stocznia remontowa
+    # standards
+    # frontpagetype = 1
+    # resulttable = 1  # 1 - IM; 2-remontowa
+    # measurementequipment
+    # summary
+    # signatures
+
+    reptypedict = {
+        "fileformat": 0,
+        "headtabletype": 0,
+        "frontpagetype": 0,
+        "standards": 0,
+        "resulttable": 0,
+        "measurementequipment": 0,
+        "summary": 0,
+        "signatures": 0,
+    }
+
+    if int(reporttype) == 3:
+        reptypedict.update( {"fileformat": 1})
+        reptypedict.update({"headtabletype": 1})
+        reptypedict.update({"standards": 1})
+        reptypedict.update({"frontpagetype": 1})
+        reptypedict.update({"resulttable": 1})
+        reptypedict.update({"measurementequipment": 1})
+        reptypedict.update({"summary": 1})
+        reptypedict.update({"signatures": 1})
+    print(reptypedict)
+
+    #############################################################################################
+    ############################ I. WYBIERANIE FORMATKI POD RAPORT ##############################
+    #############################################################################################
+
+    if reptypedict["fileformat"] == 1:
         filepath = 'C:\\overmind\\Data\\baseIM.docx'
-    if fileformattype == 2:
+    if reptypedict["fileformat"] == 2:
         filepath = 'C:\\overmind\\Data\\baseKAM.docx'
-    if fileformattype == 3:
+    if reptypedict["fileformat"] == 3:
         filepath = 'C:\\overmind\\Data\\baseGSR.docx'
     document = Document ( filepath )
     loadstyles ( document )
-    rn_ = str ( rn_ )
-    if headtabletype == 1:
+
+
+    #############################################################################################
+    ################################# II. TABELA NAGŁÓWEK #######################################
+    #############################################################################################
+
+
+    if reptypedict["headtabletype"] == 1:
         standard_info_table ( connD ,document ,rn_ )
-    if frontpagetype == 1:
+    elif reptypedict["headtabletype"] == 2:
+        standard_Kamtro_table ( document )
+    elif reptypedict["headtabletype"] == 3:
+        standard_GSR_table ( document )
+
+
+
+
+    #############################################################################################
+    ############################# III. TEKST STRONA TYTUŁOWA ####################################
+    #############################################################################################
+
+
+    if reptypedict["frontpagetype"] == 1:
         standard_with_pms ( document )
+
+
+        # standard_with_pms(document)
+        # standard_GSR(document)
+
+
         ### HASZUJE DLA SZYBSZEJ PRACY (POTEM TRZEBA TO ROZKMINIC
         # standards ( document )
         # legend_IM ( document )
 
 
-        respar = document.add_paragraph ( 'Results' )
-        respar.runs[ 0 ].bold = True
-        respar.runs[ 0 ].font.name = 'Times New Roman'
-        respar.runs[ 0 ].font.size = Pt ( 12 )
-        respar.add_run ().add_break ()
-        resrun = respar.add_run (
-            "In table are presented only readings with max. RMS results for each device equipment:" )
-        resrun.font.size = Pt ( 11 )
+
+
+
         measlist = prepare_IM(connD, rn_)
-        drawtable_IM ( document ,measlist ,connD ,report_number )
+        drawtable_IM_chart_PMS ( document ,measlist ,connD ,rn_ )
         document.add_paragraph ()
         # trendresults ( document )
         # devicetable ( document )
@@ -158,39 +164,33 @@ def makereport ( connD ,rn_ ):
 
 
 
-        # podsumowanie daję tu na sztywno, na dzień dzisiejszy nie wiem czy to jest pobierane z bazy czy uzupełniane ręcznie
-        document.add_page_break ()
-        summary = document.add_paragraph ()
-        summary.add_run ( 'Summary:' ).bold = True
-        summary.runs[ 0 ].add_break ()
-        s1 = summary.add_run (
-            'Next measurements should be done in three month period to obtain trend value for each equipment, in some cases even one month period is preferable.' )
-        s1.add_break ()
-        s1.add_break ()
-        summary.add_run (
-            'This report is prepared in good faith based on measurement diagnostic done on available running rotary machine and documentation submitted.' ).font.size = Pt (
-            11 )
-        document.add_paragraph ()
+    # podsumowanie daję tu na sztywno, na dzień dzisiejszy nie wiem czy to jest pobierane z bazy czy uzupełniane ręcznie
+    document.add_page_break ()
+    summary = document.add_paragraph ()
+    summary.add_run ( 'Summary:' ).bold = True
+    summary.runs[ 0 ].add_break ()
+    s1 = summary.add_run (
+        'Next measurements should be done in three month period to obtain trend value for each equipment, in some cases even one month period is preferable.' )
+    s1.add_break ()
+    s1.add_break ()
+    summary.add_run (
+        'This report is prepared in good faith based on measurement diagnostic done on available running rotary machine and documentation submitted.' ).font.size = Pt (
+        11 )
+    document.add_paragraph ()
 
-        signpar = document.add_paragraph ()
-        seCAP = signpar.add_run (
-            'Service Engineer                                                                                             Approved by' )
-        seCAP.alignment = WD_ALIGN_PARAGRAPH.LEFT
-        name = str ( getname ( host='localhost' ,username='postgres' ,password='info' ) )
-        signpar = document.add_paragraph ( str ( name ))
+    signpar = document.add_paragraph ()
+    seCAP = signpar.add_run (
+        'Service Engineer                                                                                             Approved by' )
+    seCAP.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    name = str ( getname ( host='localhost' ,username='postgres' ,password='info' ) )
+    signpar = document.add_paragraph ( str ( name ))
 
 
 
-    if headtabletype == 2:
-        standard_Kamtro_table ( document )
-        standard_with_pms ( document )
-    if headtabletype == 3:
-        standard_GSR_table ( document )
-        standard_GSR ( document )
 
-        # if frontpagetype == 1:
-        #  standard_PMS_limit(document)
-        document.add_paragraph ()
+    # if frontpagetype == 1:
+    #  standard_PMS_limit(document)
+    document.add_paragraph ()
     # P3 = document.add_paragraph('03. STANDARDS (put informations about standards here)')
     # standards(document)
     measlist = prepare_IM ( connD ,rn_ )
@@ -201,6 +201,16 @@ def makereport ( connD ,rn_ ):
     # appr = document.add_paragraph()
     # appr.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     document.save ( 'C:\overmind\Reports\GSR ' + rn_ + '.docx' )
+
+
+
+
+username = 'testuser'
+password = 'info'
+host = '192.168.10.243'
+rn_ = '2070-2019'
+connD = [ username ,password ,host ]
+
 
 makereport ( connD ,str( rn_ ) )
 #os.startfile ( 'C:\overmind\Reports\GSR 1987-2019.docx' )

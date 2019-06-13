@@ -1,5 +1,7 @@
 import time
 
+import chart_scripts
+
 import psycopg2
 from chart_scripts import *
 from docx.enum.table import WD_ALIGN_VERTICAL
@@ -7,43 +9,42 @@ from docx.shared import Cm
 from docx.shared import RGBColor
 from report_database import *
 from report_headtables import *
+from docx.shared import Inches
 
-rn_ = '1987-2019'
 
 
+
+def q_run(connD, querry):
+	username = connD[0]
+	password = connD[1]
+	host = connD[2]
+	kport = "5432"
+	kdb = "postgres"
+	# cs = ' host="localhost",database="postgres", user= "postgres" , password="info" '
+	cs = "dbname=%s user=%s password=%s host=%s port=%s" % (kdb, username, password, host, kport)
+	conn = None
+	conn = psycopg2.connect(str(cs))
+	cur = conn.cursor()
+	cur.execute(querry)
+	try:
+		result = cur.fetchall()
+		return result
+	except:
+		pass
+	conn.commit()
+	cur.close()
 def set_cols_width_trend ( table ):
     widths = (Cm ( 1.5 ) ,Cm ( 15 ))
     for row in table.rows:
         for idx ,width in enumerate ( widths ):
             row.cells[ idx ].width = width
-# funkcja do stałej szerokości komórek w raportach GSR
-def set_col_width_GSR( table ):
+def set_col_width_GSR( table ):  # funkcja do stałej szerokości komórek w raportach GSR
     widths = (Cm( 7 ) ,Cm( 1.5 ) ,Cm( 1.5 ) ,Cm( 1.5 ) ,Cm( 1.5 ) ,Cm( 1.5 ) ,Cm( 5 ))
     for row in table.rows:
         for idx ,width in enumerate( widths ):
             row.cells[ idx ].width = width
-
-
-def q_run( connD ,querry ):
-    username = connD[ 0 ]
-    password = connD[ 1 ]
-    # cs = (host="localhost"  , dbname="postgres" , user= "postgres" , password="info")
-    # cs = "dbname=%s user=%s password=%s host=%s port=%s"%(kdb,username,password,host,kport)
-    conn = psycopg2.connect( host="localhost" ,dbname="postgres" ,user="postgres" ,password="info" )
-    cur = conn.cursor()
-    cur.execute( querry )
-    try:
-        result = cur.fetchall()
-        return result
-    except:
-        pass
-    conn.commit()
-    cur.close()
-
-
-def prepare_IM( connD ,report_number ):  # RETURN MEASLIST
+def prepare_IM( connD ,report_number):  # RETURN MEASLIST
     measlist = list()
-
     class meas( object ):
         def __init__( self ):
             self.id = ''
@@ -58,7 +59,7 @@ def prepare_IM( connD ,report_number ):  # RETURN MEASLIST
             self.drivenby = ''
             self.sort = ''
             self.sort2 = ''
-
+            self.pms = ''
     def loadData( connD ):
         def countLimit( standard ,value ):
             for limNo in limits:
@@ -77,9 +78,8 @@ def prepare_IM( connD ,report_number ):  # RETURN MEASLIST
                             else:
                                 limSrt = str( limNo[ 8 ] )
                                 break
-
-            return limSrt
-
+            try:return limSrt
+            except:return ('Limit count error')
         def getTrend( self ):
             trendlist = list()
             for line in reportresults:
@@ -90,26 +90,19 @@ def prepare_IM( connD ,report_number ):  # RETURN MEASLIST
                         if newdate < mydate:
                             trendlist.append( str( line[ 3 ] ) )  # VAL
                             trendlist.append( str( line[ 6 ] ) )  # DATE
-
                             change = abs( (float( line[ 3 ] ) - float( self.maxval )) / float( line[ 3 ] ) )
-
                             if change <= 0.05:
                                 TREND = 'C'
-
                             if float( line[ 3 ] ) < float( self.maxval ):
                                 TREND = 'U'
-
                             if float( line[ 3 ] ) > float( self.maxval ):
                                 TREND = 'D'
-
                             trendlist.append( TREND )  # TREND=> U-UP, D-DOWN, C-CONST
                             break
             self.trend = trendlist
             return measlist
-
-        querry = "Select parent from measurements_low where raport_number = '" + rn_ + "' limit 1"
-        parent = q_run( connD ,querry )
-
+        querry = "Select parent from measurements_low where raport_number = '" + str(report_number) + "' limit 1"
+        parent = list(q_run( connD ,querry ))[0][0]
         querry = """select standard,
 							limit_1_value,limit_1_name,
 							limit_2_value,limit_2_name, 
@@ -119,19 +112,18 @@ def prepare_IM( connD ,report_number ):  # RETURN MEASLIST
 					from standards"""
         limits = q_run( connD ,querry )
         querry = """select 
-					 ml.id, ml.raport_number, dev.name,  max(ml.value) as RMS, ml2.max as Envelope, dev.norm ,ml.date, dev.drivenby,dss.sort
+					 ml.id, ml.raport_number, dev.name,  max(ml.value) as RMS, ml2.max as Envelope, dev.norm ,ml.date, dev.drivenby,dss.sort,dev.pms
 					from measurements_low as ml
 					left join (select 
 								 ml.id, ml.raport_number,  max(ml.value)
 								 from measurements_low as ml
-								 where type = 'envelope P-K' and parent = """ + str( parent[ 0 ][ 0 ] ) + """
+								 where type = 'envelope P-K' and parent = """ + str( parent ) + """
 								 group by id,raport_number order by raport_number DESC) as ml2 on ml.id = ml2.id and ml.raport_number = ml2.raport_number
 					 left join devices as dev on ml.id = dev.id
 					 left join(select cast (id as integer), sort from ds_structure where id ~E'^\\\d+$' ) as dss on ml.id = dss.id
-					 where ml.type = 'RMS' and ml.parent = """ + str( parent[ 0 ][ 0 ] ) + """
-					 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,ml.date,dev.drivenby,dss.sort order by raport_number DESC"""
+					 where ml.type = 'RMS' and ml.parent = """ + str( parent ) + """
+					 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,ml.date,dev.drivenby,dss.sort,dev.pms order by raport_number DESC"""
         reportresults = q_run( connD ,querry )
-
         for line in reportresults:
             x = meas()
             if str( line[ 1 ] ) == str( report_number ):
@@ -146,19 +138,29 @@ def prepare_IM( connD ,report_number ):  # RETURN MEASLIST
                 x.drivenby = line[ 7 ]
                 x.sort = line[ 8 ][ :4 ]
                 x.sort2 = line[ 8 ][ :1 ]
+                x.pms = line [9]
                 measlist.append( x )
-
     loadData( connD )
     return measlist
-    maxval
-
-def drawtable_IM( document ,measlist ,connD ,report_number ):  # ):
-
+def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
+    respar = document.add_paragraph('Results')
+    respar.runs[0].bold = True
+    respar.runs[0].font.name = 'Times New Roman'
+    respar.runs[0].font.size = Pt(12)
+    respar.add_run().add_break()
+    resrun = respar.add_run(
+        "In table are presented only readings with max. RMS results for each device equipment:")
+    resrun.font.size = Pt(11)
+    root = tk.Tk()
+    root.withdraw()
+    MsgBox = messagebox.askquestion('Chart controll', 'Do you want to check te charts data?',)
+    if MsgBox == 'yes':
+        GUI = True
+    elif MsgBox == 'no':
+        GUI = False
     querry = "Select parent from measurements_low where raport_number = '" + str( report_number ) + "' limit 1"
-    parent = q_run( connD ,querry )
-    print ( parent[ 0 ][ 0 ] )
-
-    querry = "Select sort, id from ds_structure where parent = '" + str ( parent[ 0 ][ 0 ] ) + "' order by sort"
+    parent = list(q_run( connD ,querry ))[0][0]
+    querry = "Select sort, id from ds_structure where parent = '" + str ( parent) + "' order by sort"
     sortlistQ = q_run( connD ,querry )
     trueMeasList = list()
     activeIdList = list()
@@ -166,8 +168,20 @@ def drawtable_IM( document ,measlist ,connD ,report_number ):  # ):
     activeSortPList = list()
     idlist = list()
     drivenByList = list()
+
+    if GUI == False:
+        pbars = tk.Tk()
+        pbars.title("Generating chart")
+        progress_bar = ttk.Progressbar(pbars, orient='horizontal', lengt=286, mode='determinate')
+        progress_bar['maximum'] = len(sortlistQ)
+        progress_bar.pack(side=TOP)
+        pp = 0
+
+
+
     for sort in sortlistQ:
         for meas in measlist:
+
             if (sort[ 1 ]).isdigit == False:
                 trueMeasList.append( 'header' )
                 drivenByList.append( 997 )
@@ -179,14 +193,13 @@ def drawtable_IM( document ,measlist ,connD ,report_number ):  # ):
                 activeSortPList.append( str( meas.sort2 ) )
                 drivenByList.append( meas.drivenby )
                 idlist.append( meas.id )
-
     counter = 0
     counterCharts = 0
-
     xcord = 0
     i = -1
     for measStrip in sortlistQ:
         i += 1
+
         if (measStrip[ 1 ]).isdigit() == False:  ######## NAGŁÓWKI
             try:
                 if measStrip[ 0 ][ -5: ] == '00.00' and sortlistQ[ i + 1 ][ 0 ][ -5: ] != '00.00' and \
@@ -213,40 +226,51 @@ def drawtable_IM( document ,measlist ,connD ,report_number ):  # ):
                         break
                     except:
                         xcord += 2
-
     rowscount = xcord
     resulttable = document.add_table( rows=rowscount + 1 ,cols=7 )
     resulttable.style = 'Table Grid'
 
-    col_name = 0
+    col_PMS = 0
+    ht = resulttable.cell( 0 ,col_PMS ).paragraphs[ 0 ]
+    r0 = ht.add_run( 'PMS' )
+
+    col_name = 1
     ht = resulttable.cell( 0 ,col_name ).paragraphs[ 0 ]
     r0 = ht.add_run( 'Machine name' )
 
-    col_val = 1
+    col_val = 2
     ht = resulttable.cell( 0 ,col_val ).paragraphs[ 0 ]
     r0 = ht.add_run( 'Velocity RMS (mm/s) Max' )
 
-    col_class = 2
+    col_class = 3
     ht = resulttable.cell( 0 ,col_class ).paragraphs[ 0 ]
     r0 = ht.add_run( 'ISO standard' )
 
-    col_env = 3
+    col_env = 4
     ht = resulttable.cell( 0 ,col_env ).paragraphs[ 0 ]
     r0 = ht.add_run( 'Bearing Envelope 0-Peak (m/s2) Max' )
 
-    col_trend = 4
+    col_trend = 5
     ht = resulttable.cell( 0 ,col_trend ).paragraphs[ 0 ]
     r0 = ht.add_run( 'Trend Velocity RMS (mm/s) Max' )
 
-    col_remark = 5
+    col_remark = 6
     ht = resulttable.cell( 0 ,col_remark ).paragraphs[ 0 ]
     r0 = ht.add_run( 'Remarks and suggestions' )
 
     xcord = 0
     i = -1
-    for measStrip in sortlistQ:
-        i += 1
+    ids = list()
 
+
+    for measStrip in sortlistQ:
+
+        if GUI == False:
+            pp += 1
+            progress_bar['value'] = pp
+            progress_bar.update()
+
+        i += 1
         if (measStrip[ 1 ]).isdigit() == False:  ######## NAGŁÓWKI
             try:
                 ht = resulttable.cell( xcord + 1 ,0 ).paragraphs[ 0 ]
@@ -272,7 +296,8 @@ def drawtable_IM( document ,measlist ,connD ,report_number ):  # ):
             for xx in trueMeasList:
                 p += 1
                 if str( measStrip[ 1 ] ) == str( xx.id ):
-
+                    ht = resulttable.cell( xcord + 1 ,col_PMS).paragraphs[ 0 ]
+                    r0 = ht.add_run(str(xx.pms) )
                     ht = resulttable.cell( xcord + 1 ,col_name ).paragraphs[ 0 ]
                     r0 = ht.add_run( xx.name )
                     ht = resulttable.cell( xcord + 1 ,col_val ).paragraphs[ 0 ]
@@ -284,13 +309,12 @@ def drawtable_IM( document ,measlist ,connD ,report_number ):  # ):
                     ht = resulttable.cell( xcord + 1 ,col_env ).paragraphs[ 0 ]
                     r0 = ht.add_run ( str ( xx.maxenv ).replace ( "." ,"," ) )
                     ht = resulttable.cell( xcord + 1 ,col_trend ).paragraphs[ 0 ]
+                    ids.append(xx.id)
                     if str( xx.limit ) == 'Cl. D':  # TEGO DLA CZYTELNOSCI LEPIEJ ZROBIC FUNKCJE
                         try:
-
                             trendtemp1 = xx.trend[ 0 ]
                             trendtemp2 = xx.trend[ 1 ]
                             trendtemp3 = xx.trend[ 2 ]
-
                             if str( trendtemp3 ) == 'U':
                                 r0 = ht.add_run()
                                 r0.add_picture( 'Iup.gif' )
@@ -307,146 +331,30 @@ def drawtable_IM( document ,measlist ,connD ,report_number ):  # ):
                             pass
 
                     try:
+
                         if str( drivenByList[ p + 1 ] ) == str( xx.id ):
                             xcord += 1
                         else:
                             xcord += 1
                             resulttable.cell( xcord + 1 ,0 ).merge( resulttable.cell( xcord + 1 ,col_remark ))
                             ht = resulttable.cell( xcord + 1 ,0 ).paragraphs[ 0 ]
-                            p0 = ht.add_run( 'TUBEDZIEWYKRES' )
+
+                            image = (trendchart(ids, connD,GUI).giveimage())
+                            p0 = ht.add_run(  )
+                            p0.add_picture(image, width=Inches(7.0))
+
+                            ids.clear()
                             xcord += 1
                         break
                     except:  # OSTATNIA LINIA TABELI
                         xcord += 1
                         resulttable.cell( xcord + 1 ,0 ).merge( resulttable.cell( xcord + 1 ,col_remark ) )
                         ht = resulttable.cell( xcord + 1 ,0 ).paragraphs[ 0 ]
-                        p0 = ht.add_run( 'TUBEDZIEWYKRES' )
+                        image = (trendchart(ids, connD,GUI).giveimage())
+                        p0 = ht.add_run()
+                        p0.add_picture(image, width=Inches(7.0))
 
-
-# def	drawtable_STOCZNIA_REMONTOWA(document,measlist,connD,report_number):#):trzeba troche ukrocic
-# 	querry = "Select parent from measurements_low where raport_number = '" + str(report_number) + "' limit 1"
-# 	parent = q_run(connD,querry)[0][0]
-# 	querry = "Select sort, id from ds_structure where parent = '" + str(parent) + "' order by sort"
-# 	sortlistQ = q_run(connD,querry)
-# 	trueMeasList = list()
-# 	activeIdList = list()
-# 	for sort in sortlistQ:
-# 		for meas in measlist:
-# 			if (sort[1]).isdigit == False:
-# 				trueMeasList.append('header')
-# 			if str(sort[1])==str(meas.id):
-# 				trueMeasList.append(meas)
-# 				activeIdList.append(str(meas.id))
-# 	counter = 0
-# 	counterCharts = 0
-# 	i=-1
-# 	for measStrip in sortlistQ:  #ILOSC WIERSZY
-# 		i += 1
-# 		if (measStrip[1]).isdigit() == False:
-# 			if measStrip[0][-5:] == '00.00' and sortlistQ[i+1][0][-5:] != '00.00' and sortlistQ[i+1][0][-3:] == '.00':
-# 				counter +=1
-# 				continue
-# 			if measStrip[0][-5:] != '00.00' and measStrip[0][-3:] == '.00' :
-# 				if str(sortlistQ[i+1][1]) in activeIdList:
-# 					counter +=1
-# 					continue
-# 		else:
-# 			for xx in trueMeasList:
-# 				if str(measStrip[1]) == str(xx.id):
-# 					counter +=1
-# 					if str(xx.drivenby) in activeIdList:
-# 						counterCharts +=1
-# 						break
-# 					else:
-# 						break
-#
-# 	rowscount = (counter*2) - counterCharts
-# 	resulttable = document.add_table(rows=rowscount+1, cols=7)
-# 	resulttable.style = 'Table Grid'
-#
-# 	ht= resulttable.cell(0,0).paragraphs[0]
-# 	r0 = ht.add_run('Nazwa urządzenia')
-#
-# 	ht= resulttable.cell(0,1).paragraphs[0]
-# 	r0 = ht.add_run('Prędkość RMS (mm/s) Freq A Max')
-#
-# 	ht= resulttable.cell(0,2).paragraphs[0]
-# 	r0 = ht.add_run('Prędkość RMS (mm/s) Freq B Max')
-#
-# 	ht= resulttable.cell(0,3).paragraphs[0]
-# 	r0 = ht.add_run('ISO/VDI standard')
-#
-# 	ht= resulttable.cell(0,4).paragraphs[0]
-# 	r0 = ht.add_run('Obwiednia łożysk 0-Peak (gE) Max')
-#
-# 	ht= resulttable.cell(0,5).paragraphs[0]
-# 	r0 = ht.add_run('Prędkość RMS Max (mm/s) Trend')
-#
-# 	ht= resulttable.cell(0,6).paragraphs[0]
-# 	r0 = ht.add_run('Uwagi i sugestie')
-#
-# 	xcord = 0
-# 	i=-1
-# 	for measStrip in sortlistQ:
-# 		i += 1
-# 		if (measStrip[1]).isdigit() == False:######## NAGŁÓWKI
-# 			try:
-# 				ht= resulttable.cell(xcord+1,0).paragraphs[0]
-# 				if measStrip[0][-5:] == '00.00' and sortlistQ[i+1][0][-5:] != '00.00' and sortlistQ[i+1][0][-3:] == '.00':
-# 					r0 = ht.add_run(measStrip[1])
-# 					resulttable.cell(xcord+1,0).merge(resulttable.cell(xcord+1,6))
-# 					xcord += 1
-# 					continue
-# 				if measStrip[0][-5:] != '00.00' and measStrip[0][-3:] == '.00' :
-# 					if str(sortlistQ[i+1][1]) in activeIdList:
-# 						r0 = ht.add_run(measStrip[1])
-# 						resulttable.cell(xcord+1,0).merge(resulttable.cell(xcord+1,6))
-# 						xcord += 1
-# 						continue
-# 			except:
-# 				pass
-# 		else:	######## POMIARY
-# 			for xx in trueMeasList:
-#
-#
-#
-# 				if str(measStrip[1]) == str(xx.id):
-# 					if str(xx.drivenby) == '0':# tu nie dosc ze robi przed to nie rozwiazuje jak nie ma urzadzenia wskazanego przez driven by
-# 						xcord += 1
-# 					ht = resulttable. cell(xcord+1,0).paragraphs[0]
-# 					r0 = ht.add_run(xx.name)
-# 					ht = resulttable. cell(xcord+1,1).paragraphs[0]
-# 					r0 = ht.add_run(str(xx.maxval))
-# 					ht = resulttable. cell(xcord+1,2).paragraphs[0]
-# 					r0 = ht.add_run(str(xx.maxval2))
-# 					ht = resulttable. cell(xcord+1,3).paragraphs[0]
-# 					r0 = ht.add_run(str(xx.limit))
-# 					ht = resulttable. cell(xcord+1,4).paragraphs[0]
-# 					r0 = ht.add_run(str(xx.maxenv))
-# 					ht = resulttable. cell(xcord+1,5).paragraphs[0]
-# 					if  str(xx.limit) == 'Cl. D':   #TEGO DLA CZYTELNOSCI LEPIEJ ZROBIC FUNKCJE
-# 						try:
-# 							trendtemp1 = xx.trend[0]
-# 							trendtemp2 = xx.trend[1]
-# 							trendtemp3 = xx.trend[2]
-#
-# 							if str(trendtemp3) == 'U':
-# 								r0 = ht.add_run()
-# 								r0.add_picture('up.gif')
-# 							elif str(trendtemp3) == 'D':
-# 								r0 = ht.add_run()
-# 								r0.add_picture('down.gif')
-# 							elif str(trendtemp3) == 'C':
-# 								r0 = ht.add_run()
-# 								r0.add_picture('none.gif')
-# 							p0 = ht.add_run('\nOstatnia Wartość:')
-# 							p0 = ht.add_run('\n' + str(trendtemp2))
-# 							p0 = ht.add_run('\n' + str(trendtemp1))
-# 						except:
-# 							pass
-# 					xcord += 1
-# 					break
-
+                        ids.clear()
 def drawtable_GSR( document ,measlist ,connD ,rn_ ):
     print( 'Wyniki: ' )
     H = document.add_paragraph( 'Wyniki' )
@@ -866,8 +774,6 @@ def drawtable_GSR( document ,measlist ,connD ,rn_ ):
         restable_gsr2.cell( 30 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
         restable_gsr2.cell( 30 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
         restable_gsr2.style='Table Grid'
-
-
 def trendresults ( document ) :
     trendpar = document.add_paragraph ( 'Trend results:' )
     trendpar.runs[ 0 ].bold = True

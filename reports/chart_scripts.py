@@ -13,10 +13,12 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 matplotlib.use("TkAgg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
-username = 'testuser'
-password = 'info'
-host = 'localhost'
-connD = [username,password,host]
+import io
+
+# username = 'testuser'
+# password = 'info'
+# host = 'localhost'
+# connD = [username,password,host]
 def q_run(connD, querry):
     username = connD[0]
     password = connD[1]
@@ -37,15 +39,12 @@ def q_run(connD, querry):
     conn.commit()
     cur.close()
 class trendchart:
-    def __init__(self,ids):
+    def __init__(self,ids,connD,GUI):
         def trendresults(devid):
             def gettrendresults():
-
-
                 querry ="select ml.raport_number,max(ml.value),max(ml.date),dev.name from measurements_low as ml"\
                         " left join devices as dev on ml.id = dev.id" \
                         " where ml.id =" + str(devid) + " and ml.type = 'RMS' group by ml.raport_number,dev.name order by ml.raport_number desc"
-
                 return q_run(connD, querry)
             dates = list()
             vals = list()
@@ -68,9 +67,11 @@ class trendchart:
             return ans
         def draw(x,y,a,name):
             a.plot(x, y, label=str(name[0]))
-            a.axhline(y=.5, xmin=0.25, xmax=0.75)
+            a.yaxis.grid( linewidth='0.5')
             a.legend(loc='upper center', bbox_to_anchor=(0.5, -0.17), ncol=5,frameon=False)
             f.autofmt_xdate()
+            return f
+
         def details(VALS,id_,name):
             VALS = list(map(list, zip(*VALS)))
             LL = (len(VALS))
@@ -89,12 +90,9 @@ class trendchart:
             button1 = tk.Button(detailFrame, text='Details', command=lambda: calldatasheet(self,id_,name))
             button1.grid(column = LL+1,row=0,rowspan = 3)
         def calldatasheet(parentclass,id_,name):
-            datasheet(ids,parentclass,id_,self,name)
-        def controlbuttons():
-            butlab = tk.Frame(self.wdw)
-            button2 = tk.Button(butlab, text = 'OK')
-            butlab.pack(side = TOP)
-            button2.pack(side= RIGHT)
+            datasheet(ids,parentclass,id_,self,name,connD)
+
+        self.imgdata = io.BytesIO()
         self.wdw  = tk.Tk()
         self.wdw.title("Trend Chart")
         f = Figure(figsize=(12, 3.5), dpi=100)
@@ -104,24 +102,33 @@ class trendchart:
         toolbar.update()
         canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         VALS =list()
+
         for i in ids:
             VALS = trendresults(i)
-            draw(VALS[0],VALS[1],a,VALS[3])
+            self.f = draw(VALS[0],VALS[1],a,VALS[3])
             querry = "select name from devices where id = " + str(i)
             name = list(q_run(connD,querry))[0][0]
             details(VALS,i,name)
-        controlbuttons()
-        self.wdw.mainloop()
+
+        self.f.savefig(self.imgdata, format='png')
+        if GUI == True:
+            self.wdw.mainloop()
+        if GUI == False:
+            self.wdw.withdraw()
+    def giveimage(self):
+        return(self.imgdata)
+
+
 class ValRMSwindow():
-    def updateRMS(self,_id_,parentclass,grandparentclass,id_,chartframe):
+    def updateRMS(self,_id_,parentclass,grandparentclass,id_,chartframe,connD,ids):
         querry = "UPDATE measurements_low set value = " + str(self.Val.get("1.0", END)) + " where _id_ = " + str(_id_)
         q_run(connD, querry)
         grandparentclass.quit()
         self.window.destroy()
         querry = "select name from devices where id = " + str(id_)
         name = list(q_run(connD, querry))[0][0]
-        datasheet(ids,chartframe,id_,chartframe,name)
-    def __init__(self, connD, parentclass, _id_,grandparentclass,id_,chartframe):
+        datasheet(ids,chartframe,id_,chartframe,name,connD)
+    def __init__(self, connD, parentclass, _id_,grandparentclass,id_,chartframe,ids):
         self.window = tk.Tk()
         self.window.title("CHANGE RMS")
         self.Val = tk.Text(self.window, height=1, width=12)
@@ -133,7 +140,7 @@ class ValRMSwindow():
         self.RN = tk.Label(self.window, text=ans[0][2])
         self.Point = tk.Label(self.window, text=ans[0][3])
         self.Val.insert(END, ans[0][0])
-        self.okbut = tk.Button(self.window, text='UPDATE', command=lambda:self.updateRMS(_id_,self,grandparentclass,id_,chartframe), width=12)
+        self.okbut = tk.Button(self.window, text='UPDATE', command=lambda:self.updateRMS(_id_,self,grandparentclass,id_,chartframe,connD,ids), width=12)
         self.Name.pack(side=TOP)
         self.RN.pack(side = TOP)
         self.Point.pack(side=TOP)
@@ -143,21 +150,22 @@ class ValRMSwindow():
 class measBut:
     def changeWindow(self,_id_):
         print(_id_)
-    def __init__(self,dsFrame,r,c,val,_id_,parentclass,id_,chartframe):
+    def __init__(self,dsFrame,r,c,val,_id_,parentclass,id_,chartframe,connD,ids):
         self._id = _id_
-        self.lab = tk.Button(dsFrame,text = str(val),command = lambda : ValRMSwindow(connD,self,_id_,parentclass,id_,chartframe), width = 15)
+        self.lab = tk.Button(dsFrame,text = str(val),command = lambda : ValRMSwindow(connD,self,_id_,parentclass,id_,chartframe,ids), width = 15)
         #command = lambda ue=self.user_entry, pe=self.pass_entry: self.logging_in(ue, pe))
         #self.lab.bind("<ButtonRelease-1>",changeWindow(self._id))
         self.lab.grid(row=r, column=c)
 class datasheet:
     def quit(self):
         self.DSW.destroy()
-    def refresh (self,ids,parentclass):
+    def refresh (self,ids,parentclass,connD):
         parentclass.wdw.destroy()
         self.quit()
-        trendchart(ids)
-        chartwindow.mainloop()
-    def __init__(self,ids,parentclass,id_,chartframe,name):
+        trendchart(ids,connD)
+        # try:chartwindow.mainloop()
+        # except: print('No chartwindow')
+    def __init__(self,ids,parentclass,id_,chartframe,name,connD):
         self.DSW = tk.Tk()
         self.DSW.title("Datasheet")
         querry = """select ml.raport_number,ml.point, ml.value,ml.date,dev.name, ml._id_ from measurements_low as ml
@@ -186,11 +194,9 @@ class datasheet:
                 tk.Label(dsFrame, text=line2).grid(row=r, column=0)
                 for seekVal in dsd:
                     if str(line) == str(seekVal[0]) and str(line2) == str(seekVal[1]):
-                        x = measBut(dsFrame,r,c,seekVal[2],seekVal[5],self,id_,chartframe)
+                        x = measBut(dsFrame,r,c,seekVal[2],seekVal[5],self,id_,chartframe,connD,ids)
         dsFrame.pack()
-        okbutton = tk.Button(self.DSW,text = 'Reload Chart', command = lambda:self.refresh(ids,parentclass)).pack()
+        okbutton = tk.Button(self.DSW,text = 'Reload Chart', command = lambda:self.refresh(ids,parentclass,connD)).pack()
         self.DSW.mainloop()
-# ids = ['5045','5046']
-# trendchart(ids)
 
-
+#trendchart(['5008','5009'], connD)
