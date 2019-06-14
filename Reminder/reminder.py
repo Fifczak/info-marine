@@ -16,7 +16,7 @@ from tkinter import filedialog
 import datetime
 
 
-connD=['testuser','info','localhost']
+connD=['testuser','info','192.168.10.243']
 def q_run(connD, querry):
     username = connD[0]
     password = connD[1]

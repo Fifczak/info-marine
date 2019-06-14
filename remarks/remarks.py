@@ -120,7 +120,7 @@ class LogApplication:
 				filewriter = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
 				filewriter.writerow([user_get])
 				filewriter.writerow([pass_get])
-		connD = [user_get, pass_get, 'localhost']
+		connD = [user_get, pass_get, '192.168.10.243']
 
 
 		querry = "SELECT current_user"

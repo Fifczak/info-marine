@@ -910,4 +910,4 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 # 'Vibscanner'
 # 'Marvib'
 # 'ezThomas'
-read_measurement_file('Marvib','testuser','info','localhost','1986U-2019', '92')
+#read_measurement_file('Marvib','testuser','info','localhost','1986U-2019', '92')
