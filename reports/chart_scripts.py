@@ -111,10 +111,11 @@ class trendchart:
             details(VALS,i,name)
 
         self.f.savefig(self.imgdata, format='png')
-        if GUI == True:
-            self.wdw.mainloop()
-        if GUI == False:
-            self.wdw.withdraw()
+        # if GUI == True:
+
+        self.wdw.mainloop()
+        # if GUI == False:
+        #     self.wdw.withdraw()
     def giveimage(self):
         return(self.imgdata)
 

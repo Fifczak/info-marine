@@ -16,7 +16,7 @@ from tkinter import filedialog
 import datetime
 
 
-connD=['testuser','info','192.168.10.243']
+connD=['testuser','info','localhost']
 def q_run(connD, querry):
     username = connD[0]
     password = connD[1]
@@ -56,14 +56,12 @@ def remindershow():
 
     class reminderwindow:
         def __init__(self):
-
             self.name =''
             self.lastfulldatemin = ''
             self.lastfulldatemax = ''
             self.parent = ''
             self.results = []
             self.resultr = []
-
 
             def lastfulldate():
                 ss = (
@@ -101,7 +99,7 @@ def remindershow():
                                 """
 
                 self.resultr = q_run(connD, querry)
-
+                print('querryrefresh')
                 # answerQuerrys = [parent, results, resultr]
                 # return answerQuerrys
             def dontsend(ID):
@@ -159,11 +157,13 @@ def remindershow():
             def makedevs(check1):
                 self.devlistbox.delete(0, 'end')
 
+
+
                 if check1 == "Y":
                     last = lastfulldate()
                     self.lastfulldatemin = last[0]
                     self.lastfulldatemax = last[1]
-                    check_new_measurements()
+                #     check_new_measurements() ### sprawdzanie przeniesione do wgrywania pomiarow
                 querry = "select id,raport_number,status from reminder where status is distinct from 2 and parent = " + str(
                     self.parent)
                 remindertbl = q_run(connD, querry)
@@ -252,7 +252,7 @@ def remindershow():
 
                 W.detWindow.mainloop()
             def check_new_measurements():
-                ##TODO: jest problem z crossowaniem - lastfullreportdate jest zmienna od klikniecia, przemyslec jeszcze raz i zmienic funkcje => albo przeniesc do wgrywania
+                #przeniesione do wgrywania pomiarow
 
                 ###################CROSSOWANIE TABELI REMINDER Z MEASUREMENTS_LOW
                 querry = """select rem.id, rem.raport_number, cast(har.send_raport_koniec as date)
@@ -308,6 +308,7 @@ def remindershow():
                             else:
                                 x.requestdate = datetime.datetime.strptime(str(line2[4]), '%Y-%m-%d').date()
                             self.devlistbox.insert(END, self.results[p][1])
+                            print('Querrydate = ' + str (x.lastraportdate) + ' Self lastfulldate: ' + str(self.lastfulldatemin))
                             if x.lastraportdate >= self.lastfulldatemin:
                                 self.devlistbox.itemconfig(END, bg='Green')
                                 x.status = 'OK'
@@ -328,6 +329,7 @@ def remindershow():
                                             self.devlistbox.itemconfig(END, bg='Grey')
 
                             else:
+
                                 self.devlistbox.itemconfig(END, bg='Red')
                                 x.status = 'NOK'
                             devlist.append(x)

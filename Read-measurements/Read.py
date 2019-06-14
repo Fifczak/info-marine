@@ -671,7 +671,7 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
         okbutton.pack(side=TOP)
 
         def upload():
-            #Window.destroy()
+
             def recountoverall(id,rn):
                 querry = "SELECT point,value from measurements_low where raport_number = '" + str(rn) + "' and id = " + str(id) + " and type = 'RMS' group by point,value"
 
@@ -703,7 +703,23 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                         rn) + "' and id = " + str(id) + " and type = 'RMS' and point = '" + str(point[0]) + "'"
                     q_run(connD,querry)
 
+            def checkreminder():
+                querry = """select rem.id,max(ml.date),rem.raport_number from reminder as rem
+                        left join measurements_low as ml on ml.id = rem.id 
+                        where rem.parent = """+str(parent)+"""and status is distinct from 2
+                        group by rem.id,rem.raport_number"""
 
+                for i in q_run(connD,querry):
+                    for  j in measlist:
+                        if str(i[0]) == str(j.id):
+                            if str(i[1]) < str(j.date):
+
+                                querry = "UPDATE reminder set status = 2 where  id = " + str(i[0]) + " and raport_number = '" + str(i[2]) + "'"
+                                q_run(connD,querry)
+                                break
+
+
+            checkreminder()
             pbar = tk.Tk()
             pbar.title("Uploading Measurements")
             progress_bar = ttk.Progressbar(pbar, orient='horizontal', lengt=286, mode='determinate')
@@ -894,4 +910,4 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 # 'Vibscanner'
 # 'Marvib'
 # 'ezThomas'
-read_measurement_file('ezThomas','testuser','info','192.168.10.243','2038-2019', '53')
+read_measurement_file('Marvib','testuser','info','localhost','1986U-2019', '92')
