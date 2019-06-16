@@ -148,7 +148,7 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 	## PRZEZ OKNO Z WYKRESAMI WYWALA SIE PROGRESBAR. NIE MOGE TEZ POKAZAC JAKIEGOS OBRAZKA.
 	## NARAZIE KLEPSYDRA Z KOMBAJNA
 	def colorlimit(par,limit):
-		if limit == 'Cl. A' or limit == 'In Limit' or limit == 'V. I' or limit =='Cl. A/Cl. B':
+		if limit == 'Cl. A' or limit == 'In Limit' or limit == 'V. I' or limit =='Cl. A/B':
 			par.font.highlight_color = WD_COLOR_INDEX.BRIGHT_GREEN
 		elif limit == 'Cl. B':
 			par.font.highlight_color = WD_COLOR_INDEX.BRIGHT_GREEN
