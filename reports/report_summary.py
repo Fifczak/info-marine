@@ -24,7 +24,7 @@ def q_run(connD, querry):
 	conn.commit()
 	cur.close()
 
-def standardsummary(document,connD,rn):
+def IMVibEng(document,connD,rn):
 	document.add_page_break()
 	#TABELKA Z PARAMETRAMI STATKU
 	shiptable = document.add_table(rows=3, cols=2)  # trzeba usunąć enter przed
