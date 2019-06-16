@@ -10,9 +10,10 @@ from docx.shared import RGBColor
 from report_database import *
 from report_headtables import *
 from docx.shared import Inches
+from tqdm import tqdm
+import os
 
-
-
+from PIL import ImageTk, Image
 
 def q_run(connD, querry):
 	username = connD[0]
@@ -143,6 +144,10 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
     loadData( connD )
     return measlist
 def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
+    ## PRZEZ OKNO Z WYKRESAMI WYWALA SIE PROGRESBAR. NIE MOGE TEZ POKAZAC JAKIEGOS OBRAZKA.
+    ## NARAZIE KLEPSYDRA Z KOMBAJNA
+    os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
     respar = document.add_paragraph('Results')
     respar.runs[0].bold = True
     respar.runs[0].font.name = 'Times New Roman'
@@ -168,15 +173,6 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
     activeSortPList = list()
     idlist = list()
     drivenByList = list()
-
-    if GUI == False:
-        pbars = tk.Tk()
-        pbars.title("Generating chart")
-        progress_bar = ttk.Progressbar(pbars, orient='horizontal', lengt=286, mode='determinate')
-        progress_bar['maximum'] = len(sortlistQ)
-        progress_bar.pack(side=TOP)
-        pp = 0
-
 
 
     for sort in sortlistQ:
@@ -262,14 +258,9 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
     i = -1
     ids = list()
 
-
-    for measStrip in sortlistQ:
-
-        if GUI == False:
-            pp += 1
-            progress_bar['value'] = pp
-            progress_bar.update()
-
+    #trzeba zmieniac dla odpalania bez konsoli(kombajn)
+    for measStrip in tqdm(sortlistQ):
+    #for measStrip in sortlistQ:
         i += 1
         if (measStrip[ 1 ]).isdigit() == False:  ######## NAGŁÓWKI
             try:
@@ -317,7 +308,7 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
                             trendtemp3 = xx.trend[ 2 ]
                             if str( trendtemp3 ) == 'U':
                                 r0 = ht.add_run()
-                                r0.add_picture( 'Iup.gif' )
+                                r0.add_picture( 'up.gif' )
                             elif str( trendtemp3 ) == 'D':
                                 r0 = ht.add_run()
                                 r0.add_picture( 'down.gif' )
@@ -340,6 +331,7 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
                             ht = resulttable.cell( xcord + 1 ,0 ).paragraphs[ 0 ]
 
                             image = (trendchart(ids, connD,GUI).giveimage())
+
                             p0 = ht.add_run(  )
                             p0.add_picture(image, width=Inches(7.0))
 
