@@ -173,6 +173,7 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 		GUI = True
 	elif MsgBox == 'no':
 		GUI = False
+	root.destroy()
 	querry = "Select parent from measurements_low where raport_number = '" + str( report_number ) + "' limit 1"
 	parent = list(q_run( connD ,querry ))[0][0]
 	querry = "Select sort, id from ds_structure where parent = '" + str ( parent) + "' order by sort"
@@ -270,13 +271,10 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 
 	#trzeba zmieniac dla odpalania bez konsoli(kombajn)
 	print('Delete progress bar before xlwings use')
-	if GUI == False:
-		StructLoop= tqdm(sortlistQ)
-	elif GUI == True:
-		StructLoop = sortlistQ
 
 
-	for measStrip in StructLoop:
+
+	for measStrip in tqdm(sortlistQ):
 	#for measStrip in sortlistQ:
 		i += 1
 		if (measStrip[ 1 ]).isdigit() == False:  ######## NAGŁÓWKI
@@ -335,7 +333,7 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 							elif str( trendtemp3 ) == 'C':
 								r0 = ht.add_run()
 								r0.add_picture( 'none.gif' )
-							p0 = ht.add_run( '\n' + 'Ostatnia Wartość:' )
+							p0 = ht.add_run( '\n' + 'Last value:' )
 							p0 = ht.add_run( '\n' + str( trendtemp2 ) )
 							p0 = ht.add_run( '\n' + str( trendtemp1 ) )
 						except:
