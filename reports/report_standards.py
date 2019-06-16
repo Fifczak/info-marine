@@ -157,7 +157,7 @@ def standards(document):
     t_std.cell(5, 1).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
     t_std.cell(5, 1).paragraphs[0].runs[0].bold = False
     set_col_width_std ( t_std )
-
+    legend_IM(document)
 #legenda dla IM 'legend accordin to vib class'
 def legend_IM(document):
 
@@ -208,12 +208,12 @@ def legend_IM(document):
     cld_format=legend.cell(3,0).paragraphs[0].runs[0]
     cldb_format=legend.cell(4,0).paragraphs[0].runs[0]
 
-    cla_format.font.highlight_color=WD_COLOR_INDEX.GREEN
+    cla_format.font.highlight_color=WD_COLOR_INDEX.BRIGHT_GREEN
     cla_format.font.name='Calibri'
     cla_format.font.size=Pt(11)
 
 
-    clb_format.font.highlight_color=WD_COLOR_INDEX.GREEN
+    clb_format.font.highlight_color=WD_COLOR_INDEX.BRIGHT_GREEN
     clb_format.font.name = 'Calibri'
     clb_format.font.size = Pt(11)
 
@@ -238,7 +238,6 @@ def legend_IM(document):
 #legenda dla kamtro - do dokończenia [odwolanie-if w report.py]
 def legend_KAMTRO(document):
     H0 = document.add_paragraph('Legend according to vibration class').style = document.styles['IM HEAD']
-
 def standards_GSR(document):
 
     H0=document.add_paragraph()
