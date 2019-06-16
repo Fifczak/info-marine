@@ -90,7 +90,7 @@ class trendchart:
             button1 = tk.Button(detailFrame, text='Details', command=lambda: calldatasheet(self,id_,name))
             button1.grid(column = LL+1,row=0,rowspan = 3)
         def calldatasheet(parentclass,id_,name):
-            datasheet(ids,parentclass,id_,self,name,connD)
+            datasheet(ids,parentclass,id_,self,name,connD,GUI)
 
         self.imgdata = io.BytesIO()
         self.wdw  = tk.Tk()
@@ -121,15 +121,15 @@ class trendchart:
 
 
 class ValRMSwindow():
-    def updateRMS(self,_id_,parentclass,grandparentclass,id_,chartframe,connD,ids):
+    def updateRMS(self,_id_,parentclass,grandparentclass,id_,chartframe,connD,ids,GUI):
         querry = "UPDATE measurements_low set value = " + str(self.Val.get("1.0", END)) + " where _id_ = " + str(_id_)
         q_run(connD, querry)
         grandparentclass.quit()
         self.window.destroy()
         querry = "select name from devices where id = " + str(id_)
         name = list(q_run(connD, querry))[0][0]
-        datasheet(ids,chartframe,id_,chartframe,name,connD)
-    def __init__(self, connD, parentclass, _id_,grandparentclass,id_,chartframe,ids):
+        datasheet(ids,chartframe,id_,chartframe,name,connD,GUI)
+    def __init__(self, connD, parentclass, _id_,grandparentclass,id_,chartframe,ids,GUI):
         self.window = tk.Tk()
         self.window.title("CHANGE RMS")
         self.Val = tk.Text(self.window, height=1, width=12)
@@ -141,7 +141,7 @@ class ValRMSwindow():
         self.RN = tk.Label(self.window, text=ans[0][2])
         self.Point = tk.Label(self.window, text=ans[0][3])
         self.Val.insert(END, ans[0][0])
-        self.okbut = tk.Button(self.window, text='UPDATE', command=lambda:self.updateRMS(_id_,self,grandparentclass,id_,chartframe,connD,ids), width=12)
+        self.okbut = tk.Button(self.window, text='UPDATE', command=lambda:self.updateRMS(_id_,self,grandparentclass,id_,chartframe,connD,ids,GUI), width=12)
         self.Name.pack(side=TOP)
         self.RN.pack(side = TOP)
         self.Point.pack(side=TOP)
@@ -151,22 +151,22 @@ class ValRMSwindow():
 class measBut:
     def changeWindow(self,_id_):
         print(_id_)
-    def __init__(self,dsFrame,r,c,val,_id_,parentclass,id_,chartframe,connD,ids):
+    def __init__(self,dsFrame,r,c,val,_id_,parentclass,id_,chartframe,connD,ids,GUI):
         self._id = _id_
-        self.lab = tk.Button(dsFrame,text = str(val),command = lambda : ValRMSwindow(connD,self,_id_,parentclass,id_,chartframe,ids), width = 15)
+        self.lab = tk.Button(dsFrame,text = str(val),command = lambda : ValRMSwindow(connD,self,_id_,parentclass,id_,chartframe,ids,GUI), width = 15)
         #command = lambda ue=self.user_entry, pe=self.pass_entry: self.logging_in(ue, pe))
         #self.lab.bind("<ButtonRelease-1>",changeWindow(self._id))
         self.lab.grid(row=r, column=c)
 class datasheet:
     def quit(self):
         self.DSW.destroy()
-    def refresh (self,ids,parentclass,connD):
+    def refresh (self,ids,parentclass,connD,GUI):
         parentclass.wdw.destroy()
         self.quit()
-        trendchart(ids,connD)
+        trendchart(ids,connD,GUI)
         # try:chartwindow.mainloop()
         # except: print('No chartwindow')
-    def __init__(self,ids,parentclass,id_,chartframe,name,connD):
+    def __init__(self,ids,parentclass,id_,chartframe,name,connD,GUI):
         self.DSW = tk.Tk()
         self.DSW.title("Datasheet")
         querry = """select ml.raport_number,ml.point, ml.value,ml.date,dev.name, ml._id_ from measurements_low as ml
@@ -195,9 +195,9 @@ class datasheet:
                 tk.Label(dsFrame, text=line2).grid(row=r, column=0)
                 for seekVal in dsd:
                     if str(line) == str(seekVal[0]) and str(line2) == str(seekVal[1]):
-                        x = measBut(dsFrame,r,c,seekVal[2],seekVal[5],self,id_,chartframe,connD,ids)
+                        x = measBut(dsFrame,r,c,seekVal[2],seekVal[5],self,id_,chartframe,connD,ids,GUI)
         dsFrame.pack()
-        okbutton = tk.Button(self.DSW,text = 'Reload Chart', command = lambda:self.refresh(ids,parentclass,connD)).pack()
+        okbutton = tk.Button(self.DSW,text = 'Reload Chart', command = lambda:self.refresh(ids,parentclass,connD,GUI)).pack()
         self.DSW.mainloop()
 
 #trendchart(['5008','5009'], connD)
