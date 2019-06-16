@@ -6,6 +6,14 @@ from report_database import *
 
 # używana wszędzie w raportach IM
 def standard_info_table ( connD ,document ,rn_ ):
+    def getdaterangestr():
+        querry = "select min(date),max(date) from measurements_low where raport_number = '" + str(rn_) + "'"
+        datestr = list(q_run( connD ,querry ))[0]
+        mindate = datestr[0]
+        maxdate = datestr[1]
+        if str(mindate) == str(maxdate): outputdate = mindate
+        else: outputdate = str(mindate) + ' - ' + str(maxdate)
+        return outputdate
     username = connD[ 0 ]
     password = connD[ 1 ]
     host = connD[ 2 ]
@@ -64,7 +72,8 @@ def standard_info_table ( connD ,document ,rn_ ):
 
     ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
     ht.vertical_alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r0 = ht.add_run( 'XXXX-XX-XX' )
+    datestr = getdaterangestr()
+    r0 = ht.add_run(str(datestr))
     r0.bold = True
     r0.font.name = 'Calibri'
     ht = headtable.cell( 1 ,2 ).paragraphs[ 0 ]
