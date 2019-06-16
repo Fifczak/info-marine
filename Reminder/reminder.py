@@ -182,9 +182,6 @@ def remindershow():
                 self.lastfulldatemax = dates[0][2]
                 makedevs("N")
             def devremdet(evt):
-
-
-
                 class details_window():
                     def __init__(self):
                         self.detWindow = tk.Tk()
@@ -239,17 +236,9 @@ def remindershow():
                         cal.pack(fill="both", expand=True)
                         ttk.Button(top, text="ok", command=print_sel).pack()
                         root.mainloop()
-
-
-
-
-
-
-
                 w = evt.widget
                 index = int(w.curselection()[0])
                 W = details_window()
-
                 W.detWindow.mainloop()
             def check_new_measurements():
                 #przeniesione do wgrywania pomiarow
@@ -393,7 +382,6 @@ Please be so kind and inform us whether taking vibration measurements is possibl
 
             self.remWindow = tk.Tk()
             self.remWindow.title("Reminder")
-
             self.Ownerlistbox = Listbox(self.remWindow)
             self.Ownerlistbox.config(width=0)
             self.Ownerlistbox.bind('<Double-Button>', getships)
@@ -407,37 +395,35 @@ Please be so kind and inform us whether taking vibration measurements is possibl
             self.devlistbox.config(width=0)
             self.rclick = RightClick(self.devlistbox)
             self.devlistbox.bind('<Button-3>', self.rclick.popup)
-
             self.sendbutton = tk.Button(text='Send', command = marksend)
-
             self.textfield = tk.Text(self.remWindow, width=100, height=60)
-
             querry = "select name,id from main where parent = 1 order by name"
             resultrr = q_run(connD, querry)
             for line in resultrr:
                 self.Ownerlistbox.insert(END, line[0])
-
             self.Ownerlistbox.pack(side=LEFT, fill=BOTH)
             self.Shiplistbox.pack(side=LEFT, fill=BOTH)
             self.devlistbox.pack(side=LEFT, fill=BOTH)
             self.Reportlistbox.pack(side=LEFT, fill=BOTH)
             self.remWindow.mainloop()
-    class RightClick():
-        def __init__(self, master):
-            # create a popup menu
-            self.aMenu = tk.Menu(master, tearoff=0)
-            self.aMenu.add_command(label="Dont't send", command = self.dontsend)
-            self.tree_item = ''
-
-        def dontsend(self):
-            #w = evt.widget
-            index = int(deviceslistbox.curselection()[0])
 
 
-
-        def popup(self, event):
-            self.aMenu.post(event.x_root, event.y_root)
-            #self.tree_item = .devlistbox.focus()
+    # class RightClick():
+    #     def __init__(self, master):
+    #         # create a popup menu
+    #         self.aMenu = tk.Menu(master, tearoff=0)
+    #         self.aMenu.add_command(label="Dont't send", command = self.dontsend)
+    #         self.tree_item = ''
+    #
+    #     def dontsend(self):
+    #         #w = evt.widget
+    #         index = int(deviceslistbox.curselection()[0])
+    #
+    #
+    #
+    #     def popup(self, event):
+    #         self.aMenu.post(event.x_root, event.y_root)
+    #         #self.tree_item = .devlistbox.focus()
 
     reminderwindow()
 
