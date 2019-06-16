@@ -259,7 +259,14 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
     ids = list()
 
     #trzeba zmieniac dla odpalania bez konsoli(kombajn)
-    for measStrip in tqdm(sortlistQ):
+    print('Delete progress bar before xlwings use')
+    if GUI == False:
+        StructLoop= tqdm(sortlistQ)
+    elif GUI == True:
+        StructLoop = sortlistQ
+
+
+    for measStrip in StructLoop:
     #for measStrip in sortlistQ:
         i += 1
         if (measStrip[ 1 ]).isdigit() == False:  ######## NAGŁÓWKI
