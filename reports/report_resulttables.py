@@ -119,11 +119,11 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 					left join (select 
 								 ml.id, ml.raport_number,  max(ml.value)
 								 from measurements_low as ml
-								 where type = 'envelope P-K' and parent = """ + str( parent ) + """
+								 where ml.value <> -1 and type = 'envelope P-K' and parent = """ + str( parent ) + """
 								 group by id,raport_number order by raport_number DESC) as ml2 on ml.id = ml2.id and ml.raport_number = ml2.raport_number
 					 left join devices as dev on ml.id = dev.id
 					 left join(select cast (id as integer), sort from ds_structure where id ~E'^\\\d+$' ) as dss on ml.id = dss.id
-					 where ml.type = 'RMS' and ml.parent = """ + str( parent ) + """
+					 where ml.value <> -1 and ml.type = 'RMS' and ml.parent = """ + str( parent ) + """
 					 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,ml.date,dev.drivenby,dss.sort,dev.pms order by raport_number DESC"""
 		reportresults = q_run( connD ,querry )
 		for line in reportresults:
@@ -268,12 +268,8 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 	xcord = 0
 	i = -1
 	ids = list()
-
 	#trzeba zmieniac dla odpalania bez konsoli(kombajn)
 	print('Delete progress bar before xlwings use')
-
-
-
 	for measStrip in tqdm(sortlistQ):
 	#for measStrip in sortlistQ:
 		i += 1
@@ -303,6 +299,7 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 				p += 1
 				if str( measStrip[ 1 ] ) == str( xx.id ):
 					ht = resulttable.cell( xcord + 1 ,col_PMS).paragraphs[ 0 ]
+					if str(xx.pms) == '0' or str(xx.pms) == '' : xx.pms = '-'
 					r0 = ht.add_run(str(xx.pms) )
 					ht = resulttable.cell( xcord + 1 ,col_name ).paragraphs[ 0 ]
 					r0 = ht.add_run( xx.name )
@@ -365,6 +362,27 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 						p0.add_picture(image, width=Inches(7.0))
 
 						ids.clear()
+	ht = document.add_paragraph()
+	r0 = ht.add_run()
+	r0.text = str('Trend results:')
+	r0.bold = True
+	ht = document.add_paragraph()
+	r0 = ht.add_run()
+	r0.add_picture('up.gif')
+	r0 = ht.add_run()
+	r0.text = str('Whenever new results are increased more than 5% of previous measurements')
+	ht = document.add_paragraph()
+	r0 = ht.add_run()
+	r0.add_picture('none.gif')
+	r0 = ht.add_run()
+	r0.text = str('Whenever new results are in range plus / minus 5% of previous measurements')
+	ht = document.add_paragraph()
+	r0 = ht.add_run()
+	r0.add_picture('down.gif')
+	r0 = ht.add_run()
+	r0.text = str('Whenever new results are reduced more than 5% of previous measurements')
+
+
 def drawtable_GSR( document ,measlist ,connD ,rn_ ):
 	print( 'Wyniki: ' )
 	H = document.add_paragraph( 'Wyniki' )
