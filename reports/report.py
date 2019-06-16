@@ -8,32 +8,34 @@ from report_styles import loadstyles
 from report_headtables import standard_info_table
 from report_frontpages import standard_with_pms
 from report_resulttables import prepare_IM ,drawtable_IM_chart_PMS ,trendresults
+from report_standards import legend_IM ,standards
+from time import gmtime, strftime
+from report_measurementequipment import MarVibENG
+from report_summary import IMVibEng
+from report_signature import signatureENG
 
+from tkinter import filedialog
 
 
 # from report_devicetable import devicetable
-# from report_shipdata import getshipsdata ,shipdata
-# from report_standards import legend_IM ,standards
+#NIEUZYWANE from report_shipdata import getshipsdata ,shipdata
 
 
 
 
 
 
-def getname ( host ,username ,password ) :
-    kport = "5432"
-    kdb = "postgres"
-    cs = "dbname=%s user=%s password=%s host=%s port=%s" % (kdb ,username ,password ,host ,kport)
-    conn = None
-    conn = psycopg2.connect ( str ( cs ) )
-    cur = conn.cursor ()
-    # tu trzeba dodać 'kuser' w kwerendzie
-    querry = "select full_name from users where login = 'krystiank' limit 1;"
-    cur.execute ( querry )
-    result = cur.fetchall ()
-    conn.commit ()
-    cur.close ()
-    return result[ 0 ][ 0 ]
+
+
+def getini ( connD) :
+
+	querry = "select ini from users where login = '"+str(connD[0]).strip()+"' limit 1;"
+	result = list(q_run(connD,querry))
+
+
+
+	return result[ 0 ][ 0 ]
+
 def q_run(connD, querry):
 	username = connD[0]
 	password = connD[1]
@@ -57,165 +59,155 @@ def q_run(connD, querry):
 
 
 def makereport ( connD ,rn_ ):
-    rn_ = str(rn_)
-    #############################################################################################
-    ############################ 0.USTALANIE SKŁADOWYCH DO RAPORTU ##############################
-    #############################################################################################
-
-    querry = "select reporttype from main where id = (select shipid from harmonogram where report_number = '"+str(rn_)+"')"
-    reporttype = list(q_run(connD,querry))[0][0]
-
-    # fileformattype = 1  # 1 - IM; 2 - KAMTRO ; 3-Stocznia Remontowa
-    # headtabletype = 1  # 1 - IM; 2 - KAMTRO; 3 - stocznia remontowa
-    # standards
-    # frontpagetype = 1
-    # resulttable = 1  # 1 - IM; 2-remontowa
-    # measurementequipment
-    # summary
-    # signatures
-
-    reptypedict = {
-        "fileformat": 0,
-        "headtabletype": 0,
-        "frontpagetype": 0,
-        "standards": 0,
-        "resulttable": 0,
-        "measurementequipment": 0,
-        "summary": 0,
-        "signatures": 0,
-    }
-
-    if int(reporttype) == 3:
-        reptypedict.update( {"fileformat": 1})
-        reptypedict.update({"headtabletype": 1})
-        reptypedict.update({"standards": 1})
-        reptypedict.update({"frontpagetype": 1})
-        reptypedict.update({"resulttable": 1})
-        reptypedict.update({"measurementequipment": 1})
-        reptypedict.update({"summary": 1})
-        reptypedict.update({"signatures": 1})
-    print(reptypedict)
-
-    #############################################################################################
-    ############################ I. WYBIERANIE FORMATKI POD RAPORT ##############################
-    #############################################################################################
-
-    if reptypedict["fileformat"] == 1:
-        filepath = 'C:\\overmind\\Data\\baseIM.docx'
-    if reptypedict["fileformat"] == 2:
-        filepath = 'C:\\overmind\\Data\\baseKAM.docx'
-    if reptypedict["fileformat"] == 3:
-        filepath = 'C:\\overmind\\Data\\baseGSR.docx'
-    document = Document ( filepath )
-    loadstyles ( document )
-
-
-    #############################################################################################
-    ################################# II. TABELA NAGŁÓWEK #######################################
-    #############################################################################################
-
-
-    if reptypedict["headtabletype"] == 1:
-        standard_info_table ( connD ,document ,rn_ )
-    elif reptypedict["headtabletype"] == 2:
-        standard_Kamtro_table ( document )
-    elif reptypedict["headtabletype"] == 3:
-        standard_GSR_table ( document )
+	rn_ = str(rn_)
 
 
 
+	#############################################################################################
+	############################ 0.USTALANIE SKŁADOWYCH DO RAPORTU ##############################
+	#############################################################################################
 
-    #############################################################################################
-    ############################# III. TEKST STRONA TYTUŁOWA ####################################
-    #############################################################################################
+	querry = "select reporttype from main where id = (select shipid from harmonogram where report_number = '"+str(rn_)+"')"
+	reporttype = list(q_run(connD,querry))[0][0]
+
+	# fileformattype = 1  # 1 - IM; 2 - KAMTRO ; 3-Stocznia Remontowa
+	# headtabletype = 1  # 1 - IM; 2 - KAMTRO; 3 - stocznia remontowa
+	# standards #
+	# frontpagetype = 1
+	# resulttable = 1  # 1 - IM; 2-remontowa
+	# measurementequipment
+	# summary #1 - standard IM summary
+	# signatures
+
+	reptypedict = {
+		"fileformat": 0,
+		"headtabletype": 0,
+		"frontpagetype": 0,
+		"standards": 0,
+		"resulttable": 0,
+		"measurementequipment": 0,
+		"summary": 0,
+		"signatures": 0,
+	}
+
+	if int(reporttype) == 3:
+		reptypedict.update( {"fileformat": 1})
+		reptypedict.update({"headtabletype": 1})
+		reptypedict.update({"standards": 1})
+		reptypedict.update({"frontpagetype": 1})
+		reptypedict.update({"resulttable": 1})
+		reptypedict.update({"measurementequipment": 1})
+		reptypedict.update({"summary": 1})
+		reptypedict.update({"signatures": 1})
 
 
-    if reptypedict["frontpagetype"] == 1:
-        standard_with_pms ( document )
+	#############################################################################################
+	############################ I. WYBIERANIE FORMATKI POD RAPORT ##############################
+	#############################################################################################
+
+	if reptypedict["fileformat"] == 1:
+		filepath = 'C:\\overmind\\Data\\baseIM.docx'
+	if reptypedict["fileformat"] == 2:
+		filepath = 'C:\\overmind\\Data\\baseKAM.docx'
+	if reptypedict["fileformat"] == 3:
+		filepath = 'C:\\overmind\\Data\\baseGSR.docx'
+	document = Document ( filepath )
+	loadstyles ( document )
 
 
-        # standard_with_pms(document)
-        # standard_GSR(document)
+	#############################################################################################
+	################################# II. TABELA NAGŁÓWEK #######################################
+	#############################################################################################
 
 
-        ### HASZUJE DLA SZYBSZEJ PRACY (POTEM TRZEBA TO ROZKMINIC
-        # standards ( document )
-        # legend_IM ( document )
+	if reptypedict["headtabletype"] == 1:
+		standard_info_table ( connD ,document ,rn_ )
+	elif reptypedict["headtabletype"] == 2:
+		standard_Kamtro_table ( document )
+	elif reptypedict["headtabletype"] == 3:
+		standard_GSR_table ( document )
 
 
 
 
-
-        measlist = prepare_IM(connD, rn_)
-        drawtable_IM_chart_PMS ( document ,measlist ,connD ,rn_ )
-        document.add_paragraph ()
-        # trendresults ( document )
-        # devicetable ( document )
-        # getshipsdata ( parent )
-        # shipdata ( document )
+	#############################################################################################
+	############################# III. TEKST STRONA TYTUŁOWA ####################################
+	#############################################################################################
 
 
+	if reptypedict["frontpagetype"] == 1:
+		standard_with_pms ( document )
+
+	#############################################################################################
+	######################################## IV. NORMY ##########################################
+	#############################################################################################
 
 
-
-
-
-
-
-
-
-    # podsumowanie daję tu na sztywno, na dzień dzisiejszy nie wiem czy to jest pobierane z bazy czy uzupełniane ręcznie
-    document.add_page_break ()
-    summary = document.add_paragraph ()
-    summary.add_run ( 'Summary:' ).bold = True
-    summary.runs[ 0 ].add_break ()
-    s1 = summary.add_run (
-        'Next measurements should be done in three month period to obtain trend value for each equipment, in some cases even one month period is preferable.' )
-    s1.add_break ()
-    s1.add_break ()
-    summary.add_run (
-        'This report is prepared in good faith based on measurement diagnostic done on available running rotary machine and documentation submitted.' ).font.size = Pt (
-        11 )
-    document.add_paragraph ()
-
-    signpar = document.add_paragraph ()
-    seCAP = signpar.add_run (
-        'Service Engineer                                                                                             Approved by' )
-    seCAP.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    name = str ( getname ( host='localhost' ,username='postgres' ,password='info' ) )
-    signpar = document.add_paragraph ( str ( name ))
+	if reptypedict["standards"] == 1:
+		standards ( document )
 
 
 
+	#############################################################################################
+	######################################## V. WYNIKI ##########################################
+	#############################################################################################
 
-    # if frontpagetype == 1:
-    #  standard_PMS_limit(document)
-    document.add_paragraph ()
-    # P3 = document.add_paragraph('03. STANDARDS (put informations about standards here)')
-    # standards(document)
-    measlist = prepare_IM ( connD ,rn_ )
-    # drawtable_GSR ( document ,measlist ,connD ,rn_ )
+	if reptypedict["resulttable"] == 1:
+		measlist = prepare_IM(connD, rn_)
+		drawtable_IM_chart_PMS ( document ,measlist ,connD ,rn_ )
 
-    # drawtable_IM()
-    ##########################################
-    # appr = document.add_paragraph()
-    # appr.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    document.save ( 'C:\overmind\Reports\GSR ' + rn_ + '.docx' )
+	#############################################################################################
+	################################ VI. Urządzenie pomiarowe ###################################
+	#############################################################################################
 
 
+	if reptypedict["measurementequipment"] == 1:
+		MarVibENG ( document,connD ,rn_)
 
 
-username = 'testuser'
-password = 'info'
-host = 'localhost'
-rn_ = '1620U6-2018'
+	#############################################################################################
+	################################## VII. Podsumowanie ########################################
+	#############################################################################################
 
 
-host = '192.168.10.243'
-rn_ = '2070-2019'
+	if reptypedict["standards"] == 1:
+		IMVibEng ( document,connD ,rn_)
 
-connD = [ username ,password ,host ]
+	#############################################################################################
+	##################################### VI. Podpis ############################################
+	#############################################################################################
+	if reptypedict["standards"] == 1:
+		signatureENG ( document ,connD)
 
 
-makereport ( connD ,str( rn_ ) )
+	#############################################################################################
+	##################################### ZAPISANIE  ############################################
+	#############################################################################################
+
+	#if int(reporttype) == 3:
+	querry = "select name from main where id = (select shipid from harmonogram where report_number = '" + str(rn_) + "')"
+	shipname = list(q_run(connD,querry))[0][0]
+
+	f = filedialog.askdirectory()
+	document.save ( f +'/'+ str(shipname) + ' - vibration report '
+					+ str(rn_) + '_' + str(getini(connD)) + '_' + str(strftime("%Y-%m-%d", gmtime())) + '.docx')
+
+
+
+
+
+#
+# username = 'filipb '
+# password = '@infomarine'
+# host = 'localhost'
+# rn_ = '1620U6-2018'
+#rn_ ='1968-2019'
+#
+# host = '192.168.10.243'
+# rn_ = '2070-2019'
+
+#connD = [ username ,password ,host ]
+
+
+#makereport ( connD ,str( rn_ ) )
 #os.startfile ( 'C:\overmind\Reports\GSR 1987-2019.docx' )
