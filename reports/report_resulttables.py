@@ -269,7 +269,7 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 	i = -1
 	ids = list()
 	#trzeba zmieniac dla odpalania bez konsoli(kombajn)
-	print('Delete progress bar before xlwings use')
+	#print('Delete progress bar before xlwings use')
 	for measStrip in tqdm(sortlistQ):
 	#for measStrip in sortlistQ:
 		i += 1
@@ -384,7 +384,7 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 
 
 def drawtable_GSR( document ,measlist ,connD ,rn_ ):
-	print( 'Wyniki: ' )
+	#print( 'Wyniki: ' )
 	H = document.add_paragraph( 'Wyniki' )
 	H.runs[ 0 ].font.name = 'Times New Roman'
 	H.runs[ 0 ].font.size = Pt( 14 )
