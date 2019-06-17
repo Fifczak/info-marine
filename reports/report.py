@@ -197,17 +197,17 @@ def makereport ( connD ,rn_ ):
 
 
 #
-# username = 'filipb '
-# password = '@infomarine'
-# host = 'localhost'
+username = 'testuser '
+password = 'info'
+host = 'localhost'
 # rn_ = '1620U6-2018'
 #rn_ ='1968-2019'
 #
-# host = '192.168.10.243'
-# rn_ = '2070-2019'
+host = '192.168.10.243'
+rn_ = '2071-2019'
 
-#connD = [ username ,password ,host ]
+connD = [ username ,password ,host ]
 
 
-#makereport ( connD ,str( rn_ ) )
+makereport ( connD ,str( rn_ ) )
 #os.startfile ( 'C:\overmind\Reports\GSR 1987-2019.docx' )
