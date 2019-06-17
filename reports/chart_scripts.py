@@ -150,7 +150,7 @@ class ValRMSwindow():
         self.window.mainloop()
 class measBut:
     def changeWindow(self,_id_):
-        print(_id_)
+        pass
     def __init__(self,dsFrame,r,c,val,_id_,parentclass,id_,chartframe,connD,ids,GUI):
         self._id = _id_
         self.lab = tk.Button(dsFrame,text = str(val),command = lambda : ValRMSwindow(connD,self,_id_,parentclass,id_,chartframe,ids,GUI), width = 15)
