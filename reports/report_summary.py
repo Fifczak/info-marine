@@ -32,9 +32,9 @@ def IMVibEng(document,connD,rn):
 	shiptable.cell(2, 0).merge(shiptable.cell(2, 1))
 
 	querry = "select shiptype,lenght,bradth from shipsdata where shipid = (select shipid from harmonogram where report_number = '" + str(rn) + "' limit 1)"
-	print(querry)
+
 	shipdata = list(q_run( connD ,querry ))[0]
-	print(shipdata)
+
 	##SHIPTABLE [0,0]
 	ht = shiptable.cell(0, 0).paragraphs[0]
 	r0 = ht.add_run()
