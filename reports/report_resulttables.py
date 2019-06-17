@@ -127,7 +127,6 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 					 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,ml.date,dev.drivenby,dss.sort,dev.pms order by raport_number DESC"""
 		reportresults = q_run( connD ,querry )
 		for line in reportresults:
-			print(line)
 			x = meas()
 			if str( line[ 1 ] ) == str( report_number ):
 				x.id = line[ 0 ]
