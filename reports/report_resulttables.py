@@ -123,10 +123,11 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 								 group by id,raport_number order by raport_number DESC) as ml2 on ml.id = ml2.id and ml.raport_number = ml2.raport_number
 					 left join devices as dev on ml.id = dev.id
 					 left join(select cast (id as integer), sort from ds_structure where id ~E'^\\\d+$' ) as dss on ml.id = dss.id
-					 where ml.value <> -1 and ml.type = 'RMS' and ml.parent = """ + str( parent ) + """
+					 where ml.value <> -1 and ml.type = 'RMS' and ml.parent = """ + str( parent ) + """ and sort is distinct from null
 					 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,ml.date,dev.drivenby,dss.sort,dev.pms order by raport_number DESC"""
 		reportresults = q_run( connD ,querry )
 		for line in reportresults:
+			print(line)
 			x = meas()
 			if str( line[ 1 ] ) == str( report_number ):
 				x.id = line[ 0 ]
