@@ -327,7 +327,8 @@ def resulttable ( tn ,host ,username ,password ,tableno ,id1 ,id2 ,rn ):
             maxval = result [ j ] [ 0 ]
 
     for j in range ( 5 ):
-        result_text = str ( result [ j ] [ 0 ] )
+        result_text = str ( '%.3f'%result [ j ] [ 0 ] )
+        #result_text = str ( result [ j ] [ 0 ] )
         p = tableno.cell ( 2 ,1 + j ).add_paragraph ()
         p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
         r = p.add_run ( result_text.replace ( "." ,"," ) )
@@ -376,7 +377,8 @@ def resulttable ( tn ,host ,username ,password ,tableno ,id1 ,id2 ,rn ):
 
     for j in range ( 3 ):
 
-        result_text = str ( result [ j ] [ 0 ] )
+        result_text = str ( '%.3f'%result [ j ] [ 0 ] )
+        #result_text = str ( result [ j ] [ 0 ] )
         p = tableno.cell ( 2 ,6 + j ).add_paragraph ()
         p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
         r = p.add_run ( result_text.replace ( "." ,"," ) )
