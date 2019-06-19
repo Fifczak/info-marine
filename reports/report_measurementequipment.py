@@ -4,6 +4,11 @@ from docx.shared import Cm
 from docx.shared import Pt
 import psycopg2
 
+def set_col_width_dev(table):
+    widths = (Cm ( 4.4 ) ,Cm ( 6 ))
+    for row in table.rows:
+        for idx, width in enumerate(widths):
+            row.cells[idx].width=width
 def q_run(connD, querry):
 	username = connD[0]
 	password = connD[1]
@@ -97,3 +102,5 @@ def MarVibENG(document,connD,rn):
 	ht = document.add_paragraph()
 	r0 = ht.add_run()
 	r0.text = str('MarVib is calibrated, certificate for verification - if required.')
+
+	set_col_width_dev ( shiptable )

@@ -1,12 +1,12 @@
 import time
 
 import chart_scripts
-
+from report_styles import loadstyles
 import psycopg2
 from chart_scripts import *
 from docx.enum.table import WD_ALIGN_VERTICAL
 from docx.enum.text import WD_COLOR_INDEX, WD_ALIGN_PARAGRAPH
-from docx.shared import Cm
+from docx.shared import Cm,Pt
 from docx.shared import RGBColor
 from report_database import *
 from report_headtables import *
@@ -45,6 +45,13 @@ def set_col_width_GSR( table ):  # funkcja do stałej szerokości komórek w rap
 	for row in table.rows:
 		for idx ,width in enumerate( widths ):
 			row.cells[ idx ].width = width
+
+def set_col_width_results( table ):  # funkcja do stałej szerokości komórek w raportach GSR
+	widths = (Cm(2 ) ,Cm( 7 ) ,Cm( 1.6) ,Cm( 2) ,Cm( 2 ) ,Cm( 2 ) ,Cm( 5.5 ))
+	for row in table.rows:
+		for idx ,width in enumerate( widths ):
+			row.cells[ idx ].width = width
+
 def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 	measlist = list()
 	class meas( object ):
@@ -237,51 +244,76 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 	resulttable = document.add_table( rows=rowscount + 1 ,cols=7 )
 	resulttable.style = 'Table Grid'
 
+
 	col_PMS = 0
 	ht = resulttable.cell( 0 ,col_PMS ).paragraphs[ 0 ]
-	r0 = ht.add_run( 'PMS' )
+	ht.paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
+	resulttable.cell(0,col_PMS).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+	r0 = ht.add_run( 'PMS' ).bold=True
+
 
 	col_name = 1
 	ht = resulttable.cell( 0 ,col_name ).paragraphs[ 0 ]
-	r0 = ht.add_run( 'Machine name' )
+	ht.paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
+	resulttable.cell(0,col_name).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+	r0 = ht.add_run( 'Machine name' ).bold=True
+
 
 	col_val = 2
 	ht = resulttable.cell( 0 ,col_val ).paragraphs[ 0 ]
-	r0 = ht.add_run( 'Velocity RMS (mm/s) Max' )
+	ht.paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
+	resulttable.cell(0,col_val).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+	r0 = ht.add_run( 'Velocity RMS (mm/s) Max' ).bold=True
+
 
 	col_class = 3
 	ht = resulttable.cell( 0 ,col_class ).paragraphs[ 0 ]
-	r0 = ht.add_run( 'ISO standard' )
+	ht.paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
+	resulttable.cell(0,col_class).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+	r0 = ht.add_run( 'ISO standard' ).bold=True
+
 
 	col_env = 4
 	ht = resulttable.cell( 0 ,col_env ).paragraphs[ 0 ]
-	r0 = ht.add_run( 'Bearing Envelope 0-Peak (m/s2) Max' )
+	ht.paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
+
+	resulttable.cell(0,col_env).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+	r0 = ht.add_run( 'Bearing Envelope 0-Peak (m/s2) Max' ).bold=True
+
 
 	col_trend = 5
 	ht = resulttable.cell( 0 ,col_trend ).paragraphs[ 0 ]
-	r0 = ht.add_run( 'Trend Velocity RMS (mm/s) Max' )
+	ht.paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
+	resulttable.cell(0,col_trend).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+	r0 = ht.add_run( 'Trend Velocity RMS (mm/s) Max' ).bold=True
+
 
 	col_remark = 6
 	ht = resulttable.cell( 0 ,col_remark ).paragraphs[ 0 ]
-	r0 = ht.add_run( 'Remarks and suggestions' )
+	ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	resulttable.cell(0,col_remark).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+	r0 = ht.add_run( 'Remarks and suggestions' ).bold=True
+	set_col_width_results(resulttable)
 
 	xcord = 0
 	i = -1
 	ids = list()
 	#trzeba zmieniac dla odpalania bez konsoli(kombajn)
 	#print('Delete progress bar before xlwings use')
+	#loadstyles(document)
 	for measStrip in tqdm(sortlistQ):
 	#for measStrip in sortlistQ:
 		i += 1
 		if (measStrip[ 1 ]).isdigit() == False:  ######## NAGŁÓWKI
 			try:
 				ht = resulttable.cell( xcord + 1 ,0 ).paragraphs[ 0 ]
+
 				if measStrip[ 0 ][ -5: ] == '00.00' and sortlistQ[ i + 1 ][ 0 ][ -5: ] != '00.00' and \
 						sortlistQ[ i + 1 ][ 0 ][ -3: ] == '.00':
 					if str( measStrip[ 0 ][ :1 ] ) in activeSortPList:
 						xcord += 1
-						r0 = ht.add_run( measStrip[ 1 ] )
 						resulttable.cell( xcord ,0 ).merge( resulttable.cell( xcord ,6 ) )
+
 
 					continue
 				if measStrip[ 0 ][ -5: ] != '00.00' and measStrip[ 0 ][ -3: ] == '.00':
@@ -299,22 +331,28 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 				p += 1
 				if str( measStrip[ 1 ] ) == str( xx.id ):
 					ht = resulttable.cell( xcord + 1 ,col_PMS).paragraphs[ 0 ]
+					ht.paragraph_format.alignment=WD_ALIGN_PARAGRAPH.LEFT
 					if str(xx.pms) == '0' or str(xx.pms) == '' : xx.pms = '-'
 					r0 = ht.add_run(str(xx.pms) )
 					ht = resulttable.cell( xcord + 1 ,col_name ).paragraphs[ 0 ]
+					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.LEFT
 					r0 = ht.add_run( xx.name )
 					ht = resulttable.cell( xcord + 1 ,col_val ).paragraphs[ 0 ]
+					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 					# dodałem tu zamianę kropek na przecinki + zaokrąglenie do 3 miejsca po przecinku
 					txt_result = str( round( xx.maxval ,3 ) )
 					r0 = ht.add_run( txt_result.replace( "." ,"," ) )
 					ht = resulttable.cell( xcord + 1 ,col_class ).paragraphs[ 0 ]
+					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 					r0 = ht.add_run( str( xx.limit ) )
 
 					colorlimit(r0,str( xx.limit ))
 
 					ht = resulttable.cell( xcord + 1 ,col_env ).paragraphs[ 0 ]
+					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 					r0 = ht.add_run ( str ( xx.maxenv ).replace ( "." ,"," ) )
 					ht = resulttable.cell( xcord + 1 ,col_trend ).paragraphs[ 0 ]
+					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.LEFT
 					ids.append(xx.id)
 					if str( xx.limit ) == 'Cl. D':  # TEGO DLA CZYTELNOSCI LEPIEJ ZROBIC FUNKCJE
 						try:
@@ -381,7 +419,14 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 	r0.add_picture('down.gif')
 	r0 = ht.add_run()
 	r0.text = str('Whenever new results are reduced more than 5% of previous measurements')
-
+	for row in resulttable.rows:
+		for cell in row.cells:
+			paragraphs = cell.paragraphs
+			for paragraph in paragraphs:
+				for run in paragraph.runs:
+					font = run.font
+					font.size = Pt ( 8)
+					font.name='Arial'
 
 def drawtable_GSR( document ,measlist ,connD ,rn_ ):
 	#print( 'Wyniki: ' )
