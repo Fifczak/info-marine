@@ -327,7 +327,8 @@ def resulttable ( tn ,host ,username ,password ,tableno ,id1 ,id2 ,rn ):
             maxval = result [ j ] [ 0 ]
 
     for j in range ( 5 ):
-        result_text = str ( result [ j ] [ 0 ] )
+        result_text = str ( '%.3f'%result [ j ] [ 0 ] )
+        #result_text = str ( result [ j ] [ 0 ] )
         p = tableno.cell ( 2 ,1 + j ).add_paragraph ()
         p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
         r = p.add_run ( result_text.replace ( "." ,"," ) )
@@ -347,7 +348,7 @@ def resulttable ( tn ,host ,username ,password ,tableno ,id1 ,id2 ,rn ):
         p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
         r = p.add_run ( limittxt )
         if limittxt == 'Z. A':
-            r.font.highlight_color = WD_COLOR_INDEX.GREEN
+            r.font.highlight_color = WD_COLOR_INDEX.BRIGHT_GREEN
         if limittxt == 'Z. B':
             r.font.highlight_color = WD_COLOR_INDEX.YELLOW
         if limittxt == 'Z. C' or limittxt == 'Z. D':
@@ -376,7 +377,8 @@ def resulttable ( tn ,host ,username ,password ,tableno ,id1 ,id2 ,rn ):
 
     for j in range ( 3 ):
 
-        result_text = str ( result [ j ] [ 0 ] )
+        result_text = str ( '%.3f'%result [ j ] [ 0 ] )
+        #result_text = str ( result [ j ] [ 0 ] )
         p = tableno.cell ( 2 ,6 + j ).add_paragraph ()
         p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
         r = p.add_run ( result_text.replace ( "." ,"," ) )
@@ -394,7 +396,7 @@ def resulttable ( tn ,host ,username ,password ,tableno ,id1 ,id2 ,rn ):
         p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
         r = p.add_run ( limittxt )
         if limittxt == 'Z. A':
-            r.font.highlight_color = WD_COLOR_INDEX.GREEN
+            r.font.highlight_color = WD_COLOR_INDEX.BRIGHT_GREEN
         if limittxt == 'Z. B':
             r.font.highlight_color = WD_COLOR_INDEX.YELLOW
         if limittxt == 'Z. C':
@@ -716,10 +718,10 @@ def makereport ( username ,password ,host ,rn_ ,id_ ):  # AUTORUN!
     set_col_widths(table4)
     document.add_paragraph('Legend according to vibration class','listlvl1')
     limittablelegend=document.add_table(rows=5,cols=2)
-    limittablelegend.cell(0,0).paragraphs[0].add_run('Z. A').font.highlight_color=WD_COLOR_INDEX.GREEN
+    limittablelegend.cell(0,0).paragraphs[0].add_run('Z. A').font.highlight_color=WD_COLOR_INDEX.BRIGHT_GREEN
     limittablelegend.cell(0,1).paragraphs[0].add_run('Newly commissioned')
 
-    limittablelegend.cell ( 1 ,0 ).paragraphs [ 0 ].add_run ( 'Z. B' ).font.highlight_color = WD_COLOR_INDEX.GREEN
+    limittablelegend.cell ( 1 ,0 ).paragraphs [ 0 ].add_run ( 'Z. B' ).font.highlight_color = WD_COLOR_INDEX.BRIGHT_GREEN
     limittablelegend.cell(1,1).paragraphs[0].add_run('Unrestricted')
 
     limittablelegend.cell(2,0).paragraphs[0].add_run('Z. C').font.highlight_color=WD_COLOR_INDEX.YELLOW
