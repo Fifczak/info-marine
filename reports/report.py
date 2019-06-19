@@ -197,17 +197,17 @@ def makereport ( connD ,rn_ ):
 
 
 #
-username = 'testuser '
-password = 'info'
-host = 'localhost'
-# rn_ = '1620U6-2018'
-#rn_ ='1968-2019'
+# username = 'testuser '
+# password = 'info'
+# host = 'localhost'
+# # rn_ = '1620U6-2018'
+# #rn_ ='1968-2019'
+# #
+# host = '192.168.10.243'
+# rn_ = '2083-2019'
 #
-host = '192.168.10.243'
-rn_ = '2083-2019'
-
-connD = [ username ,password ,host ]
-
-
-makereport ( connD ,str( rn_ ) )
-#os.startfile ( 'C:\overmind\Reports\GSR 1987-2019.docx' )
+# connD = [ username ,password ,host ]
+#
+#
+# makereport ( connD ,str( rn_ ) )
+# #os.startfile ( 'C:\overmind\Reports\GSR 1987-2019.docx' )

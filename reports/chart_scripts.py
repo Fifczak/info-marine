@@ -71,7 +71,6 @@ class trendchart:
             a.legend(loc='upper center', bbox_to_anchor=(0.5, -0.17), ncol=5,frameon=False)
             f.autofmt_xdate()
             return f
-
         def details(VALS,id_,name):
             VALS = list(map(list, zip(*VALS)))
             LL = (len(VALS))
@@ -91,7 +90,6 @@ class trendchart:
             button1.grid(column = LL+1,row=0,rowspan = 3)
         def calldatasheet(parentclass,id_,name):
             datasheet(ids,parentclass,id_,self,name,connD,GUI)
-
         self.imgdata = io.BytesIO()
         self.wdw  = tk.Tk()
         self.wdw.title("Trend Chart")
@@ -102,7 +100,6 @@ class trendchart:
         toolbar.update()
         canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         VALS =list()
-
         for i in ids:
             VALS = trendresults(i)
             self.f = draw(VALS[0],VALS[1],a,VALS[3])
@@ -112,13 +109,12 @@ class trendchart:
 
         self.f.savefig(self.imgdata, format='png')
         if GUI == True:
-
             self.wdw.mainloop()
-        # if GUI == False:
-        #     self.wdw.withdraw()
+        if GUI == False:
+            self.wdw.withdraw()
+
     def giveimage(self):
         return(self.imgdata)
-
 
 class ValRMSwindow():
     def updateRMS(self,_id_,parentclass,grandparentclass,id_,chartframe,connD,ids,GUI):
