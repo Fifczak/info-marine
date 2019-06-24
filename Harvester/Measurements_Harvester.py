@@ -80,7 +80,8 @@ def Harvester():
 						rms = DataFrame()
 						rms.id = (worksheet.cell(x, 0).value)
 						rms.rn = (worksheet.cell(0, 8).value)
-						rms.measdate = ((str(datetime.datetime(*xlrd.xldate_as_tuple(worksheet.cell(x , 8).value, workbook.datemode))))[:10])
+						try:rms.measdate = ((str(datetime.datetime(*xlrd.xldate_as_tuple(worksheet.cell(x , 8).value, workbook.datemode))))[:10])
+						except:rms.measdate = (worksheet.cell(1, 8).value)[0:10]
 						rms.point = (worksheet.cell(x +radj, 7).value)
 						rms.rms = (worksheet.cell(x + radj, 8).value)
 						measlist.append(rms)
@@ -88,9 +89,9 @@ def Harvester():
 						env = DataFrame()
 						env.id = (worksheet.cell(x, 0).value)
 						env.rn = (worksheet.cell(0, 8).value)
-						env.measdate = (
-						(str(datetime.datetime(*xlrd.xldate_as_tuple(worksheet.cell(x, 8).value, workbook.datemode))))[
+						try:env.measdate = ((str(datetime.datetime(*xlrd.xldate_as_tuple(worksheet.cell(x, 8).value, workbook.datemode))))[
 						:10])
+						except:env.measdate = (worksheet.cell(1, 8).value)[0:10]
 						env.point = (worksheet.cell(x + radj, 7).value)
 						env.env = (worksheet.cell(x + radj, 9).value)
 						measlist.append(env)
