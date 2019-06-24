@@ -22,18 +22,9 @@ from tkinter import filedialog
 
 
 
-
-
-
-
-
 def getini ( connD) :
-
 	querry = "select ini from users where login = '"+str(connD[0]).strip()+"' limit 1;"
 	result = list(q_run(connD,querry))
-
-
-
 	return result[ 0 ][ 0 ]
 
 def q_run(connD, querry):
@@ -60,8 +51,6 @@ def q_run(connD, querry):
 
 def makereport ( connD ,rn_ ):
 	rn_ = str(rn_)
-
-
 
 	#############################################################################################
 	############################ 0.USTALANIE SKŁADOWYCH DO RAPORTU ##############################
@@ -199,16 +188,16 @@ def makereport ( connD ,rn_ ):
 #
 username = 'testuser '
 password = 'info'
-#host = 'localhost'
-#rn_ = '1620U6-2018'
-# #rn_ ='1968-2019'
-
+# host = 'localhost'
+# rn_ = '1620U6-2018'
+# # #rn_ ='1968-2019'
+#
 host = '192.168.10.243'
-rn_ = '2085-2019'
-#
+rn_ = '2044U-2019'
+# #
 connD = [ username ,password ,host ]
-
 #
-#
-# #os.startfile ( 'C:\overmind\Reports\GSR 1987-2019.docx' )
+# #
+# #
+# # #os.startfile ( 'C:\overmind\Reports\GSR 1987-2019.docx' )
 makereport(connD,rn_)

@@ -245,11 +245,13 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 	resulttable.style = 'Table Grid'
 
 
+
 	col_PMS = 0
 	ht = resulttable.cell( 0 ,col_PMS ).paragraphs[ 0 ]
 	ht.paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
 	resulttable.cell(0,col_PMS).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 	r0 = ht.add_run( 'PMS' ).bold=True
+
 
 
 	col_name = 1
@@ -307,11 +309,17 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 		if (measStrip[ 1 ]).isdigit() == False:  ######## NAGŁÓWKI
 			try:
 				ht = resulttable.cell( xcord + 1 ,0 ).paragraphs[ 0 ]
-
+				resulttable.cell( xcord + 1 ,0 ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 				if measStrip[ 0 ][ -5: ] == '00.00' and sortlistQ[ i + 1 ][ 0 ][ -5: ] != '00.00' and \
 						sortlistQ[ i + 1 ][ 0 ][ -3: ] == '.00':
 					if str( measStrip[ 0 ][ :1 ] ) in activeSortPList:
+
 						xcord += 1
+						ht.paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
+
+						r0 = ht.add_run(measStrip[1])
+						r0.font.color.rgb = RGBColor(0, 0, 255)
+						r0.bold = True
 						resulttable.cell( xcord ,0 ).merge( resulttable.cell( xcord ,6 ) )
 
 
@@ -319,7 +327,10 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 				if measStrip[ 0 ][ -5: ] != '00.00' and measStrip[ 0 ][ -3: ] == '.00':
 					if str( measStrip[ 0 ][ :4 ] ) in activeSortList:
 						xcord += 1
+
 						r0 = ht.add_run( measStrip[ 1 ] )
+						r0.font.color.rgb = RGBColor(128, 0, 128)
+						r0.bold = True
 						resulttable.cell( xcord ,0 ).merge( resulttable.cell( xcord ,6 ) )
 
 					continue
@@ -354,6 +365,15 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 					ht = resulttable.cell( xcord + 1 ,col_trend ).paragraphs[ 0 ]
 					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.LEFT
 					ids.append(xx.id)
+
+					resulttable.cell(xcord + 1, col_PMS).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+					resulttable.cell(xcord + 1, col_name).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+					resulttable.cell(xcord + 1, col_val).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+					resulttable.cell(xcord + 1, col_class).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+					resulttable.cell(xcord + 1, col_env).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+					resulttable.cell(xcord + 1, col_trend).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+					resulttable.cell(xcord + 1, col_remark).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+
 					if str( xx.limit ) == 'Cl. D':  # TEGO DLA CZYTELNOSCI LEPIEJ ZROBIC FUNKCJE
 						try:
 							trendtemp1 = xx.trend[ 0 ]
@@ -402,22 +422,7 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 						ids.clear()
 	ht = document.add_paragraph()
 	r0 = ht.add_run()
-	r0.text = str('Trend results:')
-	r0.bold = True
-	ht = document.add_paragraph()
-	r0 = ht.add_run()
-	r0.add_picture('up.gif')
-	r0 = ht.add_run()
-	r0.text = str('Whenever new results are increased more than 5% of previous measurements')
-	ht = document.add_paragraph()
-	r0 = ht.add_run()
-	r0.add_picture('none.gif')
-	r0 = ht.add_run()
-	r0.text = str('Whenever new results are in range plus / minus 5% of previous measurements')
-	ht = document.add_paragraph()
-	r0 = ht.add_run()
-	r0.add_picture('down.gif')
-	r0 = ht.add_run()
+	trendresults(document)
 	r0.text = str('Whenever new results are reduced more than 5% of previous measurements')
 	for row in resulttable.rows:
 		for cell in row.cells:
@@ -870,4 +875,7 @@ def trendresults ( document ) :
 	trendsres.cell ( 1 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
 	trendsres.cell ( 2 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt ( 8 )
 	trendsres.cell ( 2 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
+	trendsres.cell(0, 1).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+	trendsres.cell(1, 1).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+	trendsres.cell(2, 1).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 	set_cols_width_trend ( trendsres )

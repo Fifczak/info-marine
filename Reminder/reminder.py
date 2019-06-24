@@ -7,7 +7,7 @@ from tkinter import messagebox
 from tkcalendar import Calendar, DateEntry
 from tkinter.filedialog import askopenfilename
 from tkinter import Tk
-
+import csv
 import matplotlib.pyplot as plt
 import numpy as num
 import tkinter as tkk
@@ -16,7 +16,7 @@ from tkinter import filedialog
 import datetime
 
 
-connD=['testuser','info','192.168.10.243']
+#connD=['testuser','info','192.168.10.243']
 def q_run(connD, querry):
     username = connD[0]
     password = connD[1]
@@ -38,8 +38,63 @@ def q_run(connD, querry):
     cur.close()
 
 
+class LogApplication:
 
-def remindershow():
+	def __init__(self):
+		self.root = Tk()
+		self.root.title("Log In")
+		self.title = tk.Label(self.root, text="Info Datasheet")  # TITLE
+		self.title.grid(row=0, column=2)
+		self.user_entry_label = tk.Label(self.root, text="Username: ")  # USERNAME LABEL
+		self.user_entry_label.grid(row=1, column=1)
+		self.user_entry = tk.Entry(self.root, text="Username: ")  # USERNAME ENTRY BOX
+		self.user_entry.grid(row=1, column=2)
+		self.pass_entry_label = tk.Label(self.root, text="Password: ")  # PASSWORD LABEL
+		self.pass_entry_label.grid(row=2, column=1)
+		self.pass_entry = tk.Entry(self.root, show="*")  # PASSWORD ENTRY BOX
+		self.pass_entry.grid(row=2, column=2)
+		try:
+			with open('C:\overmind\\temp\log.csv') as csvfile:
+				openfile = csv.reader(csvfile, delimiter=' ')
+				p = -1
+				for lines in openfile:
+					p += 1
+					if p == 0:
+						self.user_entry.insert(0, str(lines[0]))
+					if p == 1:
+						self.pass_entry.insert(0, str(lines[0]))
+		except:
+			pass
+		self.var = IntVar()
+		self.checksave = tk.Checkbutton(self.root, text="Remember", variable=self.var)
+		self.checksave.grid(row=3, column=2)
+		self.sign_in_butt = Button(self.root, text="Sign In", command=lambda ue=self.user_entry, pe=self.pass_entry: self.logging_in(ue, pe))
+		self.sign_in_butt.grid(row=5, column=2)
+		self.root.mainloop()
+
+	def logging_in(self,user_entry, pass_entry):
+		user_get = user_entry.get()  # Retrieve Username
+		pass_get = pass_entry.get()  # Retrieve Password
+		if bool(self.var.get()) == True:
+		   # config = Path('C:\overmind\\temp\log.csv')
+			with open('C:\overmind\\temp\log.csv', 'w+' ,newline='') as csvfile:
+				filewriter = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
+				filewriter.writerow([user_get])
+				filewriter.writerow([pass_get])
+		connD = [user_get, pass_get, '192.168.10.243']
+
+
+		querry = "SELECT current_user"
+		usercheck = ''
+
+		usercheck = q_run(connD, querry)  # PYINSTALLER ma problemy gdzies tu
+		if usercheck != '':
+			self.root.destroy()
+			remindershow(connD)
+
+
+
+def remindershow(connD):
     devlist = list()
     class device:
         def __init__(self):
@@ -393,8 +448,7 @@ Please be so kind and inform us whether taking vibration measurements is possibl
             self.Reportlistbox.bind('<Double-Button>', setquaterly)
             self.devlistbox = Listbox(self.remWindow)
             self.devlistbox.config(width=0)
-            self.rclick = RightClick(self.devlistbox)
-            self.devlistbox.bind('<Button-3>', self.rclick.popup)
+
             self.sendbutton = tk.Button(text='Send', command = marksend)
             self.textfield = tk.Text(self.remWindow, width=100, height=60)
             querry = "select name,id from main where parent = 1 order by name"
@@ -408,25 +462,9 @@ Please be so kind and inform us whether taking vibration measurements is possibl
             self.remWindow.mainloop()
 
 
-    # class RightClick():
-    #     def __init__(self, master):
-    #         # create a popup menu
-    #         self.aMenu = tk.Menu(master, tearoff=0)
-    #         self.aMenu.add_command(label="Dont't send", command = self.dontsend)
-    #         self.tree_item = ''
-    #
-    #     def dontsend(self):
-    #         #w = evt.widget
-    #         index = int(deviceslistbox.curselection()[0])
-    #
-    #
-    #
-    #     def popup(self, event):
-    #         self.aMenu.post(event.x_root, event.y_root)
-    #         #self.tree_item = .devlistbox.focus()
 
     reminderwindow()
 
 
-remindershow()
+LogApplication()
 

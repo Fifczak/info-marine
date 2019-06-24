@@ -9,6 +9,7 @@ from tkinter.filedialog import askopenfilename
 from tkinter import Tk
 from tkinter import filedialog
 import psycopg2
+from tqdm import tqdm
 
 username = 'testuser'
 password = 'info'
@@ -69,15 +70,11 @@ def Harvester():
 		pbars.title("Reading Marvib measurement file")
 		progress_bar = ttk.Progressbar(pbars,orient = 'horizontal',lengt = 286, mode = 'determinate')
 
-		progress_bar['maximum'] =(ysize)
-		progress_bar.pack(side = TOP)
-		x=-1
-		for row in range(ysize):
-			x+=1
-			progress_bar['value'] = x
-			progress_bar.update()
 
-			if (worksheet.cell(x, 0).value).isnumeric() == True:
+		x=-1
+		for row in tqdm(range(ysize)):
+			x+=1
+			if str(worksheet.cell(x, 0).value).isnumeric() == True:
 				for radj in range(1,checkpointsno(x)):
 					if (worksheet.cell(x + radj, 8).value) != '':
 						rms = DataFrame()
@@ -100,10 +97,9 @@ def Harvester():
 
 		progress_bar['maximum'] = len(measlist)
 		x=0
-		for item in measlist:
+		for item in tqdm(measlist):
 			x+=1
-			progress_bar['value'] = x
-			progress_bar.update()
+
 			if item.rms != '':
 
 				querry = "INSERT INTO MEASUREMENTS_LOW (id, raport_number,point,type,unit,date,value)" \

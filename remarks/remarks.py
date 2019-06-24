@@ -120,7 +120,7 @@ class LogApplication:
 				filewriter = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
 				filewriter.writerow([user_get])
 				filewriter.writerow([pass_get])
-		connD = [user_get, pass_get, 'localhost']
+		connD = [user_get, pass_get, '192.168.10.243']
 
 
 		querry = "SELECT current_user"
@@ -344,9 +344,9 @@ def createfeedback(rn_,connD):
 							limitstr = (countLimit(line[4], line[2]))
 							R = P.add_run(limitstr)
 					if limitstr == 'Cl. A':
-						R.font.highlight_color = WD_COLOR_INDEX.GREEN
+						R.font.highlight_color = WD_COLOR_INDEX.BRIGHT_GREEN
 					if limitstr == 'Cl. B':
-						R.font.highlight_color = WD_COLOR_INDEX.GREEN
+						R.font.highlight_color = WD_COLOR_INDEX.BRIGHT_GREEN
 					if limitstr == 'Cl. C':
 						R.font.highlight_color = WD_COLOR_INDEX.YELLOW
 					if limitstr == 'Cl. D':
