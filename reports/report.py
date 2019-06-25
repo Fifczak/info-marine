@@ -7,7 +7,7 @@ import psycopg2
 from report_styles import loadstyles
 from report_headtables import standard_info_table
 from report_frontpages import standard_with_pms
-from report_resulttables import prepare_IM ,drawtable_IM_chart_PMS ,trendresults
+from report_resulttables import prepare_IM ,drawtable_IM_chart_PMS,drawtable_IM_chart_PMS_limit ,trendresults
 from report_standards import legend_IM ,standards
 from time import gmtime, strftime
 from report_measurementequipment import MarVibENG
@@ -63,7 +63,7 @@ def makereport ( connD ,rn_ ):
 	# headtabletype = 1  # 1 - IM; 2 - KAMTRO; 3 - stocznia remontowa
 	# standards #
 	# frontpagetype = 1
-	# resulttable = 1  # 1 - IM; 2-remontowa
+	# resulttable = 1  # 1 - IM chart + PMS ; 2-remontowa ; 3 - IM chart + PMS + limit
 	# measurementequipment
 	# summary #1 - standard IM summary
 	# signatures
@@ -85,6 +85,16 @@ def makereport ( connD ,rn_ ):
 		reptypedict.update({"standards": 1})
 		reptypedict.update({"frontpagetype": 1})
 		reptypedict.update({"resulttable": 1})
+		reptypedict.update({"measurementequipment": 1})
+		reptypedict.update({"summary": 1})
+		reptypedict.update({"signatures": 1})
+
+	if int(reporttype) == 5:
+		reptypedict.update( {"fileformat": 1})
+		reptypedict.update({"headtabletype": 1})
+		reptypedict.update({"standards": 1})
+		reptypedict.update({"frontpagetype": 1})
+		reptypedict.update({"resulttable": 3})
 		reptypedict.update({"measurementequipment": 1})
 		reptypedict.update({"summary": 1})
 		reptypedict.update({"signatures": 1})
@@ -144,6 +154,9 @@ def makereport ( connD ,rn_ ):
 	if reptypedict["resulttable"] == 1:
 		measlist = prepare_IM(connD, rn_)
 		drawtable_IM_chart_PMS ( document ,measlist ,connD ,rn_ )
+	if reptypedict["resulttable"] == 3:
+		measlist = prepare_IM(connD, rn_)
+		drawtable_IM_chart_PMS_limit ( document ,measlist ,connD ,rn_ )
 
 	#############################################################################################
 	################################ VI. Urządzenie pomiarowe ###################################
@@ -186,18 +199,18 @@ def makereport ( connD ,rn_ ):
 
 
 #
-# username = 'testuser '
-# password = 'info'
-# # host = 'localhost'
-# # rn_ = '1620U6-2018'
-# # # #rn_ ='1968-2019'
+username = 'testuser '
+password = 'info'
+host = 'localhost'
+rn_ = '1994U6-2019'
+# # #rn_ ='1968-2019'
 # #
-# host = '192.168.10.243'
+host = '192.168.10.243'
 # rn_ = '2044U-2019'
 # # #
-# connD = [ username ,password ,host ]
-# #
+connD = [ username ,password ,host ]
+#
 # # #
 # # #
 # # # #os.startfile ( 'C:\overmind\Reports\GSR 1987-2019.docx' )
-# makereport(connD,rn_)
+makereport(connD,rn_)
