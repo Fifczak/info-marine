@@ -2,7 +2,8 @@ from docx.enum.table import WD_ALIGN_VERTICAL
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Pt
 from report_database import *
-
+from docx.enum.text import WD_BREAK
+from docx.enum.text import WD_LINE_SPACING
 
 # używana wszędzie w raportach IM
 def standard_info_table ( connD ,document ,rn_ ):
@@ -27,13 +28,15 @@ def standard_info_table ( connD ,document ,rn_ ):
     headtable.style = 'Table Grid'
 
     headtable.cell( 0 ,0 ).merge( headtable.cell( 0 ,1 ).merge( headtable.cell( 0 ,2 ) ) )
-    ht = headtable.cell( 0 ,0 ).paragraphs[ 0 ]
+    ht = headtable.cell( 0 ,0 ).paragraphs[  0]
+
     ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r0 = ht.add_run()
-    r0.text = 'Vibration diagnostic report '
+    headtable.cell(0,0).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+    r0 = ht.add_run('Vibration diagnostic report ')
+    #r0.text =
     r0.font.name = 'Calibri'
     r0.font.size = Pt( 12 )
-    r1 = ht.add_run( rn_ )
+    r1 = ht.add_run( str(rn_) )
     r1.bold = True
     r1.font.name = 'Calibri'
 
@@ -64,11 +67,9 @@ def standard_info_table ( connD ,document ,rn_ ):
     ht = headtable.cell( 1 ,1 ).paragraphs[ 0 ]
     r0 = ht.add_run( 'Date of measurement: ' )
     r0.font.name = 'Calibri'
-    headtable.cell( 1 ,1 ).add_paragraph()
-
+    r0.add_break ( WD_BREAK . LINE_CLEAR_LEFT)
     ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    ht.vertical_alignment = WD_ALIGN_PARAGRAPH.CENTER
-    ht = headtable.cell( 1 ,1 ).add_paragraph()
+    headtable.cell(0,0).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 
     ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
     ht.vertical_alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -76,6 +77,7 @@ def standard_info_table ( connD ,document ,rn_ ):
     r0 = ht.add_run(str(datestr))
     r0.bold = True
     r0.font.name = 'Calibri'
+    headtable.cell ( 1 ,1 ).add_paragraph ()
     ht = headtable.cell( 1 ,2 ).paragraphs[ 0 ]
     ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
     r0 = ht.add_run( 'Place of measurement:' )
