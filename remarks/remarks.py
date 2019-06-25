@@ -120,7 +120,7 @@ class LogApplication:
 				filewriter = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
 				filewriter.writerow([user_get])
 				filewriter.writerow([pass_get])
-		connD = [user_get, pass_get, '192.168.10.243']
+		connD = [user_get, pass_get, 'localhost']
 
 
 		querry = "SELECT current_user"
@@ -385,6 +385,7 @@ def createfeedback(rn_,connD):
 def grabremarks():
 	class remark:
 		def __init__(self):
+			remlistIN.clear()
 			self.name = ''
 			self.remark = ''
 
@@ -410,9 +411,11 @@ def grabremarks():
 					if str(paragraph.text) == 'Machine name':
 						tableflag = True
 						namecol.append(c)
+
 					if str(paragraph.text) == 'Remarks and suggestions':
 						tableflag = True
 						remcol.append(c)
+
 					if tableflag == True:
 						if t not in rt:
 							rt.append(t)
@@ -420,8 +423,12 @@ def grabremarks():
 						tableflag = False
 					try:
 						if t in rt:
+
+
 							if c in namecol:
+								print(coord)
 								if str(paragraph.text) != '':
+
 									rem.name = str(paragraph.text)
 							if c in remcol:
 								if str(paragraph.text) != '':
@@ -431,6 +438,7 @@ def grabremarks():
 			try:
 				if (str(rem.name)).strip() != '' and (str(rem.remark)).strip() != '':
 					if (str(rem.name)).strip() != (str(rem.remark)).strip():
+
 						remlistIN.append(rem)
 			except:
 				pass
@@ -563,9 +571,13 @@ def remarks(connD):
 			self.id = dev[1]
 			self.name = dev[0]
 			self.parent =dev[2]
-			self.nameLabel = tk.Label(measCframe,text= self.name, width=40)
-			self.nameLabel.pack(side = LEFT)
-
+			self.measdate = dev[3]
+			self.infoframe = tk.Frame(measCframe, width=40)
+			self.infoframe.pack(side = LEFT)
+			self.nameLabel = tk.Label(self.infoframe ,text= self.name, width=40)
+			self.nameLabel.pack(side = TOP,anchor = W)
+			self.measdateLabel = tk.Label(self.infoframe ,text= self.measdate, width=40)
+			self.measdateLabel.pack(side = TOP,anchor = W)
 			self.remarkframe = tk.Frame(measCframe)
 
 
@@ -775,18 +787,20 @@ def remarks(connD):
 		left join feedbacks as fdb on rem.id = fdb.id and rem.raport_number = fdb.raport_number
 		where rem.raport_number = '""" + str(report) + """'
 		group by rem.id, rem.raport_number, rem.remark, rem.sended, remi.request_date, fdb.feedback, fdb.documentdate"""
+		remtable = list()
+		remtable.clear()
 		remtable = q_run(connD,querry)
 
 
-		querry = """select dev.name ,ml.id,ml.parent
-			from (select ml.parent, id, max(value),raport_number
+		querry = """select dev.name ,ml.id,ml.parent,ml.min
+			from (select ml.parent, id, max(value),raport_number,min(date)
 from measurements_low as ml 
 where raport_number = '""" + str(report) + """'
 group by ml.parent, ml.id,raport_number order by id) as ml 
 			left join (select parent,sort, cast(id as int) as id from ds_structure where id ~E'^\\\d+$') as dss on ml.id =dss.id and ml.parent = dss.parent
 			left join devices as dev on ml.id =dev.id
 			where ml.raport_number = '""" + str(report) + """' 
-				group by ml.id,dss.sort,dev.name,ml.parent
+				group by ml.id,dss.sort,dev.name,ml.parent,ml.min
 				order by dss.sort"""
 		try:
 			for widget in MASTERmeasframe.winfo_children():
@@ -823,7 +837,7 @@ group by ml.parent, ml.id,raport_number order by id) as ml
 		scrollable_body = Scrollable(body, width=16)
 		remlist.clear()
 		for i in devices:
-			measCframe = tk.Frame(scrollable_body, height=20, width=64)
+			measCframe = tk.Frame(scrollable_body,  bd=1, height=20, width=64, relief=SUNKEN)
 			X = frame_reminder(measCframe,i,report,remtable)
 			remlist.append(X)
 		scrollable_body.update()
@@ -864,6 +878,7 @@ group by ml.parent, ml.id,raport_number order by id) as ml
 # root.title("Login")
 # root.geometry("200x120")
 # LogApplication(root)  # The frame is inside the widgit
+grabremarks()
 LogApplication()   #TUTAJ JEST APKA DO LOGOWANIE
 
 #remindershow()

@@ -202,7 +202,7 @@ def makereport ( connD ,rn_ ):
 username = 'testuser '
 password = 'info'
 host = 'localhost'
-rn_ = '1994U6-2019'
+rn_ = '2086-2019'
 # # #rn_ ='1968-2019'
 # #
 host = '192.168.10.243'
