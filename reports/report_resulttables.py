@@ -142,7 +142,7 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 					 left join devices as dev on ml.id = dev.id
 					 left join(select cast (id as integer), sort from ds_structure where id ~E'^\\\d+$' ) as dss on ml.id = dss.id
 					 left join standards sta on dev.norm = sta.standard
-					 where ml.value <> -1 and ml.type = 'RMS' and ml.parent = {} and sort is distinct from null
+					 where ml.date > now() - interval '2 years'  and ml.value <> -1 and ml.type = 'RMS' and ml.parent = {} and sort is distinct from null
 					 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,ml.date,dev.drivenby,dss.sort,dev.pms,sta.limit_4_value
 					  order by raport_number DESC""".format(str(parent),str(parent))
 		reportresults = q_run( connD ,querry )
