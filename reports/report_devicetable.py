@@ -1,7 +1,7 @@
 import psycopg2
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Pt ,Cm
-
+from docx.enum.table import WD_TABLE_ALIGNMENT
 
 def set_col_width_dev(table):
     widths = (Cm ( 4.4 ) ,Cm ( 3 ))
@@ -40,6 +40,7 @@ def devicetable ( document ) :
     devtab.cell ( 5 ,0 ).text = 'Indication error:'
     devtab.cell ( 4 ,1 ).text = '2Hz-30kHz / RPM = 60-20000'
     devtab.cell ( 5 ,1 ).text = '±0,5%'
+    devtab.alignment=WD_TABLE_ALIGNMENT.CENTER
 
     for i in range ( 6 ) :
         devtab.cell ( i ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
