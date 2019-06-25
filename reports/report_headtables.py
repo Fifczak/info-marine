@@ -66,6 +66,8 @@ def standard_info_table ( connD ,document ,rn_ ):
     r1.font.name = 'Calibri'
     ht = headtable.cell( 1 ,1 ).paragraphs[ 0 ]
     r0 = ht.add_run( 'Date of measurement: ' )
+    r0.add_break()
+
     r0.font.name = 'Calibri'
     r0.add_break ( WD_BREAK . LINE_CLEAR_LEFT)
     ht.alignment = WD_ALIGN_PARAGRAPH.CENTER

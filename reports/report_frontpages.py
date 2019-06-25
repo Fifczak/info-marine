@@ -71,7 +71,7 @@ def standard_with_pms(document):
 
 	h3=document.add_paragraph()
 	h3.style = document.styles['IM TEXT']
-
+	h3.paragraph_format.alignment=WD_ALIGN_PARAGRAPH.JUSTIFY
 	r1=h3.add_run('Measured values are presented in the table below. Each machine if applicable is separated for driver (el. motor, diesel engine, etc.) and driven unit (pump, compressor, etc.) ')
 	r1.add_break()
 	r2=h3.add_run('First and second columns')
