@@ -2,30 +2,24 @@ from docx.enum.text import WD_BREAK
 from docx.enum.text import WD_COLOR_INDEX, WD_ALIGN_PARAGRAPH
 from docx.shared import Cm
 from docx.shared import Pt
+from docx.enum.table import WD_ALIGN_VERTICAL
 
 
 
 def set_col_width(table):
-    widths = (Cm ( 1.4 ) ,Cm ( 3 ) ,Cm ( 1 ) ,Cm ( 9 ))
+    widths = (Cm ( 2.1 ) ,Cm ( 3 ) ,Cm ( 1 ) ,Cm ( 9 ))
     for row in table.rows:
         for idx, width in enumerate(widths):
             row.cells[idx].width=width
 
 
 def set_col_width_lim ( table ):
-    widths = (Cm ( 2 ) ,Cm ( 6 ))
+    widths = (Cm ( 1.5 ) ,Cm ( 10 ))
     for row in table.rows:
         for idx ,width in enumerate ( widths ):
             row.cells[ idx ].width = width
-def set_col_width_GSR(table):
-    widths=(Cm(5.5),Cm(1.5),Cm(1.5),Cm(2),Cm(2),Cm(2),Cm(3.5))
-    for row in table.rows:
-        for idx, width in enumerate(widths):
-            row.cells[idx].width=width
-
-
 def set_col_width_std ( table ):
-    widths = (Cm ( 3 ) ,Cm ( 15 ))
+    widths = (Cm ( 2.2 ) ,Cm ( 15 ))
     for row in table.rows:
         for idx ,width in enumerate ( widths ):
             row.cells[ idx ].width = width
@@ -52,6 +46,7 @@ def standards(document):
     t_std.cell(0, 0).paragraphs[0].runs[0].font.size = Pt(11)
     t_std.cell(0, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
     t_std.cell(0, 0).paragraphs[0].runs[0].bold = True
+    t_std.cell(0,0).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 
 
     #opis
@@ -70,6 +65,7 @@ def standards(document):
     t_std.cell(1, 0).paragraphs[0].runs[0].font.size = Pt(11)
     t_std.cell(1, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
     t_std.cell(1, 0).paragraphs[0].runs[0].bold = True
+    t_std.cell(1,0).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 
     #opis
     t_std.cell(1, 1).paragraphs[0].runs[0].font.name = 'Calibri'
@@ -87,6 +83,7 @@ def standards(document):
     t_std.cell(2, 0).paragraphs[0].runs[0].font.size = Pt(11)
     t_std.cell(2, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
     t_std.cell(2, 0).paragraphs[0].runs[0].bold = True
+    t_std.cell(2,0).vertical_alignemnt=WD_ALIGN_VERTICAL.CENTER
 
     #opis
     t_std.cell(2, 1).paragraphs[0].runs[0].font.name = 'Calibri'
@@ -106,6 +103,7 @@ def standards(document):
     t_std.cell(3, 0).paragraphs[0].runs[0].font.size = Pt(11)
     t_std.cell(3, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
     t_std.cell(3, 0).paragraphs[0].runs[0].bold = True
+    t_std.cell(3,0).vertical_alignemnt=WD_ALIGN_VERTICAL.CENTER
 
     #opis
 
@@ -127,6 +125,7 @@ def standards(document):
     t_std.cell(4, 0).paragraphs[0].runs[0].font.size = Pt(11)
     t_std.cell(4, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
     t_std.cell(4, 0).paragraphs[0].runs[0].bold = True
+    t_std.cell(4,0).vertical_alignemnt=WD_ALIGN_VERTICAL.CENTER
 
 
     #opis
@@ -149,6 +148,7 @@ def standards(document):
     t_std.cell(5, 0).paragraphs[0].runs[0].font.size = Pt(11)
     t_std.cell(5, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
     t_std.cell(5, 0).paragraphs[0].runs[0].bold = True
+    t_std.cell(5,0).vertical_alignemnt=WD_ALIGN_VERTICAL.CENTER
 
     #opis
 
@@ -233,7 +233,7 @@ def legend_IM(document):
     end=document.add_paragraph()
     er=end.add_run()
     er.add_break(WD_BREAK.PAGE)
-    set_col_width_std ( legend )
+    set_col_width_lim ( legend )
 
 #legenda dla kamtro - do dokończenia [odwolanie-if w report.py]
 def legend_KAMTRO(document):
