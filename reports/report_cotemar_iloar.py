@@ -398,6 +398,12 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		p=tableno.cell(3,1+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(limittxt)
+		if limittxt=='Z. A':
+			r.font.highlight_color=WD_COLOR_INDEX.BRIGHT_GREEN
+		elif limittxt=='Z. B':
+			r.font.highlight_color=WD_COLOR_INDEX.YELLOW
+		elif limittxt=='Z. C':
+			r.font.highlight_color=WD_COLOR_INDEX.RED
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
 		
@@ -441,6 +447,12 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		p=tableno.cell(3,6+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(limittxt)
+		if limittxt=='Z. A':
+			r.font.highlight_color=WD_COLOR_INDEX.BRIGHT_GREEN
+		elif limittxt=='Z. B':
+			r.font.highlight_color=WD_COLOR_INDEX.YELLOW
+		elif limittxt=='Z. C':
+			r.font.highlight_color=WD_COLOR_INDEX.RED
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
 	
@@ -545,6 +557,12 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		p=tableno.cell(6,1+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(limittxt)
+		if limittxt=='Z. A':
+			r.font.highlight_color=WD_COLOR_INDEX.BRIGHT_GREEN
+		elif limittxt=='Z. B':
+			r.font.highlight_color=WD_COLOR_INDEX.YELLOW
+		elif limittxt=='Z. C':
+			r.font.highlight_color=WD_COLOR_INDEX.RED
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
 		
@@ -584,7 +602,7 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		elif result[j][0]>4.5 and result[j][0]<11.2:
 			limittxt='Z. B'
 		else:
-			limittxt = 'Out of limit'
+			limittxt = 'Z. C'
 		p=tableno.cell(6,6+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(limittxt)
@@ -687,13 +705,23 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		r.font.size= Pt(9)
 		if maxcord == j:
 			r.bold = True
-		if result[j][0] < 7.1:
-			limittxt = 'In limit'
+		if result[j][0] < 2.3:
+			limittxt = 'Z. A'
+		elif result[j][0]>2.3 and result[j][0]<4.5:
+			limittxt='Z. B'
+		elif result[j][0]>4.5 and result[j][0]<7.1:
+			limittxt='Z, C'
 		else:
-			limittxt = 'Out of limit'
+			limittxt = 'Z. D'
 		p=tableno.cell(9,1+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(limittxt)
+		if limittxt=='Z. A':
+			r.font.highlight_color=WD_COLOR_INDEX.BRIGHT_GREEN
+		elif limittxt=='Z. B':
+			r.font.highlight_color=WD_COLOR_INDEX.YELLOW
+		elif limittxt=='Z. C':
+			r.font.highlight_color=WD_COLOR_INDEX.RED
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
 		
@@ -728,13 +756,21 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		r.font.size= Pt(9)
 		if maxcord == j:
 			r.bold = True
-		if result[j][0] < 11.2:
-			limittxt = 'In limit'
+		if result[j][0] < 4.5:
+			limittxt = 'Z. A'
+		elif result[j][0]>4.5 and result[j][0]<11.2:
+			limittxt='Z. B'
 		else:
-			limittxt = 'Out of limit'
+			limittxt = 'Z. C'
 		p=tableno.cell(9,6+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(limittxt)
+		if limittxt=='Z. A':
+			r.font.highlight_color=WD_COLOR_INDEX.BRIGHT_GREEN
+		elif limittxt=='Z. B':
+			r.font.highlight_color=WD_COLOR_INDEX.YELLOW
+		elif limittxt=='Z. C':
+			r.font.highlight_color=WD_COLOR_INDEX.RED
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
 	
