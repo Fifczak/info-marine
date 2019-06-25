@@ -383,6 +383,7 @@ def createfeedback(rn_,connD):
 	document.save('C:\overmind\Reports\\' + str(result[0][0]) + ' - feedback for vibration report ' + str(rn_) + '.docx' )
 
 def grabremarks():
+	remlistIN.clear()
 	class remark:
 		def __init__(self):
 			self.name = ''
