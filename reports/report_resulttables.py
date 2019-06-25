@@ -79,6 +79,7 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 			self.sort = ''
 			self.sort2 = ''
 			self.pms = ''
+			self.Dlimit = ''
 	def loadData( connD ):
 		def countLimit( standard ,value ):
 			for limNo in limits:
@@ -131,17 +132,19 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 					from standards"""
 		limits = q_run( connD ,querry )
 		querry = """select 
-					 ml.id, ml.raport_number, dev.name,  max(ml.value) as RMS, ml2.max as Envelope, dev.norm ,ml.date, dev.drivenby,dss.sort,dev.pms
+					 ml.id, ml.raport_number, dev.name,  max(ml.value) as RMS, ml2.max as Envelope, dev.norm ,ml.date, dev.drivenby,dss.sort,dev.pms,sta.limit_4_value
 					from measurements_low as ml
 					left join (select 
 								 ml.id, ml.raport_number,  max(ml.value)
 								 from measurements_low as ml
-								 where ml.value <> -1 and type = 'envelope P-K' and parent = """ + str( parent ) + """
+								 where ml.value <> -1 and type = 'envelope P-K' and parent = {}
 								 group by id,raport_number order by raport_number DESC) as ml2 on ml.id = ml2.id and ml.raport_number = ml2.raport_number
 					 left join devices as dev on ml.id = dev.id
 					 left join(select cast (id as integer), sort from ds_structure where id ~E'^\\\d+$' ) as dss on ml.id = dss.id
-					 where ml.value <> -1 and ml.type = 'RMS' and ml.parent = """ + str( parent ) + """ and sort is distinct from null
-					 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,ml.date,dev.drivenby,dss.sort,dev.pms order by raport_number DESC"""
+					 left join standards sta on dev.norm = sta.standard
+					 where ml.value <> -1 and ml.type = 'RMS' and ml.parent = {} and sort is distinct from null
+					 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,ml.date,dev.drivenby,dss.sort,dev.pms,sta.limit_4_value
+					  order by raport_number DESC""".format(str(parent),str(parent))
 		reportresults = q_run( connD ,querry )
 		for line in reportresults:
 			x = meas()
@@ -158,6 +161,8 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 				x.sort = line[ 8 ][ :4 ]
 				x.sort2 = line[ 8 ][ :1 ]
 				x.pms = line [9]
+				x.Dlimit = line [10]
+
 				measlist.append( x )
 	loadData( connD )
 	return measlist
@@ -564,9 +569,9 @@ def drawtable_IM_chart_PMS_limit( document ,measlist ,connD ,report_number ):
 
 
 	col_limit = 3
-	ht = resulttable.cell( 0 ,col_val ).paragraphs[ 0 ]
+	ht = resulttable.cell( 0 ,col_limit ).paragraphs[ 0 ]
 	ht.paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
-	resulttable.cell(0,col_val).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+	resulttable.cell(0,col_limit).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 	r0 = ht.add_run( 'ISO limit' ).bold=True
 
 
@@ -651,9 +656,14 @@ def drawtable_IM_chart_PMS_limit( document ,measlist ,connD ,report_number ):
 					r0 = ht.add_run( xx.name )
 					ht = resulttable.cell( xcord + 1 ,col_val ).paragraphs[ 0 ]
 					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-					# dodałem tu zamianę kropek na przecinki + zaokrąglenie do 3 miejsca po przecinku
 					txt_result = str( round( xx.maxval ,3 ) )
 					r0 = ht.add_run( txt_result.replace( "." ,"," ) )
+
+					ht = resulttable.cell( xcord + 1 ,col_limit ).paragraphs[ 0 ]
+					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+					txt_result = str( round( xx.Dlimit ,1 ) )
+					r0 = ht.add_run( txt_result.replace( "." ,"," ) )
+
 					ht = resulttable.cell( xcord + 1 ,col_class ).paragraphs[ 0 ]
 					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 					r0 = ht.add_run( str( xx.limit ) )
