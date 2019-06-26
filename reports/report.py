@@ -57,6 +57,7 @@ def makereport ( connD ,rn_ ):
 	#############################################################################################
 
 	querry = "select reporttype from main where id = (select shipid from harmonogram where report_number = '"+str(rn_)+"')"
+
 	reporttype = list(q_run(connD,querry))[0][0]
 
 	# fileformattype = 1  # 1 - IM; 2 - KAMTRO ; 3-Stocznia Remontowa
@@ -202,10 +203,10 @@ def makereport ( connD ,rn_ ):
 username = 'testuser '
 password = 'info'
 host = 'localhost'
-rn_ = '2086-2019'
+rn_ = '1858U2-2018'
 # # #rn_ ='1968-2019'
 # #
-host = '192.168.10.243'
+# host = '192.168.10.243'
 # rn_ = '2044U-2019'
 # # #
 connD = [ username ,password ,host ]

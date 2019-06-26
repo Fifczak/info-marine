@@ -39,12 +39,19 @@ def q_run(connD, querry):
     conn.commit()
     cur.close()
 class trendchart:
-    def __init__(self,ids,connD,GUI):
+    def __init__(self,ids,connD,GUI,VSG):
         def trendresults(devid):
             def gettrendresults():
-                querry ="select ml.raport_number,max(ml.value),max(ml.date),dev.name from measurements_low as ml"\
-                        " left join devices as dev on ml.id = dev.id" \
-                        " where ml.id =" + str(devid) + " and ml.type = 'RMS' group by ml.raport_number,dev.name order by ml.raport_number desc"
+                if VSG == False:
+                    querry ="select ml.raport_number,max(ml.value),max(ml.date),dev.name from measurements_low as ml"\
+                            " left join devices as dev on ml.id = dev.id" \
+                            " where ml.id =" + str(devid) + " and ml.type = 'RMS' group by ml.raport_number,dev.name order by ml.raport_number desc"
+                else:
+                    querry = "select ml.raport_number,max(ml.value),max(ml.date),dev.name from measurements_low as ml" \
+                             " left join devices as dev on ml.id = dev.id" \
+                             " where ml.id =" + str(
+                        devid) + " and ml.unit = 'VSG' group by ml.raport_number,dev.name order by ml.raport_number desc"
+
                 return q_run(connD, querry)
             dates = list()
             vals = list()
@@ -89,7 +96,7 @@ class trendchart:
             button1 = tk.Button(detailFrame, text='Details', command=lambda: calldatasheet(self,id_,name))
             button1.grid(column = LL+1,row=0,rowspan = 3)
         def calldatasheet(parentclass,id_,name):
-            datasheet(ids,parentclass,id_,self,name,connD,GUI)
+            datasheet(ids,parentclass,id_,self,name,connD,GUI,VSG)
         self.imgdata = io.BytesIO()
         self.wdw  = tk.Tk()
         self.wdw.title("Trend Chart")
@@ -124,8 +131,9 @@ class ValRMSwindow():
         self.window.destroy()
         querry = "select name from devices where id = " + str(id_)
         name = list(q_run(connD, querry))[0][0]
-        datasheet(ids,chartframe,id_,chartframe,name,connD,GUI)
-    def __init__(self, connD, parentclass, _id_,grandparentclass,id_,chartframe,ids,GUI):
+        datasheet(ids,chartframe,id_,chartframe,name,connD,GUI,self.VSG)
+    def __init__(self, connD, parentclass, _id_,grandparentclass,id_,chartframe,ids,GUI,VSG):
+        self.VSG = VSG
         self.window = tk.Tk()
         self.window.title("CHANGE RMS")
         self.Val = tk.Text(self.window, height=1, width=12)
@@ -147,9 +155,9 @@ class ValRMSwindow():
 class measBut:
     def changeWindow(self,_id_):
         pass
-    def __init__(self,dsFrame,r,c,val,_id_,parentclass,id_,chartframe,connD,ids,GUI):
+    def __init__(self,dsFrame,r,c,val,_id_,parentclass,id_,chartframe,connD,ids,GUI,VSG):
         self._id = _id_
-        self.lab = tk.Button(dsFrame,text = str(val),command = lambda : ValRMSwindow(connD,self,_id_,parentclass,id_,chartframe,ids,GUI), width = 15)
+        self.lab = tk.Button(dsFrame,text = str(val),command = lambda : ValRMSwindow(connD,self,_id_,parentclass,id_,chartframe,ids,GUI,VSG), width = 15)
         #command = lambda ue=self.user_entry, pe=self.pass_entry: self.logging_in(ue, pe))
         #self.lab.bind("<ButtonRelease-1>",changeWindow(self._id))
         self.lab.grid(row=r, column=c)
@@ -159,18 +167,27 @@ class datasheet:
     def refresh (self,ids,parentclass,connD,GUI):
         parentclass.wdw.destroy()
         self.quit()
-        trendchart(ids,connD,GUI)
+        trendchart(ids,connD,GUI,self.VSG)
         # try:chartwindow.mainloop()
         # except: print('No chartwindow')
-    def __init__(self,ids,parentclass,id_,chartframe,name,connD,GUI):
+    def __init__(self,ids,parentclass,id_,chartframe,name,connD,GUI,VSG):
+        self.VSG = VSG
         self.DSW = tk.Tk()
         self.DSW.title("Datasheet")
-        querry = """select ml.raport_number,ml.point, ml.value,ml.date,dev.name, ml._id_ from measurements_low as ml
-                    left join devices as dev on ml.id = dev.id
-                    left join points as pt on ml.id = pt.id and ml.point = pt.point
-                    where ml.id = """ +str(id_) +   """ and ml.type = 'RMS' 
-                    group by ml.raport_number,ml.point, dev.name,ml.value,ml.date ,pt.sort , ml._id_
-                    order by ml.raport_number ,pt.sort  """
+        if VSG == False:
+            querry = """select ml.raport_number,ml.point, ml.value,ml.date,dev.name, ml._id_ from measurements_low as ml
+                        left join devices as dev on ml.id = dev.id
+                        left join points as pt on ml.id = pt.id and ml.point = pt.point
+                        where ml.id = """ +str(id_) +   """ and ml.type = 'RMS' 
+                        group by ml.raport_number,ml.point, dev.name,ml.value,ml.date ,pt.sort , ml._id_
+                        order by ml.raport_number ,pt.sort  """
+        else:
+            querry = """select ml.raport_number,ml.point,max(ml.value),ml.date,dev.name, ml._id_,ml.type from measurements_low as ml
+                        left join devices as dev on ml.id = dev.id
+                        left join points as pt on ml.id = pt.id and ml.point = pt.point
+                        where ml.id = {} and ml.unit = 'VSG' 
+                        group by ml.raport_number,ml.point, dev.name,ml.date ,pt.sort , ml._id_,ml.type
+                        order by ml.raport_number ,pt.sort  """.format(str(id_))
         dsd = q_run(connD,querry)
         RapList = list()
         PointList = list()
@@ -191,7 +208,7 @@ class datasheet:
                 tk.Label(dsFrame, text=line2).grid(row=r, column=0)
                 for seekVal in dsd:
                     if str(line) == str(seekVal[0]) and str(line2) == str(seekVal[1]):
-                        x = measBut(dsFrame,r,c,seekVal[2],seekVal[5],self,id_,chartframe,connD,ids,GUI)
+                        x = measBut(dsFrame,r,c,seekVal[2],seekVal[5],self,id_,chartframe,connD,ids,GUI,self.VSG)
         dsFrame.pack()
         okbutton = tk.Button(self.DSW,text = 'Reload Chart', command = lambda:self.refresh(ids,parentclass,connD,GUI)).pack()
         self.DSW.mainloop()
