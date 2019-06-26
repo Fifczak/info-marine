@@ -8,7 +8,8 @@ import csv
 from tkinter.filedialog import askopenfilename
 import tkinter as tkk
 from tkinter import filedialog
-
+from tqdm import tqdm
+from tkinter import messagebox
 
 def q_run(connD, querry):
 	username = connD[0]
@@ -299,25 +300,74 @@ class StructWindow:
 		def AddPoint(self):
 			querry = "select max(sort) from points where id = {}".format(self.devid)
 			maxsort = list(q_run(self.connD, querry))[0][0]
-			print(maxsort)
+			querry = "insert into points(id,point,sort) values ({},'{}',{})".format(self.devid,'NEWPOINT',maxsort+1)
+			q_run(self.connD, querry)
+			self.reloadquerry(self.structuresort, self.shipid, self.connD, False)
+			self.makecontrols(self.devname, self.connD)
 		def UploadPoints(self):
-
-			# self.CombBearingList[counter].showvalue,
-			# self.CombBearingSealList[counter].showvalue,
-			# self.CombBearingAddList[counter].showvalue,
-			# self.CombVisibleList[counter].showvalue,
-
-
-			counter = -1
+			testlist = list()
+			testlist.clear()
 			for i in self.CombPointList:
-				counter +=1##POKOMBINOWAC GDZIE UPDATE A GDZIE INSERT ITP
-				if self.CombVisibleList[counter].showvalue == 'None':self.CombVisibleList[counter].showvalue = 'False'
-				querry = "update points set point = {},visible = '{}' where sort = {}".format(i.showvalue,self.CombVisibleList[counter].showvalue, counter+1)
-				print(querry)
-				querry = "update bearings set ".format(i.showvalue,self.CombVisibleList[counter].showvalue, counter+1)
+				testlist.append(i.cbox.get())
+			if (any(testlist.count(x) > 1 for x in testlist)) == True:
+				messagebox.showinfo("Brak", 'Uplooad aborted. Duplicate point names')
+			else:
+				counter = -1
+				for i in tqdm(self.CombPointList):
+					counter +=1
+					point = i.cbox.get()
+					bearing = self.CombBearingList[counter].showvalue
+					if str(bearing) == 'None': bearing = 'Null'
+					else:bearing = "'{}'".format(bearing)
+					seal = self.CombBearingSealList[counter].showvalue
+					if str(seal) == 'None': seal = 'Null'
+					else:seal = "'{}'".format(seal)
+					add = self.CombBearingAddList[counter].showvalue
+					if str(add) == 'None': add = 'Null'
+					else:add = "'{}'".format(add)
+					visible = self.CombVisibleList[counter].showvalue
+					if self.CombVisibleList[counter].showvalue == 'None':self.CombVisibleList[counter].showvalue = 'False'
 
 
-		def reloadquerry(self, structuresort, shipid, connD):
+					querry = "update points set point = '{}',visible = '{}' where sort = {} and id = {}".format(point,self.CombVisibleList[counter].showvalue, counter+1,self.devid)
+					q_run(self.connD, querry)
+					if point != i.showvalue:
+						querry = "update measurements_low set point = '{}' where point = '{}' and id = {}".format(point,i.showvalue,self.devid)
+						q_run(self.connD, querry)
+					querry1 = "update bearings set bearing ={}, seal = {}, additional = {} where id = {} and point = '{}' " \
+							 "returning bearing,seal,additional ".format(bearing,seal,add,self.devid,point)
+					updates = q_run(self.connD,querry1)
+					if len(updates) == 0:
+						querry = "INSERT INTO bearings (id,point,bearing,seal,additional)" \
+								 " VALUES ({},'{}',{},{},{}) ".format(self.devid,point,bearing,seal,add)
+						q_run(self.connD, querry)
+
+					else:
+						querry = "update bearings set bearing ={}, seal = {}, additional = {} where id = {} and point = '{}' " \
+								  .format(bearing, seal, add, self.devid, point)
+						q_run(self.connD, querry)
+
+				self.reloadquerry(self.structuresort, self.shipid, self.connD,False)
+				self.makecontrols(self.devname, self.connD)
+		def DeletePoint(self):
+
+			point = (self.CombPointList[len(self.CombPointList)-1].showvalue)
+			querry = "select * from measurements_low where id = {} and point = '{}' ".format(self.devid,point)
+			if len(q_run(self.connD,querry)) == 0:
+				querry = "delete from points where id ={} and point = '{}'".format(self.devid,point)
+				q_run(self.connD,querry)
+				self.reloadquerry(self.structuresort, self.shipid, self.connD, False)
+				self.makecontrols(self.devname, self.connD)
+			else:
+				messagebox.showinfo("Brak", 'Delete not aviable, there are measurements for point {}'.format(point))
+
+
+
+		def reloadquerry(self, structuresort, shipid, connD,chagesort):
+			if chagesort == False:
+				if structuresort == True: structuresort = False
+				else: structuresort = True
+
 			if structuresort == True:
 				querry = """select dev.id, name, pts.point, bea.bearing,bea.seal,bea.additional, pts.sort,pts.visible
 						from points pts
@@ -328,6 +378,7 @@ class StructWindow:
 						where pts.id IN (select id from devices where parent = {})
 						order by dev.name,pts.sort""".format(str(shipid))
 				ans = q_run(connD, querry)
+
 				self.structuresort = False
 			else:
 				querry = """select dev.id, name, pts.point, bea.bearing,bea.seal,bea.additional, pts.sort,pts.visible
@@ -338,6 +389,7 @@ class StructWindow:
 							where pts.id IN (select id from devices where parent = {})
 							order by dss.sort,pts.sort""".format(str(shipid))
 				ans = q_run(connD, querry)
+
 				self.structuresort = True
 			self.devdata = list()
 			self.devdata.clear()
@@ -407,22 +459,24 @@ class StructWindow:
 			self.addbutton = tk.Button(self.detailframe, text='Add point', command = self.AddPoint)
 			self.addbutton.grid(row=c+1, column=0)
 
-			self.delbutton = tk.Button(self.detailframe, text='Delete point').grid(row=c+1, column=1)
+			self.delbutton = tk.Button(self.detailframe, text='Delete point', command = self.DeletePoint)
+			self.delbutton.grid(row=c+1, column=1)
 		def __init__(self, parent, shipid, connD):
 			def getdetails(evt):
 				w = evt.widget
 				index = int(w.curselection()[0])
 				devname = w.get(index)
+				self.devname = devname
 				self.makecontrols(devname,connD)
 			self.connD = connD
 			self.shipid = shipid
 			self.structuresort = True
-			self.sortbutton = Button(parent,text = 'Change sort', command = lambda: self.reloadquerry(self.structuresort,shipid,connD))
+			self.sortbutton = Button(parent,text = 'Change sort', command = lambda: self.reloadquerry(self.structuresort,shipid,connD,True))
 			self.sortbutton.pack(side = TOP, anchor = W)
 			self.deviceslistbox = Listbox(parent, exportselection=False)
 			self.detailframe = Frame(parent)
 			self.detailframe.pack(side=RIGHT, anchor=W)
-			self.reloadquerry(self.structuresort, shipid, connD)
+			self.reloadquerry(self.structuresort, shipid, connD,True)
 			self.deviceslistbox.bind('<Double-Button>',getdetails )
 			parent.pack(side=LEFT)
 	def __init__(self,connD):
