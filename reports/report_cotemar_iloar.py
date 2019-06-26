@@ -15,7 +15,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.text import WD_BREAK
 from docx.enum.text import WD_COLOR_INDEX
 from docx.enum.text import WD_LINE_SPACING
-from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.table import WD_TABLE_ALIGNMENT,WD_ALIGN_VERTICAL
 from docx.enum.text import WD_TAB_ALIGNMENT, WD_TAB_LEADER
 
 from tkinter import messagebox
@@ -298,67 +298,131 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 	tableno.style = 'Table Grid'
 	tableno.alignment = WD_TABLE_ALIGNMENT.CENTER
 	if tn == 0:
-		tableno.cell(0,0).add_paragraph('Thruster: SB AFT','textBT')
+		tableno.cell(0,0).paragraphs[0].add_run('Thruster: SB AFT')
+		tableno.cell(0,0).paragraphs[0].style=document.styles['textBT']
+		tableno.cell(0,0).paragraphs[0].alignment=WD_ALIGN_PARAGRAPH.LEFT
+		tableno.cell ( 0 ,0 ).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 	if tn == 1:
-		tableno.cell(0,0).add_paragraph('Thruster: SB FWD','textBT')
+		#tableno.cell(0,0).add_paragraph('Thruster: SB FWD','textBT')
+		tableno.cell(0,0).paragraphs[0].add_run('Thruster: SB FWD')
+		tableno.cell(0,0).paragraphs[0].style=document.styles['textBT']
+		tableno.cell(0,0).paragraphs[0].alignment=WD_ALIGN_PARAGRAPH.LEFT
+		tableno.cell ( 0 ,0 ).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 	if tn == 2:
-		tableno.cell(0,0).add_paragraph('Thruster: PS AFT','textBT')
+		#tableno.cell(0,0).add_paragraph('Thruster: PS AFT','textBT')
+		tableno.cell(0,0).paragraphs[0].add_run('Thruster: PS AFT')
+		tableno.cell(0,0).style=document.styles['textBT']
+		tableno.cell(0,0).alignment=WD_ALIGN_PARAGRAPH.LEFT
+		tableno.cell ( 0 ,0 ).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 	if tn == 3:
-		tableno.cell(0,0).add_paragraph('Thruster: PS FWD','textBT')
+		tableno.cell(0,0).paragraphs[0].add_run('Thruster: PS FWD')
+		tableno.cell(0,0).style=document.styles['textBT']
+		tableno.cell(0,0).paragraphs[0].alignment=WD_ALIGN_PARAGRAPH.LEFT
+		tableno.cell ( 0 ,0 ).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 		
-		
-	# tableno.cell(0,0).add_paragraph('Load:','textB')
-	# tableno.cell(0,0).add_paragraph('RPM:','textB')
-	
-	
-	tableno.cell(0,1).add_paragraph('Electric motor','textBT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-	tableno.cell(0,1).add_paragraph('RPM: [UZUPEŁNIĆ]','textBT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-	tableno.cell(0,1).add_paragraph('Running hours: [UZUPEŁNIĆ]','textBT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	#tableno.cell(0,0).paragraphs[0].add_run('Load:')
+	#tableno.cell(0,0).paragraphs[0].add_run('RPM:')
+
+
+	tableno.cell(0,1).paragraphs[0].style=document.styles['textBT']
+	tableno.cell(0,1).paragraphs[0].add_run('Electric motor')
+	tableno.cell(0,1).paragraphs[0].runs[0].add_break()
+	tableno.cell(0,1).paragraphs[0].add_run('RPM: [UZUPEŁNIĆ]')
+	tableno.cell ( 0 ,1 ).paragraphs [ 0 ].runs [ 1 ].add_break ()
+	tableno.cell(0,1).paragraphs[0].add_run('Running hours: [UZUPEŁNIĆ]')
+	tableno.cell ( 0 ,1 ).paragraphs [ 0 ].runs [ 2 ].add_break ()
+	tableno.cell(0,1).paragraphs[0].paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell(0,1).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+
+
+	#tableno.cell(0,1).add_paragraph('RPM: [UZUPEŁNIĆ]','textBT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	#tableno.cell(0,1).add_paragraph('Running hours: [UZUPEŁNIĆ]','textBT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 	tableno.cell(0,1).merge(tableno.cell(0,2).merge(tableno.cell(0,3).merge(tableno.cell(0,4).merge(tableno.cell(0,5)))))
 	
-	tableno.cell(0,6).add_paragraph('Gear Part','textBT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-	tableno.cell(0,6).add_paragraph('RPM: [UZUPEŁNIĆ]','textBT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-	tableno.cell(0,6).add_paragraph('Running hours: [UZUPEŁNIĆ]','textBT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	#tableno.cell(0,6).add_paragraph('Gear Part')
+	tableno.cell(0,6).paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell(0,6).paragraphs[0].add_run('Gear Part')
+	tableno.cell(0,6).paragraphs[0].runs[0].add_break()
+	tableno.cell(0,6).paragraphs[0].style=document.styles['textBT']
+	tableno.cell(0,6).paragraphs[0].vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+
+
+	tableno.cell(0,6).paragraphs[0].add_run('RPM: [UZUPEŁNIĆ]')
+	tableno.cell(0,6).paragraphs[0].runs[1].add_break()
+	tableno.cell(0,6).paragraphs[0].add_run('Running hours: [UZUPEŁNIĆ]')
+	tableno.cell(0,6).paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 	tableno.cell(0,6).merge(tableno.cell(0,7).merge(tableno.cell(0,8)))
 	
 	tableno.rows[0].cells[9]._tc.get_or_add_tcPr().append(shading_elm_19)
 	#tableno.rows[1].cells[9]._tc.get_or_add_tcPr().append(shading_elm_20)
 	tableno.cell(0,9).merge(tableno.cell(1,9))
-	tableno.cell(0,9).add_paragraph('Direction','textBT')
+	#tableno.cell(0,9).add_paragraph('Direction','textBT')
+	tableno.cell(0,9).paragraphs[0].style=document.styles['textBT']
+	tableno.cell(0,9).paragraphs[0].add_run('Direction')
+	tableno.cell(0,9).paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell(0,9).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 
 	
 	tableno.rows[0].cells[10]._tc.get_or_add_tcPr().append(shading_elm_21)
 	#tableno.rows[1].cells[10]._tc.get_or_add_tcPr().append(shading_elm_22)
 	tableno.cell(0,10).merge(tableno.cell(1,10))
-	tableno.cell(0,10).add_paragraph('Current','textBT')
+	#tableno.cell(0,10).add_paragraph('Current')
+	tableno.cell(0,10).paragraphs[0].add_run('Current')
+	tableno.cell(0,10).paragraphs[0].style=document.styles['textBT']
+	tableno.cell(0,10).paragraphs[0].paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell(0,10).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 
-	
-	tableno.cell(1,0).add_paragraph('Position of accelerometers','textBT')
+	tableno.cell(1,0).paragraphs[0].add_run('Position of accelerometers')
+	tableno.cell(1,0).paragraphs[0].style=document.styles['textBT']
 	tableno.rows[1].cells[0]._tc.get_or_add_tcPr().append(shading_elm_1)
 	
-	tableno.cell(1,1).add_paragraph('H1','textT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell(1,1).paragraphs[0].add_run('H1')
+	tableno.cell(1,1).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+	tableno.cell(1,1).paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell(1,1).paragraphs[0].style=document.styles['textT']
 	tableno.rows[1].cells[1]._tc.get_or_add_tcPr().append(shading_elm_2)
 	
-	tableno.cell(1,2).add_paragraph('V1','textT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell(1,2).paragraphs[0].add_run('V1')
+	tableno.cell(1,2).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+	tableno.cell ( 1 ,2 ).paragraphs [ 0 ].style=document.styles['textT']
+	tableno.cell(1,2).paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 	tableno.rows[1].cells[2]._tc.get_or_add_tcPr().append(shading_elm_3)
 	
-	tableno.cell(1,3).add_paragraph('H2','textT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell(1,3).paragraphs[0].add_run('H2')
+	tableno.cell(1,3).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+	tableno.cell(1,3).paragraphs[0].style=document.styles['textT']
+	tableno.cell(1,3).paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 	tableno.rows[1].cells[3]._tc.get_or_add_tcPr().append(shading_elm_4)
-	
-	tableno.cell(1,4).add_paragraph('V2','textT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+	tableno.cell(1,4).paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell(1,4).paragraphs[0].add_run('V2')
+	tableno.cell(1,4).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+	tableno.cell(1,4).paragraphs[0].style=document.styles['textT']
 	tableno.rows[1].cells[4]._tc.get_or_add_tcPr().append(shading_elm_5)
 	
-	tableno.cell(1,5).add_paragraph('A2','textT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell(1,5).paragraphs[0].add_run('A2')
+	tableno.cell(1,5).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+	tableno.cell(1,5).paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell(1,5).paragraphs[0].style=document.styles['textT']
 	tableno.rows[1].cells[5]._tc.get_or_add_tcPr().append(shading_elm_6)
 	
-	tableno.cell(1,6).add_paragraph('H3','textT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell(1,6).paragraphs[0].add_run('H3')
+	tableno.cell(1,6).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+	tableno.cell(1,6).paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 	tableno.rows[1].cells[6]._tc.get_or_add_tcPr().append(shading_elm_7)
-	
-	tableno.cell(1,7).add_paragraph('V3','textT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell(1,6).paragraphs[0].style=document.styles['textT']
+
+	tableno.cell(1,7).paragraphs[0].add_run('V3')
+	tableno.cell(1,7).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+	tableno.cell(1,7).paragraphs[0].style=document.styles['textT']
+	tableno.cell(1,7).paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 	tableno.rows[1].cells[7]._tc.get_or_add_tcPr().append(shading_elm_8)
 	
 
-	tableno.cell(1,8).add_paragraph('A3','textT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell(1,8).paragraphs[0].add_run('A3')
+	tableno.cell(1,8).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+	tableno.cell(1,8).paragraphs[0].style=document.styles['textT']
+	tableno.cell(1,8).paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 	tableno.rows[1].cells[8]._tc.get_or_add_tcPr().append(shading_elm_9)
 
 	maxcord = 0
@@ -380,7 +444,8 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 	
 	for j in range(5):
 		result_text = str(round(float(result[j][0]),3))
-		p=tableno.cell(2,1+j).add_paragraph()
+		p=tableno.cell(2,1+j).paragraphs[0]
+		tableno.cell(2,1+j).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
@@ -395,7 +460,7 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 			limittxt='Z. C'
 		else:
 			limittxt = 'Z. D'
-		p=tableno.cell(3,1+j).add_paragraph()
+		p=tableno.cell(3,1+j).paragraphs[0]
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(limittxt)
 		if limittxt=='Z. A':
@@ -431,7 +496,8 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 	for j in range(3):
 	
 		result_text = str(round(float(result[j][0]),3))
-		p=tableno.cell(2,6+j).add_paragraph()
+		p=tableno.cell(2,6+j).paragraphs[0]
+		tableno.cell(2,6+j).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
@@ -444,7 +510,8 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 			limittxt='Z. B'
 		else:
 			limittxt = 'Z. C'
-		p=tableno.cell(3,6+j).add_paragraph()
+		p=tableno.cell(3,6+j).paragraphs[0]
+		tableno.cell(3,6+j).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(limittxt)
 		if limittxt=='Z. A':
@@ -476,8 +543,9 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 	
 	for j in range(5):
 		result_text = str(round(float(result[j][0]),3))
-		p=tableno.cell(4,1+j).add_paragraph()
+		p=tableno.cell(4,1+j).paragraphs[0]
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+		tableno.cell(4,1+j).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
@@ -508,7 +576,8 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 	for j in range(3):
 	
 		result_text = str(round(float(result[j][0]),3))
-		p=tableno.cell(4,6+j).add_paragraph()
+		p=tableno.cell(4,6+j).paragraphs[0]
+		tableno.cell(4,6+j).alignment_vertical=WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
@@ -539,8 +608,9 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 	
 	for j in range(5):
 		result_text = str(round(float(result[j][0]),3))
-		p=tableno.cell(5,1+j).add_paragraph()
+		p=tableno.cell(5,1+j).paragraphs[0]
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+		tableno.cell(5,1+j).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
@@ -554,8 +624,9 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 			limittxt='Z. C'
 		else:
 			limittxt = 'Z. D'
-		p=tableno.cell(6,1+j).add_paragraph()
+		p=tableno.cell(6,1+j).paragraphs[0]
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+		tableno.cell(6,1+j).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 		r=p.add_run(limittxt)
 		if limittxt=='Z. A':
 			r.font.highlight_color=WD_COLOR_INDEX.BRIGHT_GREEN
@@ -590,8 +661,9 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 	for j in range(3):
 	
 		result_text = str(round(float(result[j][0]),3))
-		p=tableno.cell(5,6+j).add_paragraph()
+		p=tableno.cell(5,6+j).paragraphs[0]
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+		tableno.cell(5,6+j).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
@@ -603,7 +675,7 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 			limittxt='Z. B'
 		else:
 			limittxt = 'Z. C'
-		p=tableno.cell(6,6+j).add_paragraph()
+		p=tableno.cell(6,6+j).paragraphs[0]
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(limittxt)
 		if limittxt == 'Z. A':
@@ -636,7 +708,8 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 	
 	for j in range(5):
 		result_text = str(round(float(result[j][0]),3))
-		p=tableno.cell(7,1+j).add_paragraph()
+		p=tableno.cell(7,1+j).paragraphs[0]
+		tableno.cell(7,1+j).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
@@ -668,7 +741,8 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 	for j in range(3):
 	
 		result_text = str(round(float(result[j][0]),3))
-		p=tableno.cell(7,6+j).add_paragraph()
+		p=tableno.cell(7,6+j).paragraphs[0]
+		tableno.cell(7,6+j).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
@@ -698,7 +772,8 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 	
 	for j in range(5):
 		result_text = str(round(float(result[j][0]),3))
-		p=tableno.cell(8,1+j).add_paragraph()
+		p=tableno.cell(8,1+j).paragraphs[0]
+		tableno.cell(8,1+j).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
@@ -713,7 +788,8 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 			limittxt='Z, C'
 		else:
 			limittxt = 'Z. D'
-		p=tableno.cell(9,1+j).add_paragraph()
+		p=tableno.cell(9,1+j).paragraphs[0]
+		tableno.cell(9,1+j).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(limittxt)
 		if limittxt=='Z. A':
@@ -749,7 +825,8 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 	for j in range(3):
 	
 		result_text = str(round(float(result[j][0]),3))
-		p=tableno.cell(8,6+j).add_paragraph()
+		p=tableno.cell(8,6+j).paragraphs[0]
+		tableno.cell(8,6+j).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
@@ -762,7 +839,8 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 			limittxt='Z. B'
 		else:
 			limittxt = 'Z. C'
-		p=tableno.cell(9,6+j).add_paragraph()
+		p=tableno.cell(9,6+j).paragraphs[0]
+		tableno.cell(9,6+j).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(limittxt)
 		if limittxt=='Z. A':
@@ -794,7 +872,8 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 	
 	for j in range(5):
 		result_text = str(round(float(result[j][0]),3))
-		p=tableno.cell(10,1+j).add_paragraph()
+		p=tableno.cell(10,1+j).paragraphs[0]
+		tableno.cell(10,1+j).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
@@ -826,7 +905,8 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 	for j in range(3):
 	
 		result_text = str(round(float(result[j][0]),3))
-		p=tableno.cell(10,6+j).add_paragraph()
+		p=tableno.cell(10,6+j).paragraphs[0]
+		tableno.cell(10,6+j).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(result_text.replace(".",","))
 		r.font.name = 'Calibri'
@@ -834,19 +914,21 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		if maxcord == j:
 			r.bold = True
 			
-	tableno.cell(2,0).add_paragraph('Overall velocity RMS (mm/s)','textBT')
-
+	RMSov=tableno.cell(2,0).paragraphs[0].add_run('Overall velocity RMS (mm/s)')
+	RMSov = tableno.cell ( 2 ,0 ).paragraphs [ 0 ].style=document.styles['textBT']
 
 	
 	tableno.rows[2].cells[0]._tc.get_or_add_tcPr().append(shading_elm_10)
-	tableno.cell(3,0).add_paragraph('Vibration Class','textBT')
+	tableno.cell(3,0).paragraphs[0].add_run('Vibration Class')
+	tableno.cell(3,0).paragraphs[0].style=document.styles['textBT']
+
+
 	tableno.rows[3].cells[0]._tc.get_or_add_tcPr().append(shading_elm_11)
 
+
 	
-	
-	
-	
-	tableno.cell(4,0).add_paragraph('Envelope 0-P value(mm/s²)','textBT')
+	tableno.cell(4,0).paragraphs[0].add_run('Envelope 0-P value(mm/s²)')
+	tableno.cell(4,0).paragraphs[0].style=document.styles['textBT']
 
 	
 	
@@ -856,29 +938,37 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 	
 	tableno.rows[4].cells[0]._tc.get_or_add_tcPr().append(shading_elm_12)
 	tableno.cell(2,9).merge(tableno.cell(3,9).merge(tableno.cell(4,9)))
-	tableno.cell(2,9).add_paragraph('SB','textBT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-	tableno.cell(2,9).add_paragraph('[INSERT]','textBT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell(2,9).paragraphs[0].add_run('SB')
+	tableno.cell ( 2 ,9 ).paragraphs [ 0 ].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell ( 2 ,9 ).paragraphs [ 0 ].style=document.styles['textBT']
+	tableno.cell(2,9).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+	#tableno.cell(2,9).add_paragraph('[INSERT]','textBT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 	
 	tableno.cell(2,10).merge(tableno.cell(3,10).merge(tableno.cell(4,10)))
-	tableno.cell(2,10).add_paragraph('[INSERT]','textBT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell(2,10).paragraphs[0].add_run('[INSERT]')
+	tableno.cell(2,10).paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell(2,10).paragraphs[0].style=document.styles['textBT']
 
 	
 
 	
 	
-	tableno.cell(5,0).add_paragraph('Overall velocity RMS (mm/s)','textBT')
+	tableno.cell(5,0).paragraphs[0].add_run('Overall velocity RMS (mm/s)')
+	tableno.cell(5,0).paragraphs[0].style=document.styles['textBT']
 
 	
 	
 	
 	tableno.rows[5].cells[0]._tc.get_or_add_tcPr().append(shading_elm_13)
-	tableno.cell(6,0).add_paragraph('Vibration Class','textBT')
+	tableno.cell(6,0).paragraphs[0].add_run('Vibration Class')
+	tableno.cell(6,0).paragraphs[0].style=document.styles['textBT']
 	tableno.rows[6].cells[0]._tc.get_or_add_tcPr().append(shading_elm_14)
 	
 	
 	
 	
-	tableno.cell(7,0).add_paragraph('Envelope 0-P value(mm/s²)','textBT')
+	tableno.cell(7,0).paragraphs[0].add_run('Envelope 0-P value(mm/s²)')
+	tableno.cell(7,0).paragraphs[0].style=document.styles['textBT']
 
 	
 	
@@ -886,30 +976,44 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 	
 	tableno.rows[7].cells[0]._tc.get_or_add_tcPr().append(shading_elm_15)
 	tableno.cell(5,9).merge(tableno.cell(6,9).merge(tableno.cell(7,9)))
-	tableno.cell(5,9).add_paragraph('PS','textBT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-	tableno.cell(5,9).add_paragraph('[INSERT]','textBT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell(5,9).paragraphs[0].add_run('PS')
+	#tableno.cell(5,9)
+	tableno.cell(5,9).paragraphs[0].style=document.styles['textBT']
+	tableno.cell(5,9).paragraphs[0].runs[0].add_break()
+	tableno.cell(5,9).paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell(5,9).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 	
 	tableno.cell(5,10).merge(tableno.cell(6,10).merge(tableno.cell(7,10)))
-	tableno.cell(5,10).add_paragraph('[INSERT]','textBT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell(5,10).paragraphs[0].add_run('[INSERT]')
+	tableno.cell(5,10).style=document.styles['textBT']
+	tableno.cell(5,10).paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell ( 5 ,10 ).style = document.styles [ 'textBT' ]
 	
 	
 	
-	
-	tableno.cell(8,0).add_paragraph('Overall velocity RMS (mm/s)','textBT')
+	tableno.cell(8,0).paragraphs[0].add_run('Overall velocity RMS (mm/s)')
+	tableno.cell(8,0).paragraphs[0].style=document.styles['textBT']
 	tableno.rows[8].cells[0]._tc.get_or_add_tcPr().append(shading_elm_16)
-	tableno.cell(9,0).add_paragraph('Vibration Class','textBT')
+	tableno.cell(9,0).paragraphs[0].add_run('Vibration Class')
+	tableno.cell(9,0).paragraphs[0].style=document.styles['textBT']
 	tableno.rows[9].cells[0]._tc.get_or_add_tcPr().append(shading_elm_17)
-	tableno.cell(10,0).add_paragraph('Envelope 0-P value(mm/s²)','textBT')
+	tableno.cell(10,0).paragraphs[0].add_run('Envelope 0-P value(mm/s²)')
+	tableno.cell(10,0).paragraphs[0].style=document.styles['textBT']
 
 	
 	tableno.rows[10].cells[0]._tc.get_or_add_tcPr().append(shading_elm_18)
 	
 	tableno.cell(8,9).merge(tableno.cell(9,9).merge(tableno.cell(10,9)))
-	tableno.cell(8,9).add_paragraph('IDLE','textBT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-	tableno.cell(8,9).add_paragraph('0%','textBT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell(8,9).paragraphs[0].add_run('IDLE')
+	tableno.cell(8,9).paragraphs[0].runs[0].add_break()
+	tableno.cell(8,9).paragraphs[0].style=document.styles['textBT']
+	tableno.cell(8,9).paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell(8,9).paragraphs[0].add_run('0%')
+	tableno.cell(8,9).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 	
 	tableno.cell(8,10).merge(tableno.cell(9,10).merge(tableno.cell(10,10)))
-	tableno.cell(8,10).add_paragraph('[INSERT]','textBT').paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER	
+	tableno.cell(8,10).add_paragraph('[INSERT]')
+	tableno.cell(8,10).paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 	
 def getname(host, username, password):
 	kport = "5432"
