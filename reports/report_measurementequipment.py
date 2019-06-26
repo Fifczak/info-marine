@@ -1,5 +1,6 @@
 from docx.enum.text import WD_BREAK
 from docx.enum.text import WD_COLOR_INDEX, WD_ALIGN_PARAGRAPH
+from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.shared import Cm
 from docx.shared import Pt
 import psycopg2
@@ -32,18 +33,21 @@ def q_run(connD, querry):
 def MarVibENG(document,connD,rn):
 	document.add_page_break()
 	summary = document.add_paragraph()
-	summary.add_run('Measurement equipment:').bold = True
+	r=summary.add_run('Measurement equipment:')
+	summary.alignment=WD_ALIGN_PARAGRAPH.CENTER
+	r.bold=True
 
 
 	shiptable = document.add_table(rows=7, cols=2)  # trzeba usunąć enter przed
 	shiptable.style = 'Table Grid'
 	shiptable.cell(0, 0).merge(shiptable.cell(0, 1))
-
+	shiptable.alignment=WD_TABLE_ALIGNMENT.CENTER
 
 	##SHIPTABLE [0,0]
 	ht = shiptable.cell(0, 0).paragraphs[0]
 	r0 = ht.add_run()
 	r0.text = 'Technical data'
+	ht.alignment=WD_ALIGN_PARAGRAPH.CENTER
 
 	##SHIPTABLE [1,0]
 	ht = shiptable.cell(1, 0).paragraphs[0]

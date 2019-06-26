@@ -182,14 +182,16 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 
 	os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
-	respar = document.add_paragraph('Results')
-	respar.runs[0].bold = True
-	respar.runs[0].font.name = 'Times New Roman'
-	respar.runs[0].font.size = Pt(12)
+	respar = document.add_paragraph('Results','IM HEAD')
+	#respar.runs[0].bold = True
+	#respar.runs[0].font.name = 'Times New Roman'
+	#respar.runs[0].font.size = Pt(12)
 	respar.add_run().add_break()
 	resrun = respar.add_run(
 		"In table are presented only readings with max. RMS results for each device equipment:")
 	resrun.font.size = Pt(11)
+	resrun.font.name='Calibri'
+	resrun.font.color.rgb=RGBColor(0,0,0)
 	root = tk.Tk()
 	root.withdraw()
 	MsgBox = messagebox.askquestion('Chart controll', 'Do you want to check te charts data?',)

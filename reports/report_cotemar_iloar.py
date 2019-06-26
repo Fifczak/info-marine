@@ -4,6 +4,7 @@ import os
 import os.path
 import time
 
+
 from docx import Document
 from docx.shared import Inches
 from docx.shared import Pt
@@ -12,6 +13,7 @@ from docx.shared import RGBColor
 from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.text import WD_BREAK
+from docx.enum.text import WD_COLOR_INDEX
 from docx.enum.text import WD_LINE_SPACING
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.text import WD_TAB_ALIGNMENT, WD_TAB_LEADER
@@ -213,10 +215,10 @@ def createchart(host, username, password, id, rn, type):
 	
 	if type == 'Vel':
 		if str(id) == '18100' or str(id) == '18102' or str(id) == '18104' or str(id) == '18106' or str(id) == '18108' or str(id) == '18110' or str(id) == '18112' or str(id) == '18114' or str(id) == '18116' or str(id) == '18118' or str(id) == '18120' or str(id) == '18122':
-			maxf = 800#motor
+			maxf = 1000#motor
 			minf = 10
 		if str(id) == '18101' or str(id) == '18103' or str(id) == '18105' or str(id) == '18107' or str(id) == '18109' or str(id) == '18111' or str(id) == '18113' or str(id) == '18115' or str(id) == '18117' or str(id) == '18119' or str(id) == '18121' or str(id) == '18123':
-			maxf = 800 #gear
+			maxf = 1000 #gear
 			minf = 5
 	
 	for i in x:
@@ -385,13 +387,23 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		r.font.size= Pt(9)
 		if maxcord == j:
 			r.bold = True
-		if result[j][0] < 7.1:
-			limittxt = 'In limit'
+		if result[j][0] < 2.3:
+			limittxt = 'Z. A'
+		elif result[j][0]> 2.3 and result[j][0]<4.5:
+			limittxt='Z. B'
+		elif result[j][0]>4.5 and result[j][0]<7.1:
+			limittxt='Z. C'
 		else:
-			limittxt = 'Out of limit'
+			limittxt = 'Z. D'
 		p=tableno.cell(3,1+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(limittxt)
+		if limittxt=='Z. A':
+			r.font.highlight_color=WD_COLOR_INDEX.BRIGHT_GREEN
+		elif limittxt=='Z. B':
+			r.font.highlight_color=WD_COLOR_INDEX.YELLOW
+		elif limittxt=='Z. C':
+			r.font.highlight_color=WD_COLOR_INDEX.RED
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
 		
@@ -426,13 +438,21 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		r.font.size= Pt(9)
 		if maxcord == j:
 			r.bold = True
-		if result[j][0] < 11.2:
-			limittxt = 'In limit'
+		if result[j][0] < 4.5:
+			limittxt = 'Z. A'
+		elif result[j][0]>4.5 and result[j][0]<11.2:
+			limittxt='Z. B'
 		else:
-			limittxt = 'Out of limit'
+			limittxt = 'Z. C'
 		p=tableno.cell(3,6+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(limittxt)
+		if limittxt=='Z. A':
+			r.font.highlight_color=WD_COLOR_INDEX.BRIGHT_GREEN
+		elif limittxt=='Z. B':
+			r.font.highlight_color=WD_COLOR_INDEX.YELLOW
+		elif limittxt=='Z. C':
+			r.font.highlight_color=WD_COLOR_INDEX.RED
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
 	
@@ -526,13 +546,23 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		r.font.size= Pt(9)
 		if maxcord == j:
 			r.bold = True
-		if result[j][0] < 7.1:
-			limittxt = 'In limit'
+		if result[j][0] < 2.3:
+			limittxt = 'Z. A'
+		elif result[j][0]>2.3 and result[j][0]<4.5:
+			limittxt='Z. B'
+		elif result[j][0]>4.5 and result[j][0]<7.1:
+			limittxt='Z. C'
 		else:
-			limittxt = 'Out of limit'
+			limittxt = 'Z. D'
 		p=tableno.cell(6,1+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(limittxt)
+		if limittxt=='Z. A':
+			r.font.highlight_color=WD_COLOR_INDEX.BRIGHT_GREEN
+		elif limittxt=='Z. B':
+			r.font.highlight_color=WD_COLOR_INDEX.YELLOW
+		elif limittxt=='Z. C':
+			r.font.highlight_color=WD_COLOR_INDEX.RED
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
 		
@@ -567,13 +597,21 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		r.font.size= Pt(9)
 		if maxcord == j:
 			r.bold = True
-		if result[j][0] < 11.2:
-			limittxt = 'In limit'
+		if result[j][0] <4.5:
+			limittxt = 'Z. A'
+		elif result[j][0]>4.5 and result[j][0]<11.2:
+			limittxt='Z. B'
 		else:
-			limittxt = 'Out of limit'
+			limittxt = 'Z. C'
 		p=tableno.cell(6,6+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(limittxt)
+		if limittxt == 'Z. A':
+			r.font.highlight_color = WD_COLOR_INDEX.BRIGHT_GREEN
+		if limittxt == 'Z. B':
+			r.font.highlight_color = WD_COLOR_INDEX.YELLOW
+		if limittxt == 'Z. C':
+			r.font.highlight_color = WD_COLOR_INDEX.RED
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
 	
@@ -667,13 +705,23 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		r.font.size= Pt(9)
 		if maxcord == j:
 			r.bold = True
-		if result[j][0] < 7.1:
-			limittxt = 'In limit'
+		if result[j][0] < 2.3:
+			limittxt = 'Z. A'
+		elif result[j][0]>2.3 and result[j][0]<4.5:
+			limittxt='Z. B'
+		elif result[j][0]>4.5 and result[j][0]<7.1:
+			limittxt='Z, C'
 		else:
-			limittxt = 'Out of limit'
+			limittxt = 'Z. D'
 		p=tableno.cell(9,1+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(limittxt)
+		if limittxt=='Z. A':
+			r.font.highlight_color=WD_COLOR_INDEX.BRIGHT_GREEN
+		elif limittxt=='Z. B':
+			r.font.highlight_color=WD_COLOR_INDEX.YELLOW
+		elif limittxt=='Z. C':
+			r.font.highlight_color=WD_COLOR_INDEX.RED
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
 		
@@ -708,13 +756,21 @@ def resulttable_iloar(tn, host, username, password, tableno, id1, id2, id3, id4,
 		r.font.size= Pt(9)
 		if maxcord == j:
 			r.bold = True
-		if result[j][0] < 11.2:
-			limittxt = 'In limit'
+		if result[j][0] < 4.5:
+			limittxt = 'Z. A'
+		elif result[j][0]>4.5 and result[j][0]<11.2:
+			limittxt='Z. B'
 		else:
-			limittxt = 'Out of limit'
+			limittxt = 'Z. C'
 		p=tableno.cell(9,6+j).add_paragraph()
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r=p.add_run(limittxt)
+		if limittxt=='Z. A':
+			r.font.highlight_color=WD_COLOR_INDEX.BRIGHT_GREEN
+		elif limittxt=='Z. B':
+			r.font.highlight_color=WD_COLOR_INDEX.YELLOW
+		elif limittxt=='Z. C':
+			r.font.highlight_color=WD_COLOR_INDEX.RED
 		r.font.name = 'Calibri'
 		r.font.size= Pt(9)
 	
