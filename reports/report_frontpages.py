@@ -73,10 +73,7 @@ def standard_with_pms(document):
 	h3.style = document.styles['IM TEXT']
 	h3.paragraph_format.alignment=WD_ALIGN_PARAGRAPH.JUSTIFY
 	r1=h3.add_run('Measured values are presented in the table below. Each machine if applicable is separated for driver (el. motor, diesel engine, etc.) and driven unit (pump, compressor, etc.) ')
-	r1.add_break()
 	r2=h3.add_run('First and second columns')
-	r2.alignment=WD_ALIGN_PARAGRAPH.LEFT
-
 	r2.italic=True
 	r2.underline=True
 	r2 = h3.add_run ( ' of the table consist PMS number and name of the equipment. ' )
@@ -87,20 +84,26 @@ def standard_with_pms(document):
 	r5=h3.add_run('Fourth column')
 	r5.italic=True
 	r5.underline=True
-	r6=h3.add_run(' contains classification of the vibration class according to proper ISO standard and other normative documents. Classification depends on highest reading of measured equipment only. ')
+	r6=h3.add_run(' contains ISO classification limit. ')
 	r7=h3.add_run('Fifth column')
 	r7.underline=True
 	r7.italic=True
-	r8=h3.add_run(' contains additional readings of enveloped value of acceleration, which is helpful in detection of early stage of bearing wear. ')
+	r8=h3.add_run(' contains classification of the vibration class according to proper ISO standard and other normative documents. Classification depends on highest reading of measured equipment only. ')
 	r9=h3.add_run('Sixth column')
 	r9.italic=True
 	r9.underline=True
-	r10=h3.add_run(' contains vibration trend values if previous results are available from the same source. ')
+	r10=h3.add_run(' contains additional readings of enveloped value of acceleration, which is helpful in detection of early stage of bearing wear.  ')
 	r11=h3.add_run('Seventh column')
-	r11.underline=True
+	#r10.underline=True
 	r11.italic=True
+	r11.underline=True
 	r12=h3.add_run(' contains remarks and suggestions based on the analysis of vibration signal. This column can be taken as the final conclusion about machine condition. If cell is empty, it means that there is no existing problem or defect shown in vibration signal.')
-	r12.add_break()
+
+
+
+
+
+
 #siem z limitem bez PMS
 def standard_non_PMS_limit(document):
 	document.add_paragraph()
@@ -139,7 +142,7 @@ def standard_non_PMS_limit(document):
 	r13=p1.add_run('Seventh column')
 	r13.italic=True
 	r13.underline=True
-	p1.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+	#p1.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
 	r14=p1.add_run(' contains remarks and suggestions based on the analysis of vibration signal. This column can be taken as the final conclusion about machine condition. If cell is empty, it means that there is no existing problem or defect shown in vibration signal.')
 	r14.add_break()
 #siem z PMS i LIMITEM

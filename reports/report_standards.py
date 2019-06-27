@@ -28,7 +28,9 @@ def set_col_width_std ( table ):
 #pomysł: pobierac listę urządzeń z tabeli measurements i wtedy pętla z wyszukiwaniem limitów, break na kolejnym urządzeniu z tym samym limitem
 
 def standards(document):
+    document.add_paragraph()
     H0 = document.add_paragraph('Vibration standards')
+
     H0.style=document.styles['IM HEAD']
     p0 = document.add_paragraph('Following standards may applied for assessment:').style=document.styles['IM TEXT']
     t_std=document.add_table(6,2)

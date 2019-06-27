@@ -50,10 +50,10 @@ def IMVibEng(document,connD,rn):
 	r0.text = 'Main dimensions:'
 	ht = shiptable.cell(0, 1).add_paragraph()
 	r0 = ht.add_run()
-	r0.text = 'Length(b.p)............................................' + str(shipdata[1]) + ' m'
+	r0.text = 'Length(b.p).......................................' + str("%.2f" % shipdata[1]).replace('.',',') + ' m'
 	ht = shiptable.cell(0, 1).add_paragraph()
 	r0 = ht.add_run()
-	r0.text = 'Breadth(B.).............................................' + str(shipdata[2]) + ' m'
+	r0.text = 'Breadth(B.)........................................' + str("%.2f" %shipdata[2]).replace('.',',') + ' m'
 
 	##SHIPTABLE [1,0]
 	ht = shiptable.cell(1, 0).paragraphs[0]

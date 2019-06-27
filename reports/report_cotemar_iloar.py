@@ -33,7 +33,11 @@ import psycopg2
 tk = Tk ()
 document = Document ( 'C:\\overmind\\Data\\base.docx' )
 
-
+def set_col_widths(table):
+    widths = (Inches(0.6), Inches(5))
+    for row in table.rows:
+        for idx, width in enumerate(widths):
+            row.cells[idx].width = width
 def q_run ( connD , querry ):
 	username = connD [ 0 ]
 	password = connD [ 1 ]
@@ -307,12 +311,12 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 	if tn == 2:
 		# tableno.cell(0,0).add_paragraph('Thruster: PS AFT','textBT')
 		tableno.cell ( 0 , 0 ).paragraphs [ 0 ].add_run ( 'Thruster: PS AFT' )
-		tableno.cell ( 0 , 0 ).style = document.styles [ 'textBT' ]
-		tableno.cell ( 0 , 0 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
+		tableno.cell ( 0 , 0 ).paragraphs [ 0 ].style = document.styles [ 'textBT' ]
+		tableno.cell ( 0 , 0 ).paragraphs [ 0 ].alignment = WD_ALIGN_PARAGRAPH.LEFT
 		tableno.cell ( 0 , 0 ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 	if tn == 3:
 		tableno.cell ( 0 , 0 ).paragraphs [ 0 ].add_run ( 'Thruster: PS FWD' )
-		tableno.cell ( 0 , 0 ).style = document.styles [ 'textBT' ]
+		tableno.cell ( 0 , 0 ).paragraphs [ 0 ].style = document.styles [ 'textBT' ]
 		tableno.cell ( 0 , 0 ).paragraphs [ 0 ].alignment = WD_ALIGN_PARAGRAPH.LEFT
 		tableno.cell ( 0 , 0 ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 
@@ -436,7 +440,7 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 			maxval = round ( float ( result [ j ] [ 0 ] ) , 3 )
 
 	for j in range ( 5 ):
-		result_text = str ( round ( float ( result [ j ] [ 0 ] ) , 3 ) )
+		result_text = str ( round ( float ( '%.3f'%result [ j ] [ 0 ] ) , 3 ) )
 		p = tableno.cell ( 2 , 1 + j ).paragraphs [ 0 ]
 		tableno.cell ( 2 , 1 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -455,6 +459,7 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 			limittxt = 'Z. D'
 		p = tableno.cell ( 3 , 1 + j ).paragraphs [ 0 ]
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+		tableno.cell ( 2 , 1 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 		r = p.add_run ( limittxt )
 		if limittxt == 'Z. A':
 			r.font.highlight_color = WD_COLOR_INDEX.BRIGHT_GREEN
@@ -486,7 +491,7 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 
 	for j in range ( 3 ):
 
-		result_text = str ( round ( float ( result [ j ] [ 0 ] ) , 3 ) )
+		result_text = str ( round ( float ( '%.3f'%result [ j ] [ 0 ] ) , 3 ) )
 		p = tableno.cell ( 2 , 6 + j ).paragraphs [ 0 ]
 		tableno.cell ( 2 , 6 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -533,7 +538,7 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 			maxval = round ( float ( result [ j ] [ 0 ] ) , 3 )
 
 	for j in range ( 5 ):
-		result_text = str ( round ( float ( result [ j ] [ 0 ] ) , 3 ) )
+		result_text = str ( round ( float ( '%.3f'%result [ j ] [ 0 ] ) , 3 ) )
 		p = tableno.cell ( 4 , 1 + j ).paragraphs [ 0 ]
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		tableno.cell ( 4 , 1 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
@@ -565,9 +570,9 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 
 	for j in range ( 3 ):
 
-		result_text = str ( round ( float ( result [ j ] [ 0 ] ) , 3 ) )
+		result_text = str ( round ( float ( '%.3f'%result [ j ] [ 0 ] ) , 3 ) )
 		p = tableno.cell ( 4 , 6 + j ).paragraphs [ 0 ]
-		tableno.cell ( 4 , 6 + j ).alignment_vertical = WD_ALIGN_VERTICAL.CENTER
+		tableno.cell ( 4 , 6 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		r = p.add_run ( result_text.replace ( "." , "," ) )
 		r.font.name = 'Calibri'
@@ -595,7 +600,7 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 			maxval = round ( float ( result [ j ] [ 0 ] ) , 3 )
 
 	for j in range ( 5 ):
-		result_text = str ( round ( float ( result [ j ] [ 0 ] ) , 3 ) )
+		result_text = str ( round ( float ( '%.3f'%result [ j ] [ 0 ] ) , 3 ) )
 		p = tableno.cell ( 5 , 1 + j ).paragraphs [ 0 ]
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		tableno.cell ( 5 , 1 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
@@ -647,7 +652,7 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 
 	for j in range ( 3 ):
 
-		result_text = str ( round ( float ( result [ j ] [ 0 ] ) , 3 ) )
+		result_text = str ( round ( float ( '%.3f'%result [ j ] [ 0 ] ) , 3 ) )
 		p = tableno.cell ( 5 , 6 + j ).paragraphs [ 0 ]
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		tableno.cell ( 5 , 6 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
@@ -725,7 +730,7 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 
 	for j in range ( 3 ):
 
-		result_text = str ( round ( float ( result [ j ] [ 0 ] ) , 3 ) )
+		result_text = str ( round ( float ( '%.3f'%result [ j ] [ 0 ] ) , 3 ) )
 		p = tableno.cell ( 7 , 6 + j ).paragraphs [ 0 ]
 		tableno.cell ( 7 , 6 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -756,7 +761,7 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 			maxval = round ( float ( result [ j ] [ 0 ] ) , 3 )
 
 	for j in range ( 5 ):
-		result_text = str ( round ( float ( result [ j ] [ 0 ] ) , 3 ) )
+		result_text = str ( round ( float ( '%.3f'%result [ j ] [ 0 ] ) , 3 ) )
 		p = tableno.cell ( 8 , 1 + j ).paragraphs [ 0 ]
 		tableno.cell ( 8 , 1 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -808,7 +813,7 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 
 	for j in range ( 3 ):
 
-		result_text = str ( round ( float ( result [ j ] [ 0 ] ) , 3 ) )
+		result_text = str ( round ( float ( '%.3f'%result [ j ] [ 0 ] ) , 3 ) )
 		p = tableno.cell ( 8 , 6 + j ).paragraphs [ 0 ]
 		tableno.cell ( 8 , 6 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -855,7 +860,7 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 			maxval = round ( float ( result [ j ] [ 0 ] ) , 3 )
 
 	for j in range ( 5 ):
-		result_text = str ( round ( float ( result [ j ] [ 0 ] ) , 3 ) )
+		result_text = str ( round ( float ( '%.3f'%result [ j ] [ 0 ] ) , 3 ) )
 		p = tableno.cell ( 10 , 1 + j ).paragraphs [ 0 ]
 		tableno.cell ( 10 , 1 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -887,7 +892,7 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 
 	for j in range ( 3 ):
 
-		result_text = str ( round ( float ( result [ j ] [ 0 ] ) , 3 ) )
+		result_text = str ( round ( float ( '%.3f'%result [ j ] [ 0 ] ) , 3 ) )
 		p = tableno.cell ( 10 , 6 + j ).paragraphs [ 0 ]
 		tableno.cell ( 10 , 6 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -1213,22 +1218,21 @@ def makereport ( username , password , host , rn_ , id_ ):  # AUTORUN!
 
 	table3.cell ( 1 , 0 ).add_paragraph ( 'Value:' , 'texthead' )
 	table3.cell ( 1 , 0 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
-
-	table3.cell ( 1 , 1 ).add_paragraph ( 'Velocity' , 'text' )
+	table3.cell ( 2 , 0 ).add_paragraph ( 'Range: ' , 'texthead' )
+	table3.cell ( 2 , 1 ).add_paragraph ( '2-1000Hz' , 'text' )
+	vel = table3.cell ( 1 , 1 ).add_paragraph ( 'Velocity' , 'text' )
 	table3.cell ( 1 , 1 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
+	vel.add_run ().add_break ()
+	vel.add_run ( 'Zone A:        0-2,3 mm/s' )
+	vel.add_run ().add_break ()
+	vel.add_run ( 'Zone B:        2,3-4,5 mm/s' )
+	vel.add_run ().add_break ()
+	vel.add_run ( 'Zone C:        4,5-7,1 mm/s' )
+	vel.add_run ().add_break ()
+	vel.add_run ( 'Zone D:        above 7,1 mm/s' )
 
-	table3.cell ( 2 , 0 ).add_paragraph ( 'Range:' , 'texthead' )
-	table3.cell ( 2 , 0 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
-
-	table3.cell ( 2 , 1 ).add_paragraph ( '4-200 Hz' , 'text' )
-	table3.cell ( 2 , 1 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
-
-	table3.cell ( 3 , 0 ).add_paragraph ( 'Limit:' , 'texthead' )
-	table3.cell ( 3 , 0 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
-
-	table3.cell ( 3 , 1 ).add_paragraph ( '18 mm/s' , 'text' )
-	table3.cell ( 3 , 1 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
-
+	table3.cell ( 1 , 1 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
+	set_col_widths ( table3 )
 	document.add_paragraph ()
 
 	table4 = document.add_table ( rows=4 , cols=2 )
@@ -1247,21 +1251,39 @@ def makereport ( username , password , host , rn_ , id_ ):  # AUTORUN!
 
 	table4.cell ( 1 , 0 ).add_paragraph ( 'Value:' , 'texthead' )
 	table4.cell ( 1 , 0 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
+	velgear = table4.cell ( 1 , 1 ).add_paragraph ( 'Velocity: ' , 'text' )
+	table4.cell ( 2 , 0 ).add_paragraph ( 'Range: ' , 'texthead' )
+	table4.cell ( 2 , 1 ).add_paragraph ( '5-1000Hz' , 'text' )
+	velgear.add_run ().add_break ()
+	velgear.add_run ( 'Zone A:        0-4,5 mm/s' )
+	velgear.add_run ().add_break ()
+	velgear.add_run ( 'Zone B:        4,5-11,2 mm/s' )
+	velgear.add_run ().add_break ()
+	velgear.add_run ( 'Zone C:        above 11,2 mm/s' )
 
-	table4.cell ( 1 , 1 ).add_paragraph ( 'Velocity' , 'text' )
 	table4.cell ( 1 , 1 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
+	set_col_widths ( table4 )
+	document.add_paragraph ( 'Legend according to vibration class' , 'listlvl1' )
+	limittablelegend = document.add_table ( rows=5 , cols=2 )
+	limittablelegend.cell ( 0 , 0 ).paragraphs [ 0 ].add_run (
+		'Z. A' ).font.highlight_color = WD_COLOR_INDEX.BRIGHT_GREEN
+	limittablelegend.cell ( 0 , 1 ).paragraphs [ 0 ].add_run ( 'Newly commissioned' )
 
-	table4.cell ( 2 , 0 ).add_paragraph ( 'Range:' , 'texthead' )
-	table4.cell ( 2 , 0 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
+	limittablelegend.cell ( 1 , 0 ).paragraphs [ 0 ].add_run (
+		'Z. B' ).font.highlight_color = WD_COLOR_INDEX.BRIGHT_GREEN
+	limittablelegend.cell ( 1 , 1 ).paragraphs [ 0 ].add_run ( 'Unrestricted' )
 
-	table4.cell ( 2 , 1 ).add_paragraph ( '4-1000 Hz' , 'text' )
-	table4.cell ( 2 , 1 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
+	limittablelegend.cell ( 2 , 0 ).paragraphs [ 0 ].add_run ( 'Z. C' ).font.highlight_color = WD_COLOR_INDEX.YELLOW
+	limittablelegend.cell ( 2 , 1 ).paragraphs [ 0 ].add_run ( 'Restricted long-term operation' )
 
-	table4.cell ( 3 , 0 ).add_paragraph ( 'Limit:' , 'texthead' )
-	table4.cell ( 3 , 0 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
+	limittablelegend.cell ( 3 , 0 ).paragraphs [ 0 ].add_run ( 'Z. D' ).font.highlight_color = WD_COLOR_INDEX.RED
+	limittablelegend.cell ( 3 , 1 ).paragraphs [ 0 ].add_run ( 'High probability of damage, action required' )
 
-	table4.cell ( 3 , 1 ).add_paragraph ( '7 mm/s' , 'text' )
-	table4.cell ( 3 , 1 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
+	limittablelegend.cell ( 4 , 0 ).paragraphs [ 0 ].add_run ( 'Z. D' ).font.bold = True
+	limittablelegend.cell ( 4 , 1 ).paragraphs [ 0 ].add_run (
+		'Vibrations over the limits but actions are not required.' )
+
+	set_col_widths ( limittablelegend )
 
 	document.add_page_break ()
 	l23 = document.add_paragraph ( '2.3.	Measurement equipment' )

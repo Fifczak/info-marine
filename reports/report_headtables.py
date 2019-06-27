@@ -1,9 +1,15 @@
 from docx.enum.table import WD_ALIGN_VERTICAL
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.shared import Pt
+from docx.shared import Pt,Cm
 from report_database import *
 from docx.enum.text import WD_BREAK
 from docx.enum.text import WD_LINE_SPACING
+
+def set_col_width_dev(table):
+    widths = (Cm ( 5) ,Cm ( 5.8 ), Cm(5.9))
+    for row in table.rows:
+        for idx, width in enumerate(widths):
+            row.cells[idx].width=width
 
 # używana wszędzie w raportach IM
 def standard_info_table ( connD ,document ,rn_ ):
@@ -25,7 +31,7 @@ def standard_info_table ( connD ,document ,rn_ ):
     shipstr = result[ 0 ][ 0 ]
 
     headtable = document.add_table( rows=2 ,cols=3 )  # trzeba usunąć enter przed
-    headtable.style = 'Table Grid'
+
 
     headtable.cell( 0 ,0 ).merge( headtable.cell( 0 ,1 ).merge( headtable.cell( 0 ,2 ) ) )
     ht = headtable.cell( 0 ,0 ).paragraphs[  0]
@@ -66,9 +72,10 @@ def standard_info_table ( connD ,document ,rn_ ):
     r1.font.name = 'Calibri'
     ht = headtable.cell( 1 ,1 ).paragraphs[ 0 ]
     r0 = ht.add_run( 'Date of measurement: ' )
+    r0.font.size=Pt(12)
+    r0.font.name='Calibri'
     r0.add_break()
 
-    r0.font.name = 'Calibri'
     r0.add_break ( WD_BREAK . LINE_CLEAR_LEFT)
     ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
     headtable.cell(0,0).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
@@ -79,11 +86,13 @@ def standard_info_table ( connD ,document ,rn_ ):
     r0 = ht.add_run(str(datestr))
     r0.bold = True
     r0.font.name = 'Calibri'
+    r0.font.size=Pt(11)
     headtable.cell ( 1 ,1 ).add_paragraph ()
     ht = headtable.cell( 1 ,2 ).paragraphs[ 0 ]
     ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
     r0 = ht.add_run( 'Place of measurement:' )
     r0.font.name = 'Calibri'
+    r0.font.size=Pt(12)
 
     headtable.cell( 1 ,2 ).add_paragraph()
     ht = headtable.cell( 1 ,2 ).add_paragraph()
@@ -92,12 +101,13 @@ def standard_info_table ( connD ,document ,rn_ ):
     r0.bold = True
     r0.font.name = 'Calibri'
     section = document.sections[ 0 ]
+    r0.font.size=Pt(11)
     # footer = section.footer
     # footer.add_paragraph( shipstr + ' ' + rn_ )
     # footer.alignment = WD_ALIGN_PARAGRAPH.LEFT
     # footer.vertical_alignment = WD_ALIGN_VERTICAL.TOP
-
-
+    set_col_width_dev(headtable)
+    headtable.style = 'Table Grid'
 
 # tabela początkowa kamtro
 def standard_Kamtro_table ( document ):
