@@ -51,7 +51,7 @@ def set_col_width_results( table ):  # funkcja do stałej szerokości komórek w
 		for idx ,width in enumerate( widths ):
 			row.cells[ idx ].width = width
 def set_col_width_results_pms_limit( table ):
-	widths = (Cm(2 ) ,Cm( 7 ) ,Cm( 1.6),Cm( 1.6) ,Cm( 2) ,Cm( 2 ) ,Cm( 5.5 ))
+	widths = (Cm(2 ) ,Cm( 7 ) ,Cm( 1.6),Cm( 1.6) ,Cm( 1.8) ,Cm( 2 ) ,Cm( 5.5 ))
 	for row in table.rows:
 		for idx ,width in enumerate( widths ):
 			row.cells[ idx ].width = width
@@ -220,7 +220,7 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 	## PRZEZ OKNO Z WYKRESAMI WYWALA SIE PROGRESBAR. NIE MOGE TEZ POKAZAC JAKIEGOS OBRAZKA.
 	## NARAZIE KLEPSYDRA Z KOMBAJNA
 	def colorlimit(par,limit):
-		if limit == 'Cl. A' or limit == 'In Limit' or limit == 'V. I' or limit =='Cl. A/B' or limit == 'In limit':
+		if limit == 'Cl. A' or limit == 'In Limit' or limit == 'V. I' or limit =='Cl. A/B' or limit == 'In limit' or limit=='Cl. B':
 			par.font.highlight_color = WD_COLOR_INDEX.BRIGHT_GREEN
 		elif limit == 'Cl. B':
 			par.font.highlight_color = WD_COLOR_INDEX.BRIGHT_GREEN
@@ -471,7 +471,7 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 	ht = document.add_paragraph()
 	r0 = ht.add_run()
 	trendresults(document)
-	r0.text = str('Whenever new results are reduced more than 5% of previous measurements')
+	#r0.text = str('Whenever new results are reduced more than 5% of previous measurements')
 	for row in resulttable.rows:
 		for cell in row.cells:
 			paragraphs = cell.paragraphs
@@ -773,7 +773,7 @@ def drawtable_IM_chart_PMS_limit( document ,measlist ,connD ,report_number ):
 	ht = document.add_paragraph()
 	r0 = ht.add_run()
 	trendresults(document)
-	r0.text = str('Whenever new results are reduced more than 5% of previous measurements')
+	#r0.text = str('Whenever new results are reduced more than 5% of previous measurements')
 	for row in resulttable.rows:
 		for cell in row.cells:
 			paragraphs = cell.paragraphs
@@ -1210,7 +1210,7 @@ def trendresults ( document ) :
 	trendpar.runs[ 0 ].underline = True
 	trendpar.runs[ 0 ].font.size = Pt ( 8 )
 	trendpar.runs[ 0 ].font.name = 'Arial'
-
+	trendpar.add_run()
 	trendsres = document.add_table ( rows=3 ,cols=2 )
 	up = trendsres.cell ( 0 ,0 ).paragraphs[ 0 ].add_run ()
 	up.add_picture ( 'C:\\overmind\\Data\\up.gif' )
@@ -1219,8 +1219,11 @@ def trendresults ( document ) :
 	down = trendsres.cell ( 2 ,0 ).paragraphs[ 0 ].add_run ()
 	down.add_picture ( 'C:\\overmind\\Data\\down.gif' )
 	trendsres.cell ( 0 ,1 ).text = 'Whenever new results are increased more than 5% of previous measurements'
+	trendsres.cell(0,1).paragraphs[0].paragraph_format.alignment=WD_ALIGN_PARAGRAPH.LEFT
 	trendsres.cell ( 1 ,1 ).text = 'Whenever new results are in range plus / minus 5% of previous measurements'
+	trendsres.cell(0,1).paragraphs[0].paragraph_format.alignment=WD_ALIGN_PARAGRAPH.LEFT
 	trendsres.cell ( 2 ,1 ).text = 'Whenever new results are reduced more than 5% of previous measurements'
+	trendsres.cell(0,1).paragraphs[0].paragraph_format.alignment=WD_ALIGN_PARAGRAPH.LEFT
 	trendsres.cell ( 0 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt ( 8 )
 	trendsres.cell ( 0 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
 	trendsres.cell ( 1 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt ( 8 )
@@ -1228,6 +1231,9 @@ def trendresults ( document ) :
 	trendsres.cell ( 2 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt ( 8 )
 	trendsres.cell ( 2 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
 	trendsres.cell(0, 1).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+	trendsres.cell(0, 0).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 	trendsres.cell(1, 1).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+	trendsres.cell(1, 0).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 	trendsres.cell(2, 1).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+	trendsres.cell(2, 0).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 	set_cols_width_trend ( trendsres )
