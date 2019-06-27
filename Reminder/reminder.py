@@ -81,7 +81,7 @@ class LogApplication:
 				filewriter = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
 				filewriter.writerow([user_get])
 				filewriter.writerow([pass_get])
-		connD = [user_get, pass_get, '192.168.10.243']
+		connD = [user_get, pass_get, 'localhost']
 
 
 		querry = "SELECT current_user"
@@ -185,7 +185,10 @@ def remindershow(connD):
             def marksend():
                 for item in devlist:
                     if item.status == 'REM':
-                        querry = "UPDATE REMINDER SET STATUS = 1 WHERE ID = '" + str(item.id) + "' AND raport_number = '" + str(item.lastraport) + "'"
+                        teraz = str(datetime.datetime.now() )[:10]
+                        querry = "UPDATE REMINDER SET STATUS = 1, send_date = '{}'" \
+                                 " WHERE ID = '{}' AND raport_number = '{}'".format(teraz,str(item.id),str(item.lastraport) )
+
                         q_run(connD,querry)
             def getships(evt):
                 w = evt.widget
@@ -352,7 +355,6 @@ def remindershow(connD):
                             else:
                                 x.requestdate = datetime.datetime.strptime(str(line2[4]), '%Y-%m-%d').date()
                             self.devlistbox.insert(END, self.results[p][1])
-                            print('Querrydate = ' + str (x.lastraportdate) + ' Self lastfulldate: ' + str(self.lastfulldatemin))
                             if x.lastraportdate >= self.lastfulldatemin:
                                 self.devlistbox.itemconfig(END, bg='Green')
                                 x.status = 'OK'
