@@ -13,10 +13,10 @@ import numpy as num
 import tkinter as tkk
 from tkinter import filedialog
 
-import datetime
 
 
-#connD=['testuser','info','192.168.10.243']
+
+connD=['testuser','info','192.168.10.243']
 def q_run(connD, querry):
     username = connD[0]
     password = connD[1]
@@ -36,10 +36,10 @@ def q_run(connD, querry):
         pass
     conn.commit()
     cur.close()
-
+def column(matrix, i):
+    return [row[i] for row in matrix]
 
 class LogApplication:
-
 	def __init__(self):
 		self.root = Tk()
 		self.root.title("Log In")
@@ -81,7 +81,7 @@ class LogApplication:
 				filewriter = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
 				filewriter.writerow([user_get])
 				filewriter.writerow([pass_get])
-		connD = [user_get, pass_get, 'localhost']
+		#connD = [user_get, pass_get, 'localhost']
 
 
 		querry = "SELECT current_user"
@@ -117,7 +117,7 @@ def remindershow(connD):
             self.parent = ''
             self.results = []
             self.resultr = []
-
+            self.reminderharmo = list()
             def lastfulldate():
                 ss = (
                     q_run(connD,
@@ -154,7 +154,7 @@ def remindershow(connD):
                                 """
 
                 self.resultr = q_run(connD, querry)
-                print('querryrefresh')
+
                 # answerQuerrys = [parent, results, resultr]
                 # return answerQuerrys
             def dontsend(ID):
@@ -181,6 +181,7 @@ def remindershow(connD):
                             self.devlistbox.itemconfig(END, bg='Grey')
 
                 builddevlistlocal()
+
                 makemessage()
             def marksend():
                 for item in devlist:
@@ -196,13 +197,8 @@ def remindershow(connD):
                 shipname = w.get(index)
                 makeships(shipname)
             def makeships(shnm):
-                querry = "select name from main where parent =(select id from main where name = '" + str(
-                    shnm) + "' limit 1) order by name"
-                ships = q_run(connD, querry)
-                self.Shiplistbox.delete(0, 'end')
 
-                for line in ships:
-                    self.Shiplistbox.insert(END, line[0])
+                ColorShips(self.Shiplistbox, shnm)
             def getparent(shipname):
                 self.parent = q_run(connD,"select id from main where name ='" + str(shipname) + "'" )[0][0]
             def getdevs(evt):
@@ -214,9 +210,6 @@ def remindershow(connD):
                 makedevs("Y")
             def makedevs(check1):
                 self.devlistbox.delete(0, 'end')
-
-
-
                 if check1 == "Y":
                     last = lastfulldate()
                     self.lastfulldatemin = last[0]
@@ -384,8 +377,32 @@ def remindershow(connD):
                     p += 1
                 self.devlistbox.bind('<Double-Button>', devremdet)
             def makemessage():
-                self.textfield.delete('1.0', END)
-                headerstr = """
+                nextfull = self.lastfulldatemax + datetime.timedelta(days=90)
+                teraz = datetime.datetime.now().date()
+                delay = datetime.timedelta(days=14)
+                request = teraz + delay
+
+                if nextfull >request:
+                    self.textfield.delete('1.0', END)
+                    headerstr = """
+To: 
+
+Attn: 
+
+From: Info Marine
+
+Subject:  
+
+Our ref.: 
+
+Dear Sirs,
+In accordance to three month measurement period time, please be so kind and inform us whether taking vibration measurements of whole machinery is possible and - if yes, when we can expect data?
+We hope to receive your response soon, thank you in advance.
+                                        """
+                    self.textfield.insert(INSERT, headerstr)
+                else:
+                    self.textfield.delete('1.0', END)
+                    headerstr = """
 To: 
 
 Attn: 
@@ -399,64 +416,140 @@ Our ref.:
 Good day Sirs,
 
 Please be so kind and inform us whether taking vibration measurements is possible and - if yes, when we can expect data for following equipment:
+    
+                        """
+                    self.textfield.insert(INSERT, headerstr)
+                    devstr = ''
 
-                    """
-                self.textfield.insert(INSERT, headerstr)
+                    for line in devlist:
 
-                devstr = ''
-                for line in devlist:
-                    if str(line.status) == 'REM':
-                        devstr += chr(10) + str('-') + str(line.name)
-                        ## UZUPEŁNIANIE REMCOM DO PRZEMYSLENIA
-                        # if str(line.remcom) != 'None':
-                        #     devstr += "(" + str(line.remcom) + ")"
-
-                self.textfield.insert(INSERT, devstr)
-                devstr = ""
-                header2str = chr(10) + chr(10) + "Which was recommended to be controlled in our reports. "
-                self.textfield.insert(INSERT, header2str)
-
-                devlistnok = list()
-                for line in devlist:
-                    if str(line.status) == 'NOK':
-                        devlistnok.append(line)
-                if len(devlistnok) == 0:
-                    pass
-                else:
-                    devstr = "Could you also perform measurements of machinery missing from three months survey:" + chr(
-                        10)
-                    for line in devlistnok:
-                        if str(line.status) == 'NOK':
+                        if str(line.status) == 'REM':
+                            print(line.name)
                             devstr += chr(10) + str('-') + str(line.name)
-
-                devstr += chr(10) + chr(10)
-                self.textfield.insert(INSERT, devstr)
-
-                header3str = "We hope to receive your response soon, thank you in advance. "
-                self.textfield.insert(INSERT, header3str)
+                            ## UZUPEŁNIANIE REMCOM DO PRZEMYSLENIA
+                            # if str(line.remcom) != 'None':
+                            #     devstr += "(" + str(line.remcom) + ")"
+                    self.textfield.insert(INSERT, devstr)
+                    devstr = ""
+                    header2str = chr(10) + chr(10) + "Which was recommended to be controlled in our reports. "
+                    self.textfield.insert(INSERT, header2str)
+                    devlistnok = list()
+                    for line in devlist:
+                        if str(line.status) == 'NOK':
+                            devlistnok.append(line)
+                    if len(devlistnok) == 0:
+                        pass
+                    else:
+                        devstr = "Could you also perform measurements of machinery missing from three months survey:" + chr(
+                            10)
+                        for line in devlistnok:
+                            if str(line.status) == 'NOK':
+                                devstr += chr(10) + str('-') + str(line.name)
+                    devstr += chr(10) + chr(10)
+                    self.textfield.insert(INSERT, devstr)
+                    header3str = "We hope to receive your response soon, thank you in advance. "
+                    self.textfield.insert(INSERT, header3str)
                 self.sendbutton.pack(side=TOP)
                 self.textfield.pack(side=LEFT)
+            def ReminderQuerrys():
+                querry = """select main2.name, main.name,remi.parent,max(remi.send_date)as send,min(remi.request_date) as request
+                            from reminder remi
+                            left join main on remi.parent = main.id
+                            left join main main2 on main.parent = main2.id
+                            where remi.status is distinct from 2 and remi.send_date is not null
+                            group by main2.name,  main.name,remi.parent"""
+                self.reminderharmo = q_run(connD, querry)
+                querry = """select main2.name, max(remi.send_date)as send,min(remi.request_date) as request,remi.parent 
+                            from reminder remi
+                            left join main on remi.parent = main.id
+                            left join main main2 on main.parent = main2.id
+                            where remi.status is distinct from 2 and remi.send_date is not null
+                            group by main2.name,remi.parent 
+							order by main2.name"""
+                self.reminderownerharmo = q_run(connD, querry)
+                querry = "select name,id from main where parent = 1 order by name"
+                self.resultrr = q_run(connD, querry)
+            def ColorOwners(object):
+                ReminderQuerrys()
+                try:
+                    print(self.lastfulldatemax)
+                    nextfull = datetime.datetime.strptime(str(self.lastfulldatemax), '%y-%m-%d').date() + datetime.timedelta(days=90)
+                except:
+                    nextfull =datetime.datetime.now().date()
+                teraz = datetime.datetime.now().date()
+                delay = datetime.timedelta(days=14)
+                request = teraz + delay
+                delay2 = datetime.timedelta(days=7)
+                lastsend = teraz - delay2
 
+                for line in self.resultrr:
+                    object.insert(END, line[0])
+                    for line2 in self.reminderownerharmo:
+                        if line[0] == line2[0]:
+                            object.itemconfig(END, bg='grey')
+                            self.parent = line2[3]
+                            print(self.parent)
+                            self.lastfulldatemax = lastfulldate()[0]
+                            nextfull = self.lastfulldatemax + datetime.timedelta(days=90)
+
+                            if nextfull > request:
+                                    object.itemconfig(END, bg='red')
+                                    continue
+                            if line2[2] < request: #jeśli jest request_date mniejsza niz dzis + 2 tygodnie
+                                object.itemconfig(END, bg='yellow')
+
+                                if line2[1] > lastsend: #jeśli wysłano w przeciągu zeszłego tygodnia
+                                    object.itemconfig(END, bg='orange')
+                                    break
+
+            def ColorShips(object,shnm):
+
+
+                teraz = datetime.datetime.now().date()
+                delay = datetime.timedelta(days=14)
+                request = teraz + delay
+                delay2 = datetime.timedelta(days=7)
+                lastsend = teraz - delay2
+
+                querry = "select name from main where parent =(select id from main where name = '" + str(
+                    shnm) + "' limit 1) order by name"
+                ships = q_run(connD, querry)
+                object.delete(0, 'end')
+                for line in ships:
+                    object.insert(END, line[0])
+                    for line2 in self.reminderharmo:
+                        if line[0] == line2[1]:
+                            object.itemconfig(END, bg='grey')
+                            self.parent = line2[2]
+                            self.lastfulldatemax= lastfulldate()[0]
+                            nextfull = self.lastfulldatemax + datetime.timedelta(days=90)
+                            if line2[4] < request: #jeśli jest request_date mniejsza niz dzis + 2 tygodnie
+                                object.itemconfig(END, bg='yellow')
+                                if nextfull > request:
+                                    object.itemconfig(END, bg='red')
+                                if line2[3] > lastsend: #jeśli wysłano w przeciągu zeszłego tygodnia
+                                    object.itemconfig(END, bg='orange')
+                                    break
             self.remWindow = tk.Tk()
             self.remWindow.title("Reminder")
-            self.Ownerlistbox = Listbox(self.remWindow)
+            self.Ownerlistbox = Listbox(self.remWindow, exportselection=False)
             self.Ownerlistbox.config(width=0)
             self.Ownerlistbox.bind('<Double-Button>', getships)
-            self.Shiplistbox = Listbox(self.remWindow)
+            self.Shiplistbox = Listbox(self.remWindow, exportselection=False)
             self.Shiplistbox.config(width=0)
             self.Shiplistbox.bind('<Double-Button>', getdevs)
-            self.Reportlistbox = Listbox(self.remWindow)
+            self.Reportlistbox = Listbox(self.remWindow, exportselection=False)
             self.Reportlistbox.config(width=0)
             self.Reportlistbox.bind('<Double-Button>', setquaterly)
             self.devlistbox = Listbox(self.remWindow)
             self.devlistbox.config(width=0)
-
             self.sendbutton = tk.Button(text='Send', command = marksend)
             self.textfield = tk.Text(self.remWindow, width=100, height=60)
-            querry = "select name,id from main where parent = 1 order by name"
-            resultrr = q_run(connD, querry)
-            for line in resultrr:
-                self.Ownerlistbox.insert(END, line[0])
+
+
+            ColorOwners(self.Ownerlistbox)
+
+
             self.Ownerlistbox.pack(side=LEFT, fill=BOTH)
             self.Shiplistbox.pack(side=LEFT, fill=BOTH)
             self.devlistbox.pack(side=LEFT, fill=BOTH)
