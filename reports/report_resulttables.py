@@ -661,7 +661,8 @@ def drawtable_IM_chart_PMS_limit( document ,measlist ,connD ,report_number ):
 						r0.font.color.rgb = RGBColor(0, 0, 255)
 						r0.bold = True
 						resulttable.cell( xcord ,0 ).merge( resulttable.cell( xcord ,6 ) )
-
+						resulttable.rows[xcord].height= WD_ROW_HEIGHT.EXACTLY
+						resulttable.rows[xcord].height = Cm(0.5)
 
 					continue
 				if measStrip[ 0 ][ -5: ] != '00.00' and measStrip[ 0 ][ -3: ] == '.00':
@@ -672,7 +673,8 @@ def drawtable_IM_chart_PMS_limit( document ,measlist ,connD ,report_number ):
 						r0.font.color.rgb = RGBColor(128, 0, 128)
 						r0.bold = True
 						resulttable.cell( xcord ,0 ).merge( resulttable.cell( xcord ,6 ) )
-
+						resulttable.rows[xcord].height= WD_ROW_HEIGHT.EXACTLY
+						resulttable.rows[xcord].height = Cm(0.5)
 					continue
 			except:
 				pass
