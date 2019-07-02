@@ -435,12 +435,12 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 	cur.close ()
 
 	for j in range ( 5 ):
-		if result [ j ] [ 0 ] > maxval:
+		if result [ j ] [ 0 ] > float(maxval):
 			maxcord = j
-			maxval = round ( float ( result [ j ] [ 0 ] ) , 3 )
+			maxval = str ( float ( '%.3f'%result [ j ] [ 0 ] ))
 
 	for j in range ( 5 ):
-		result_text = str ( round ( float ( '%.3f'%result [ j ] [ 0 ] ) , 3 ) )
+		result_text = str ( float ( '%.3f'%result [ j ] [ 0 ] ) )
 		p = tableno.cell ( 2 , 1 + j ).paragraphs [ 0 ]
 		tableno.cell ( 2 , 1 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -487,11 +487,11 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 	for j in range ( 3 ):
 		if result [ j ] [ 0 ] > maxval:
 			maxcord = j
-			maxval = round ( float ( result [ j ] [ 0 ] ) , 3 )
+			maxval =  float ( '%.3f'%result [ j ] [ 0 ] )
 
 	for j in range ( 3 ):
 
-		result_text = str ( round ( float ( '%.3f'%result [ j ] [ 0 ] ) , 3 ) )
+		result_text = str ( float ( '%.3f'%result [ j ] [ 0 ] ) )
 		p = tableno.cell ( 2 , 6 + j ).paragraphs [ 0 ]
 		tableno.cell ( 2 , 6 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -533,12 +533,12 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 	cur.close ()
 
 	for j in range ( 5 ):
-		if result [ j ] [ 0 ] > maxval:
+		if result [ j ] [ 0 ] > float(maxval):
 			maxcord = j
-			maxval = round ( float ( result [ j ] [ 0 ] ) , 3 )
+			maxval = str ( float ( '%.3f'%result [ j ] [ 0 ] ) )
 
 	for j in range ( 5 ):
-		result_text = str ( round ( float ( '%.3f'%result [ j ] [ 0 ] ) , 3 ) )
+		result_text = str ( float ( '%.3f'%result [ j ] [ 0 ] )  )
 		p = tableno.cell ( 4 , 1 + j ).paragraphs [ 0 ]
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		tableno.cell ( 4 , 1 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
@@ -566,11 +566,11 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 	for j in range ( 3 ):
 		if result [ j ] [ 0 ] > maxval:
 			maxcord = j
-			maxval = round ( float ( result [ j ] [ 0 ] ) , 3 )
+			maxval = float ( '%.3f'%result [ j ] [ 0 ] )
 
 	for j in range ( 3 ):
 
-		result_text = str ( round ( float ( '%.3f'%result [ j ] [ 0 ] ) , 3 ) )
+		result_text = str (  '%.3f'%result [ j ] [ 0 ] )
 		p = tableno.cell ( 4 , 6 + j ).paragraphs [ 0 ]
 		tableno.cell ( 4 , 6 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -595,12 +595,12 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 	cur.close ()
 
 	for j in range ( 5 ):
-		if result [ j ] [ 0 ] > maxval:
+		if result [ j ] [ 0 ] > float(maxval):
 			maxcord = j
-			maxval = round ( float ( result [ j ] [ 0 ] ) , 3 )
+			maxval = str ( float ( '%.3f'%result [ j ] [ 0 ] ) )
 
 	for j in range ( 5 ):
-		result_text = str ( round ( float ( '%.3f'%result [ j ] [ 0 ] ) , 3 ) )
+		result_text = str (  float ( '%.3f'%result [ j ] [ 0 ] )  )
 		p = tableno.cell ( 5 , 1 + j ).paragraphs [ 0 ]
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		tableno.cell ( 5 , 1 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
@@ -648,11 +648,11 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 	for j in range ( 3 ):
 		if result [ j ] [ 0 ] > maxval:
 			maxcord = j
-			maxval = round ( float ( result [ j ] [ 0 ] ) , 3 )
+			maxval = float ( '%.3f'%result [ j ] [ 0 ] )
 
 	for j in range ( 3 ):
 
-		result_text = str ( round ( float ( '%.3f'%result [ j ] [ 0 ] ) , 3 ) )
+		result_text = str ( float ( '%.3f'%result [ j ] [ 0 ] ) )
 		p = tableno.cell ( 5 , 6 + j ).paragraphs [ 0 ]
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		tableno.cell ( 5 , 6 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
@@ -693,12 +693,12 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 	cur.close ()
 
 	for j in range ( 5 ):
-		if result [ j ] [ 0 ] > maxval:
+		if result [ j ] [ 0 ] > float(maxval):
 			maxcord = j
-			maxval = round ( float ( result [ j ] [ 0 ] ) , 3 )
+			maxval = str ( float ( '%.3f'%result [ j ] [ 0 ] ) )
 
 	for j in range ( 5 ):
-		result_text = str ( round ( float ( result [ j ] [ 0 ] ) , 3 ) )
+		result_text = str ( float ( '%.3f'%result [ j ] [ 0 ] )  )
 		p = tableno.cell ( 7 , 1 + j ).paragraphs [ 0 ]
 		tableno.cell ( 7 , 1 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -726,11 +726,11 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 	for j in range ( 3 ):
 		if result [ j ] [ 0 ] > maxval:
 			maxcord = j
-			maxval = round ( float ( result [ j ] [ 0 ] ) , 3 )
+			maxval = float ( '%.3f'%result [ j ] [ 0 ] )
 
 	for j in range ( 3 ):
 
-		result_text = str ( round ( float ( '%.3f'%result [ j ] [ 0 ] ) , 3 ) )
+		result_text = str (float ( '%.3f'%result [ j ] [ 0 ] )  )
 		p = tableno.cell ( 7 , 6 + j ).paragraphs [ 0 ]
 		tableno.cell ( 7 , 6 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -758,10 +758,10 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 	for j in range ( 5 ):
 		if result [ j ] [ 0 ] > maxval:
 			maxcord = j
-			maxval = round ( float ( result [ j ] [ 0 ] ) , 3 )
+			maxval = round ( float ( '%.3f'%result [ j ] [ 0 ] ) , 3 )
 
 	for j in range ( 5 ):
-		result_text = str ( round ( float ( '%.3f'%result [ j ] [ 0 ] ) , 3 ) )
+		result_text = str (  float ( '%.3f'%result [ j ] [ 0 ] ) )
 		p = tableno.cell ( 8 , 1 + j ).paragraphs [ 0 ]
 		tableno.cell ( 8 , 1 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -809,11 +809,11 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 	for j in range ( 3 ):
 		if result [ j ] [ 0 ] > maxval:
 			maxcord = j
-			maxval = round ( float ( result [ j ] [ 0 ] ) , 3 )
+			maxval =  float ( '%.3f'%result [ j ] [ 0 ] )
 
 	for j in range ( 3 ):
 
-		result_text = str ( round ( float ( '%.3f'%result [ j ] [ 0 ] ) , 3 ) )
+		result_text = str ( float ( '%.3f'%result [ j ] [ 0 ] ) )
 		p = tableno.cell ( 8 , 6 + j ).paragraphs [ 0 ]
 		tableno.cell ( 8 , 6 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -855,12 +855,12 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 	cur.close ()
 
 	for j in range ( 5 ):
-		if result [ j ] [ 0 ] > maxval:
+		if result [ j ] [ 0 ] > float(maxval):
 			maxcord = j
-			maxval = round ( float ( result [ j ] [ 0 ] ) , 3 )
+			maxval = str( float ( '%.3f'%result [ j ] [ 0 ] )  )
 
 	for j in range ( 5 ):
-		result_text = str ( round ( float ( '%.3f'%result [ j ] [ 0 ] ) , 3 ) )
+		result_text = str ( float ( '%.3f'%result [ j ] [ 0 ] )  )
 		p = tableno.cell ( 10 , 1 + j ).paragraphs [ 0 ]
 		tableno.cell ( 10 , 1 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -888,11 +888,11 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 	for j in range ( 3 ):
 		if result [ j ] [ 0 ] > maxval:
 			maxcord = j
-			maxval = round ( float ( result [ j ] [ 0 ] ) , 3 )
+			maxval =float ( '%.3f'%result [ j ] [ 0 ] )
 
 	for j in range ( 3 ):
 
-		result_text = str ( round ( float ( '%.3f'%result [ j ] [ 0 ] ) , 3 ) )
+		result_text = str (  float ( '%.3f'%result [ j ] [ 0 ] ) )
 		p = tableno.cell ( 10 , 6 + j ).paragraphs [ 0 ]
 		tableno.cell ( 10 , 6 + j ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 		p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -925,6 +925,7 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 	tableno.cell ( 2 , 10 ).merge ( tableno.cell ( 3 , 10 ).merge ( tableno.cell ( 4 , 10 ) ) )
 	tableno.cell ( 2 , 10 ).paragraphs [ 0 ].add_run ( '[INSERT]' )
 	tableno.cell ( 2 , 10 ).paragraphs [ 0 ].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	tableno.cell ( 2 ,10 ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 	tableno.cell ( 2 , 10 ).paragraphs [ 0 ].style = document.styles [ 'textBT' ]
 
 	tableno.cell ( 5 , 0 ).paragraphs [ 0 ].add_run ( 'Overall velocity RMS (mm/s)' )
@@ -951,7 +952,6 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 	tableno.cell ( 5 , 10 ).paragraphs [ 0 ].add_run ( '[INSERT]' )
 	tableno.cell ( 5 , 10 ).style = document.styles [ 'textBT' ]
 	tableno.cell ( 5 , 10 ).paragraphs [ 0 ].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-	tableno.cell ( 5 , 10 ).style = document.styles [ 'textBT' ]
 
 	tableno.cell ( 8 , 0 ).paragraphs [ 0 ].add_run ( 'Overall velocity RMS (mm/s)' )
 	tableno.cell ( 8 , 0 ).paragraphs [ 0 ].style = document.styles [ 'textBT' ]
@@ -974,6 +974,7 @@ def resulttable_iloar ( tn , host , username , password , tableno , id1 , id2 , 
 
 	tableno.cell ( 8 , 10 ).merge ( tableno.cell ( 9 , 10 ).merge ( tableno.cell ( 10 , 10 ) ) )
 	tableno.cell ( 8 , 10 ).add_paragraph ( '[INSERT]' )
+	tableno.cell(8,10).paragraphs[0].style=document.styles['textBT']
 	tableno.cell ( 8 , 10 ).paragraphs [ 0 ].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
 
@@ -1084,11 +1085,12 @@ def makereport ( username , password , host , rn_ , id_ ):  # AUTORUN!
 	if id_ == '53':
 		platname = 'Atlantis'
 	elif id_ == '54':
-		platname = 'Iolar'
+		platname = 'Iolair'
 	elif id_ == '55':
 		platname = 'Neptuno'
 
 	table2.cell ( 0 , 1 ).add_paragraph ( str ( platname ) , 'text' )
+	table2.cell ( 0 , 1 ).paragraphs[0].style=document.styles['text']
 	table2.cell ( 0 , 1 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
 
 	table2.cell ( 1 , 0 ).add_paragraph ( 'The IMO Number:' , 'texthead' )
@@ -1263,6 +1265,7 @@ def makereport ( username , password , host , rn_ , id_ ):  # AUTORUN!
 
 	table4.cell ( 1 , 1 ).alignment = WD_ALIGN_PARAGRAPH.LEFT
 	set_col_widths ( table4 )
+
 	document.add_paragraph ( 'Legend according to vibration class' , 'listlvl1' )
 	limittablelegend = document.add_table ( rows=5 , cols=2 )
 	limittablelegend.cell ( 0 , 0 ).paragraphs [ 0 ].add_run (
@@ -1282,9 +1285,13 @@ def makereport ( username , password , host , rn_ , id_ ):  # AUTORUN!
 	limittablelegend.cell ( 4 , 0 ).paragraphs [ 0 ].add_run ( 'Z. D' ).font.bold = True
 	limittablelegend.cell ( 4 , 1 ).paragraphs [ 0 ].add_run (
 		'Vibrations over the limits but actions are not required.' )
-
 	set_col_widths ( limittablelegend )
-
+	for i in range(5):
+		limittablelegend.cell(i,0).paragraphs[0].runs[0].font.size=Pt(11)
+		limittablelegend.cell(i,1).paragraphs[0].runs[0].font.size=Pt(11)
+		limittablelegend.cell(i,0).paragraphs[0].runs[0].font.name='Calibri'
+		limittablelegend.cell(i,1).paragraphs[0].runs[0].font.name='Calibri'
+	#limittablelegend.paragraphs[0].style=document.styles['text']
 	document.add_page_break ()
 	l23 = document.add_paragraph ( '2.3.	Measurement equipment' )
 	l23.style = document.styles [ 'listlvl2' ]
@@ -1600,9 +1607,9 @@ def makereport ( username , password , host , rn_ , id_ ):  # AUTORUN!
 	t16.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	section=document.sections[0]
 	footer=section.footer.paragraphs[0]
-	footer.add_run('Diagnostic report for platform'+platname)
-	footer.runs[0].font.name='Times New Roman'
-	footer.runs[0].font.size=Pt(10)
+	footer.add_run('Diagnostic report for platform '+platname+' '+str(rn_)).font.name='Times New Roman'
+	#footer.runs[0].font.name='Times New Roman'
+	footer.runs[0].font.size=Pt(12)
 
 	mydate = datetime.datetime.now ()
 	repdate = str ( mydate.year ) + '_' + str ( mydate.month ) + '_' + str ( mydate.day )
