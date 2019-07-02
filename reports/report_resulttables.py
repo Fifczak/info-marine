@@ -4,7 +4,7 @@ import chart_scripts
 from report_styles import loadstyles
 import psycopg2
 from chart_scripts import *
-from docx.enum.table import WD_ALIGN_VERTICAL
+from docx.enum.table import WD_ALIGN_VERTICAL, WD_ROW_HEIGHT
 from docx.enum.text import WD_COLOR_INDEX, WD_ALIGN_PARAGRAPH
 from docx.shared import Cm,Pt
 from docx.shared import RGBColor
@@ -371,12 +371,13 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 	#for measStrip in sortlistQ:
 		i += 1
 		if (measStrip[ 1 ]).isdigit() == False:  ######## NAGŁÓWKI
-			try:
+			# try:
 				ht = resulttable.cell( xcord + 1 ,0 ).paragraphs[ 0 ]
 				resulttable.cell( xcord + 1 ,0 ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 				if measStrip[ 0 ][ -5: ] == '00.00' and sortlistQ[ i + 1 ][ 0 ][ -5: ] != '00.00' and \
 						sortlistQ[ i + 1 ][ 0 ][ -3: ] == '.00':
 					if str( measStrip[ 0 ][ :1 ] ) in activeSortPList:
+
 
 						xcord += 1
 						ht.paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
@@ -385,7 +386,8 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 						r0.font.color.rgb = RGBColor(0, 0, 255)
 						r0.bold = True
 						resulttable.cell( xcord ,0 ).merge( resulttable.cell( xcord ,5 ) )
-
+						resulttable.rows[xcord].height= WD_ROW_HEIGHT.EXACTLY
+						resulttable.rows[xcord].height = Cm(0.5)
 
 					continue
 				if measStrip[ 0 ][ -5: ] != '00.00' and measStrip[ 0 ][ -3: ] == '.00':
@@ -396,10 +398,11 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 						r0.font.color.rgb = RGBColor(128, 0, 128)
 						r0.bold = True
 						resulttable.cell( xcord ,0 ).merge( resulttable.cell( xcord ,5 ) )
-
+						resulttable.rows[xcord].height= WD_ROW_HEIGHT.EXACTLY
+						resulttable.rows[xcord].height = Cm(0.5)
 					continue
-			except:
-				pass
+			# except:
+			# 	pass
 		else:  ######## POMIARY
 			p = -1
 			for xx in trueMeasList:
