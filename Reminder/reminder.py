@@ -12,11 +12,11 @@ import matplotlib.pyplot as plt
 import numpy as num
 import tkinter as tkk
 from tkinter import filedialog
+from tqdm import tqdm
 
 
 
-
-connD=['testuser','info','192.168.10.243']
+#connD=['testuser','info','192.168.10.243']
 def q_run(connD, querry):
     username = connD[0]
     password = connD[1]
@@ -81,7 +81,7 @@ class LogApplication:
 				filewriter = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
 				filewriter.writerow([user_get])
 				filewriter.writerow([pass_get])
-		#connD = [user_get, pass_get, 'localhost']
+		connD = [user_get, pass_get, 'localhost']
 
 
 		querry = "SELECT current_user"
@@ -482,13 +482,13 @@ Please be so kind and inform us whether taking vibration measurements is possibl
                 delay2 = datetime.timedelta(days=7)
                 lastsend = teraz - delay2
 
-                for line in self.resultrr:
+                for line in tqdm(self.resultrr):
                     object.insert(END, line[0])
                     for line2 in self.reminderownerharmo:
                         if line[0] == line2[0]:
                             object.itemconfig(END, bg='grey')
                             self.parent = line2[3]
-                            print(self.parent)
+                            #print(self.parent)
                             self.lastfulldatemax = lastfulldate()[0]
                             nextfull = self.lastfulldatemax + datetime.timedelta(days=90)
 
