@@ -57,7 +57,7 @@ def makereport ( connD ,rn_ ):
 	#############################################################################################
 
 	querry = "select reporttype from main where id = (select shipid from harmonogram where report_number = '"+str(rn_)+"')"
-
+	print(querry)
 	reporttype = list(q_run(connD,querry))[0][0]
 
 	# fileformattype = 1  # 1 - IM; 2 - KAMTRO ; 3-Stocznia Remontowa
@@ -202,16 +202,13 @@ def makereport ( connD ,rn_ ):
 #
 username = 'testuser '
 password = 'info'
-host = 'localhost'
-rn_ = '1858U2-2018'
+host = '192.168.10.243'
+rn_ = '1952U3-2019'
 # # #rn_ ='1968-2019'
 # #
-# host = '192.168.10.243'
-# rn_ = '2044U-2019'
+host = 'localhost'
+rn_ = '1705U5-2018'
 # # #
 connD = [ username ,password ,host ]
 #
-# # #
-# # #
-# # # #os.startfile ( 'C:\overmind\Reports\GSR 1987-2019.docx' )
-makereport(connD,rn_)
+#makereport(connD,rn_)

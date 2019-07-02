@@ -473,7 +473,7 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 						ids.clear()
 	ht = document.add_paragraph()
 	r0 = ht.add_run()
-	trendresults(document)
+	#trendresults(document)
 	#r0.text = str('Whenever new results are reduced more than 5% of previous measurements')
 	for row in resulttable.rows:
 		for cell in row.cells:
@@ -724,9 +724,9 @@ def drawtable_IM_chart_PMS_limit( document ,measlist ,connD ,report_number ):
 					resulttable.cell(xcord + 1, col_PMS).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 					resulttable.cell(xcord + 1, col_name).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 					resulttable.cell(xcord + 1, col_val).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+					resulttable.cell(xcord + 1, col_limit).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 					resulttable.cell(xcord + 1, col_class).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 					resulttable.cell(xcord + 1, col_env).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-					# resulttable.cell(xcord + 1, col_trend).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 					resulttable.cell(xcord + 1, col_remark).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 
 					# if str( xx.limit ) == 'Cl. D':  # TEGO DLA CZYTELNOSCI LEPIEJ ZROBIC FUNKCJE
@@ -777,7 +777,7 @@ def drawtable_IM_chart_PMS_limit( document ,measlist ,connD ,report_number ):
 						ids.clear()
 	ht = document.add_paragraph()
 	r0 = ht.add_run()
-	trendresults(document)
+	#trendresults(document)
 	#r0.text = str('Whenever new results are reduced more than 5% of previous measurements')
 	for row in resulttable.rows:
 		for cell in row.cells:
