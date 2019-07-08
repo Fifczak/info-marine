@@ -74,7 +74,7 @@ class LogApplication:
 				filewriter = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
 				filewriter.writerow([user_get])
 				filewriter.writerow([pass_get])
-		connD = [user_get, pass_get, 'localhost']
+		connD = [user_get, pass_get, '192.168.10.243']
 
 
 		querry = "SELECT current_user"
@@ -360,9 +360,6 @@ class StructWindow:
 				self.makecontrols(self.devname, self.connD)
 			else:
 				messagebox.showinfo("Brak", 'Delete not aviable, there are measurements for point {}'.format(point))
-
-
-
 		def reloadquerry(self, structuresort, shipid, connD,chagesort):
 			if chagesort == False:
 				if structuresort == True: structuresort = False
@@ -398,11 +395,12 @@ class StructWindow:
 			self.loadpoints()
 		def loadpoints(self):
 			self.deviceslistbox.delete(0, END)
-
+			checkdevlist = list()
+			checkdevlist.clear()
 			devlist.clear()
+
 			for line in self.devdata:
 				dev = device()
-				self.deviceslistbox.insert(END, line[1])
 				dev.id = str(line[0])
 				dev.name = str(line[1])
 				dev.point = str(line[2])
@@ -412,8 +410,11 @@ class StructWindow:
 				dev.sort = str(line[6])
 				dev.visible = str(line[7])
 				devlist.append(dev)
+				if line[1] not in checkdevlist:
+					self.deviceslistbox.insert(END, line[1])
+					checkdevlist.append(line[1])
 
-			self.deviceslistbox.pack()
+			self.deviceslistbox.pack(fill=BOTH)
 		def makecontrols(self,devname,connD):
 			querry = "select id from devices where name = '{}' and parent = {}".format(devname,self.shipid)
 			self.devid = list(q_run(connD,querry))[0][0]
@@ -474,6 +475,7 @@ class StructWindow:
 			self.sortbutton = Button(parent,text = 'Change sort', command = lambda: self.reloadquerry(self.structuresort,shipid,connD,True))
 			self.sortbutton.pack(side = TOP, anchor = W)
 			self.deviceslistbox = Listbox(parent, exportselection=False)
+			self.deviceslistbox.config(width=0)
 			self.detailframe = Frame(parent)
 			self.detailframe.pack(side=RIGHT, anchor=W)
 			self.reloadquerry(self.structuresort, shipid, connD,True)
@@ -536,7 +538,6 @@ class StructWindow:
 		self.Ownerlistbox.pack(side=LEFT, fill=BOTH)
 		self.Shiplistbox.pack(side=LEFT, fill=BOTH)
 		self.Applistbox.pack(side=LEFT, fill=BOTH)
-		self.PointsFrame( self.Workframe, 69, connD)
 		self.stWindow.mainloop()
 
 

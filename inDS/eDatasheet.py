@@ -362,7 +362,7 @@ class Datasheet():
 							except:
 								pass
 
-				mylist.insert(END, self.results[xcord][1] + '(' + str(lrn) + ':' + str(limStr) + ')')
+				mylist.insert(END, str(self.results[xcord][1]) + '(' + str(lrn) + ':' + str(limStr) + ')')
 
 
 			else:
@@ -601,5 +601,5 @@ class Datasheet():
 # Keeps the window open/running
 
 
-#LogApplication()
-Datasheet(['testuser','info','localhost'],79)
+LogApplication()
+#Datasheet(['testuser','info','192.168.10.243'],234)
