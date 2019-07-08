@@ -81,7 +81,7 @@ class LogApplication:
 				filewriter = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
 				filewriter.writerow([user_get])
 				filewriter.writerow([pass_get])
-		connD = [user_get, pass_get, 'localhost']
+		connD = [user_get, pass_get, '192.168.10.243']
 
 
 		querry = "SELECT current_user"
@@ -129,7 +129,10 @@ def remindershow(connD):
                         self.lastfulldatemin = rep[1]
                         self.lastfulldatemax = rep[2]
                         break
+
                 lfd = [self.lastfulldatemin, self.lastfulldatemax]
+
+
                 return lfd
             def preQuerrys():
 
@@ -381,8 +384,10 @@ def remindershow(connD):
                 teraz = datetime.datetime.now().date()
                 delay = datetime.timedelta(days=14)
                 request = teraz + delay
+                print(nextfull,'<',request)
 
-                if nextfull >request:
+
+                if nextfull < request:
                     self.textfield.delete('1.0', END)
                     headerstr = """
 To: 
@@ -424,7 +429,7 @@ Please be so kind and inform us whether taking vibration measurements is possibl
                     for line in devlist:
 
                         if str(line.status) == 'REM':
-                            print(line.name)
+
                             devstr += chr(10) + str('-') + str(line.name)
                             ## UZUPEŁNIANIE REMCOM DO PRZEMYSLENIA
                             # if str(line.remcom) != 'None':
@@ -492,7 +497,7 @@ Please be so kind and inform us whether taking vibration measurements is possibl
                             self.lastfulldatemax = lastfulldate()[0]
                             nextfull = self.lastfulldatemax + datetime.timedelta(days=90)
 
-                            if nextfull > request:
+                            if nextfull < request:
                                     object.itemconfig(END, bg='red')
                                     continue
                             if line2[2] < request: #jeśli jest request_date mniejsza niz dzis + 2 tygodnie
@@ -510,7 +515,6 @@ Please be so kind and inform us whether taking vibration measurements is possibl
                 request = teraz + delay
                 delay2 = datetime.timedelta(days=7)
                 lastsend = teraz - delay2
-
                 querry = "select name from main where parent =(select id from main where name = '" + str(
                     shnm) + "' limit 1) order by name"
                 ships = q_run(connD, querry)
@@ -525,7 +529,7 @@ Please be so kind and inform us whether taking vibration measurements is possibl
                             nextfull = self.lastfulldatemax + datetime.timedelta(days=90)
                             if line2[4] < request: #jeśli jest request_date mniejsza niz dzis + 2 tygodnie
                                 object.itemconfig(END, bg='yellow')
-                                if nextfull > request:
+                                if nextfull < request:
                                     object.itemconfig(END, bg='red')
                                 if line2[3] > lastsend: #jeśli wysłano w przeciągu zeszłego tygodnia
                                     object.itemconfig(END, bg='orange')
