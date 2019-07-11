@@ -72,7 +72,21 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 
     def get_meas():
         def readomnitrend():
+            def READoverall(lines,start):
+                xcord2 = -1
+                while 1:
+                    xcord2 += 1
+                    if lines[xcord + xcord2] == '#TrendPlusRef':
+                        #print((lines[xcord + xcord2+2]).split())######################################### TUTAJ DO SPRAWDZENIA CO ZA WARTOŚĆ BIERZE
+                        values =  ((lines[xcord + xcord2+2]).split())
+                        value = values[len(values)-4]
+                    if lines[xcord + xcord2] == '#Date':
+                        date = get_date(lines[xcord + xcord2+1])
+                        break
+                value = round(float(value), 3)
+                return date,value
             def countoverall(self):
+                WTFparam = 1
                 y = meas()
                 y.routename = self.routename
                 y.point = self.point
@@ -83,13 +97,31 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                 y.mode = 'Overall'
                 sumVal = 0
                 freq = float(self.start)
+
+                min = 0
+                if str(self.type) == 'Env':
+                    min = 0
+                    WTFparam = 1
+                    ### TRZEBA PRZEMYSLEC CZY JEDYNYM WYJATKIEM NIE BEDZIE FSRU I NIE ZROBIC PO PROSTU != 234
+                    if str(parent) == '234': ##Jeśli chcemy miec RMS
+                        WTFparam = 1
+                    if str(parent) == '45' or str(parent) == '46' or str(parent) == '47' or str(parent) == '48': ##Jeśli chcemy miec 0-P
+                        WTFparam = 0.73
+                elif str(self.type) == 'Vel':
+                    min = 10
+                    WTFparam = 0.58
+
+
                 for m in self.chart:
-                    if freq > 10 and freq < 1000:  ## TUTAJ BEDZIE TRZEBA ZROVBC ZMIENNE ZAKRESY W ZALEZNOSCI OD STATKU / URZADZENIA / NORMY
+                    if freq > min and freq < 1000:  ## TUTAJ BEDZIE TRZEBA ZROVBC ZMIENNE ZAKRESY W ZALEZNOSCI OD STATKU / URZADZENIA / NORMY
                         sumVal += pow(m, 2)
                     freq += float(self.increment)
-                WTFparam = 1
-                if self.type == 'Vel':
-                    WTFparam = 0.5  # //DLA AURORY
+
+
+
+
+
+
                 y.overall = round(sqrt(sumVal) * WTFparam, 3)
 
                 if str(self.type) == 'Env':
@@ -149,7 +181,9 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                 return datestr
 
             def get_measdomain(measno):
+
                 measdomain = list();
+
                 if str(parent)=='48':
                     if measno == '1004' or measno == '1007':
                         measdomain.append(
@@ -168,7 +202,7 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                     else:
                         measdomain.append('UNKNOWN'), measdomain.append('UNKNOWN'), measdomain.append('UNKNOWN')
 
-                if str(parent) == '46':
+                if str(parent) == '46' or str(parent) == '47':
                     if measno == '1004' or measno == '1007' or measno == '1026' or measno == '1028':
                         measdomain.append(
                             'FFT'), measdomain.append('Vel'), measdomain.append('[mm/s]')
@@ -178,42 +212,69 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                     else:
                         measdomain.append('UNKNOWN'), measdomain.append('UNKNOWN'), measdomain.append('UNKNOWN')
 
+
+
+                if str(parent) == '234': #FSRU
+                    if measno == '1007' :
+                        measdomain.append('FFT'), measdomain.append('Vel'), measdomain.append('[mm/s]')
+                    elif measno == '1018':
+                        measdomain.append('FFT'), measdomain.append('Env'), measdomain.append('[m/s2]')
+                    elif measno == '1014':
+                        measdomain.append('RMS'), measdomain.append('Vel'), measdomain.append('[m/s2]')
+                    else:
+                        measdomain.append('UNKNOWN'), measdomain.append('UNKNOWN'), measdomain.append('UNKNOWN')
+
+
+
+
                 return measdomain
 
             Tk().withdraw()
             a = filedialog.askopenfilename()
             f = open(a, "r")
             lines = f.read().split("\n")  # "\r\n" if needed
-            measno = -1
             xcord = 0
+            meason = False
             for line in lines:
 
                 xcord += 1
 
                 if line == '#----- Start Task -----':
                     x = meas()
-                if line == '#Path':
-                    x.routename = (get_route_name(lines[xcord]))[0]
-                    x.point = (get_route_name(lines[xcord]))[1]
-                if line == '#Setupnumber':
-                    x.domain = (get_measdomain(lines[xcord]))[0]
-                    x.type = (get_measdomain(lines[xcord]))[1]
-                    x.unit = (get_measdomain(lines[xcord]))[2]
+                    meason = True
+                if meason == True:
+                    if line == '#Path':
+                        x.routename = (get_route_name(lines[xcord]))[0]
+                        x.point = (get_route_name(lines[xcord]))[1]
+                    if line == '#Setupnumber':
+                        x.domain = (get_measdomain(lines[xcord]))[0]
+                        x.type = (get_measdomain(lines[xcord]))[1]
+                        x.unit = (get_measdomain(lines[xcord]))[2]
+                    if str(x.domain) == 'RMS':
+                        x.mode = 'Overall'
+                        x.date, x.overall = (READoverall(lines, xcord))
+                        print (x.date, x.overall)
+                        x.type = 'RMS'
+                        measlist.append(x)
+                        meason = False
+                        continue
+                    else:
+                        if line == '#Date':
+                            x.date = get_date(lines[xcord])
 
-                if line == '#Date':
-                    x.date = get_date(lines[xcord])
-
-                if line == '#X-Start,Increment,X-End':
-                    x.start = str(lines[xcord])[0:7]
-                    x.increment = str(lines[xcord])[9:16]
-                    x.end = str(lines[xcord])[18:]
-                if line == '#Y-Values':
-                    x.mode = 'FFT'
-                    x.chart = getchart(lines, xcord)
-                    measlist.append(x)
-                    measlist.append(countoverall(x))
-
-                    measno += 1
+                        if line == '#X-Start,Increment,X-End':
+                            x.start = str(lines[xcord])[0:7]
+                            x.increment = str(lines[xcord])[9:16]
+                            x.end = str(lines[xcord])[18:]
+                        if line == '#Y-Values':
+                            x.mode = 'FFT'
+                            x.chart = getchart(lines, xcord)
+                            if str(x.type) != 'UNKNOWN':
+                                measlist.append(x)
+                                if str(parent) != '234' or str(x.type) == 'Env': #przemyslec i zmienic warunek na ze statku na to czy byl overall
+                                    measlist.append(countoverall(x))
+                                    meason = False
+                                    continue
 
         def readmarvib():
 
@@ -796,7 +857,9 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
             for y in crosstablequerry:
                 if str((y[1]).strip()) == str(routename):
                     for yy in pointstable:
+
                         if yy[1] == str(cpoint):
+
                             x.id = y[0]
                             if str(yy[0]) == str(x.id):
                                 x.checked = True
@@ -857,12 +920,14 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
         ycord = 0
 
         for x in measlist:
-
-            mylist.insert(END,
-                          str(x.routename) + ' ' + str(x.point) + ' ' + str(x.mode) + ' ' + str(x.overall) + ' ' + str(
-                              x.type) + ' ' + str(x.date))
-            check_routename(x, ycord)
-            ycord += 1
+            if x.type != 'UNKNOWN':
+                mylist.insert(END,
+                              str(x.routename) + ' ' + str(x.point) + ' ' + str(x.mode) + ' ' + str(x.overall) + ' ' + str(
+                                  x.type) + ' ' + str(x.date))
+                check_routename(x, ycord)
+                ycord += 1
+            else:
+                x.checked = True
         ycord = 0
         for x in crosstablequerry:
             crosstablelist.insert(END, str(x[1]) + ' #' + str(x[0]) + ' # ' + str(x[2]))
@@ -910,4 +975,4 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 # 'Vibscanner'
 # 'Marvib'
 # 'ezThomas'
-#read_measurement_file('Marvib','testuser','info','localhost','1986U-2019', '92')
+#read_measurement_file('Vibscanner','testuser','info','192.168.10.243','2119-2019', '47')
