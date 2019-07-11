@@ -12,8 +12,8 @@ from tqdm import tqdm
 from tkinter import messagebox
 from tkinter import simpledialog
 
-#host = '192.168.10.243'
-host = 'localhost'
+host = '192.168.10.243'
+#host = 'localhost'
 devlist = list()
 def q_run(connD, querry):
 	username = connD[0]
@@ -243,62 +243,66 @@ class ModelMakerWindow():
 		ans = list(q_run(self.connD, querry))
 		models = column(ans, 1)
 		modelsids = column(ans, 0)
-		types = column(ans, 2)
+		self.types = column(ans, 2)
 		self.cbox2.config(values=models)
 		try:
 			self.cbox2.current(0)
-			self.typelabel.config(text = types[0])
+			self.typelabel.config(text = self.types[0])
 		except:
 			self.cbox2.config(text = ' ')
 			self.typelabel.config(text=' ')
 
-	# def model_change(self,event):
-	# 	idx = self.cbox.current()
-	# 	querry = "select id,name from main_models where parent = {} order by name".format(self.makersids[idx])
-	# 	ans = list(q_run(self.connD, querry))
-	# 	models = column(ans, 1)
-	# 	modelsids = column(ans, 0)
-	# 	self.cbox2.config(values=models)
-	# 	self.cbox2.current(0)
+	def model_change(self,event):
+		idx = self.cbox2.current()
+		self.typelabel.config(text = self.types[idx])
 
+	def addmaker(self):
+		maker = simpledialog.askstring("Add maker", "Enter maker name:")
+		querry = "INSERT INTO main_models (name) VALUES ('{}')".format(maker)
+		q_run(connD, querry)
+		querry = "select id,name from main_models where parent is null and name <> '' and name <> ' ' order by name"
+		ans = list(q_run(connD, querry))
+		self.makers = column(ans, 1)
+		self.makersids = column(ans, 0)
+		self.configures
+
+	def addmodel(self):
+		idx = self.cbox.current()
+
+		querry = "INSERT INTO main_models (parent,name) VALUES (EMPTY,'{}')".format(self.makersids[idx])
+		print(querry)
 
 	def __init__(self,connD):
 		self.connD = connD
 		self.devwindow = tk.Tk()
 		self.devwindow.title("Structure")
-
 		label = tk.Label(self.devwindow, text='Maker')
 		label.grid(row=0, column=0)
 		querry = "select id,name from main_models where parent is null and name <> '' and name <> ' ' order by name"
 		ans = list(q_run(connD, querry))
-		makers = column(ans, 1)
+		self.makers = column(ans, 1)
 		self.makersids = column(ans, 0)
 		self.var = tk.StringVar()
-		#self.var.trace('w',self.maker_change)
-		self.cbox = ttk.Combobox(self.devwindow, textvariable=self.var, values=makers, state="readonly", width=50)
+		self.cbox = ttk.Combobox(self.devwindow, textvariable=self.var, values=self.makers, state="readonly", width=50)
 		self.cbox.bind('<<ComboboxSelected>>', self.maker_change)
 		self.cbox.grid(row=0, column=1)
-
-
-
 		label = tk.Label(self.devwindow, text='Model')
 		label.grid(row=1, column=0)
-
-
-
-
-
 		self.var2 = tk.StringVar()
 		self.cbox2 = ttk.Combobox(self.devwindow, textvariable=self.var2, state="readonly", width=50)
 		self.cbox2.grid(row=1, column=1)
-
+		self.cbox2.bind('<<ComboboxSelected>>', self.model_change)
 		label2 = tk.Label(self.devwindow, text = 'Type: ')
 		label2.grid(row = 2, column = 0)
-
 		self.typelabel= tk.Label(self.devwindow, text = '-')
 		self.typelabel.grid(row = 2, column =1 )
 
 		#addbut = tk.Button(self.devwindow, text='Add device', command=insertdevice).grid(row=2, column=0)
+		addmakerbut = tk.Button(self.devwindow, text='Add maker', command = self.addmaker)
+		addmakerbut.grid(row=0, column=2)
+		addmakerbut = tk.Button(self.devwindow, text='Add model', command = self.addmodel)
+		addmakerbut.grid(row=1, column=2)
+
 
 		self.devwindow.mainloop()
 
@@ -325,6 +329,7 @@ class StructWindow:
 							order by dev.name""".format(str(shipid))
 				ans= q_run(connD, querry)
 				self.structuresort = True
+			self.devdata = list()
 			self.devdata = list()
 			self.devdata.clear()
 			for item in ans:
@@ -476,9 +481,35 @@ class StructWindow:
 					visible = self.CombVisibleList[counter].showvalue
 					if self.CombVisibleList[counter].showvalue == 'None':self.CombVisibleList[counter].showvalue = 'False'
 
+					try:
+						querry = "select point from points where sort = {} and id = {}".format( counter+1,self.devid)
+						temppoint = list(q_run(self.connD, querry))[0][0]
+					except:
+						temppoint = 'NONE'
+
+					if temppoint != 'NONE':
+						querry = "update points set point = 'TEMPCHANGE' where point = '{}' and id = {}".format(point,self.devid)
+						q_run(self.connD, querry)
+
+
+
+
 
 					querry = "update points set point = '{}',visible = '{}' where sort = {} and id = {}".format(point,self.CombVisibleList[counter].showvalue, counter+1,self.devid)
 					q_run(self.connD, querry)
+
+
+
+
+
+
+
+					if temppoint != 'NONE':
+						querry = "update points set point = '{}' where point = 'TEMPCHANGE' and id = {}".format(temppoint,self.devid)
+						q_run(self.connD, querry)
+
+
+
 					if point != i.showvalue:
 						querry = "update measurements_low set point = '{}' where point = '{}' and id = {}".format(point,i.showvalue,self.devid)
 						q_run(self.connD, querry)
@@ -829,5 +860,5 @@ class StructWindow:
 
 
 
-#LogApplication()
-ModelMakerWindow(['filipb','@infomarine','192.168.10.243'])
+LogApplication()
+ModelMakerWindow(['filipb','@infomarine','localhost'])

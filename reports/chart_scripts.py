@@ -73,9 +73,11 @@ class trendchart:
             ans = [x, y, z,n]
             return ans
         def draw(x,y,a,name):
-            a.plot(x, y, label=str(name[0]))
+            a.plot(x, y,marker='o', label=str(name[0]))
+            a.set_frame_on(False)
             a.yaxis.grid( linewidth='0.5')
             a.legend(loc='upper center', bbox_to_anchor=(0.5, -0.17), ncol=5,frameon=False)
+
             f.autofmt_xdate()
             return f
         def details(VALS,id_,name):
@@ -100,7 +102,9 @@ class trendchart:
         self.imgdata = io.BytesIO()
         self.wdw  = tk.Tk()
         self.wdw.title("Trend Chart")
+
         f = Figure(figsize=(12, 3.5), dpi=100)
+
         a = f.add_subplot(1, 1, 1)
         canvas = FigureCanvasTkAgg(f, self.wdw)
         toolbar = NavigationToolbar2Tk(canvas, self.wdw)
