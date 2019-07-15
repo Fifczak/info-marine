@@ -61,7 +61,7 @@ def IMVibEng(document,connD,rn):
 	r0.text = 'Sea depth:'
 	ht = shiptable.cell(1, 0).add_paragraph()
 	r0 = ht.add_run()
-	r0.text = 'Last twice times greater than Vessel draught'
+	r0.text = 'Least twice times greater than Vessel draught'
 
 	##SHIPTABLE [2,0]
 	ht = shiptable.cell(2, 0).paragraphs[0]
@@ -82,5 +82,5 @@ def IMVibEng(document,connD,rn):
 	s1.add_break()
 	summary.add_run(
 		'This report is prepared in good faith based on measurement diagnostic done on available running rotary machine and documentation submitted.').font.size = Pt(
-		11)
+		12)
 	document.add_paragraph()

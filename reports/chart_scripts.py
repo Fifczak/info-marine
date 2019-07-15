@@ -76,7 +76,7 @@ class trendchart:
             a.plot(x, y,marker='o', label=str(name[0]))
             a.set_frame_on(False)
             a.yaxis.grid( linewidth='0.5')
-            a.legend(loc='upper center', bbox_to_anchor=(0.5, -0.17), ncol=5,frameon=False)
+            a.legend(loc='lower center',bbox_to_anchor=(0.5,-0.3), fontsize = 'x-large', ncol=3,frameon=False)#
 
             f.autofmt_xdate()
             return f
@@ -103,7 +103,7 @@ class trendchart:
         self.wdw  = tk.Tk()
         self.wdw.title("Trend Chart")
 
-        f = Figure(figsize=(12, 3.5), dpi=100)
+        f = Figure(figsize=(12, 5), dpi=100)
 
         a = f.add_subplot(1, 1, 1)
         canvas = FigureCanvasTkAgg(f, self.wdw)

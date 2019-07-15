@@ -433,7 +433,11 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 
 					ht = resulttable.cell( xcord + 1 ,col_env ).paragraphs[ 0 ]
 					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-					r0 = ht.add_run ( str ( xx.maxenv ).replace ( "." ,"," ) )
+					try:
+						xx.maxenv = round(float(str(xx.maxenv).replace(".", ",")) ,3 )
+					except:
+						xx.maxenv = xx.maxenv
+					r0 = ht.add_run ( str (xx.maxenv ) )
 
 					ids.append(xx.id)
 
@@ -452,24 +456,28 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 						else:
 							xcord += 1
 							resulttable.cell( xcord + 1 ,0 ).merge( resulttable.cell( xcord + 1 ,col_remark ))
-							ht = resulttable.cell( xcord + 1 ,0 ).paragraphs[ 0 ]
+							resulttable.cell(xcord + 1, 0).add_paragraph()
+							ht = resulttable.cell( xcord + 1 ,0 ).paragraphs[ 1 ]
 
 							image = (trendchart(ids, connD,GUI,xx.VSG).giveimage())
 
 							p0 = ht.add_run(  )
-							p0.add_picture(image, width=Inches(7.0))
 
+							p0.add_picture(image, width=Inches(6.5))
+							resulttable.cell(xcord + 1, 0).add_paragraph()
 							ids.clear()
 							xcord += 1
 						break
 					except:  # OSTATNIA LINIA TABELI
 						xcord += 1
 						resulttable.cell( xcord + 1 ,0 ).merge( resulttable.cell( xcord + 1 ,col_remark ) )
-						ht = resulttable.cell( xcord + 1 ,0 ).paragraphs[ 0 ]
+						resulttable.cell(xcord + 1, 0).add_paragraph()
+						ht = resulttable.cell( xcord + 1 ,0 ).paragraphs[ 1 ]
+
 						image = (trendchart(ids, connD,GUI,xx.VSG).giveimage())
 						p0 = ht.add_run()
-						p0.add_picture(image, width=Inches(7.0))
-
+						p0.add_picture(image, width=Inches(6.5))
+						resulttable.cell(xcord + 1, 0).add_paragraph()
 						ids.clear()
 	ht = document.add_paragraph()
 	r0 = ht.add_run()
@@ -716,7 +724,11 @@ def drawtable_IM_chart_PMS_limit( document ,measlist ,connD ,report_number ):
 
 					ht = resulttable.cell( xcord + 1 ,col_env ).paragraphs[ 0 ]
 					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-					r0 = ht.add_run ( str ( xx.maxenv ).replace ( "." ,"," ) )
+					try:
+						xx.maxenv = round(float(str(xx.maxenv).replace(".", ",")), 3)
+					except:
+						xx.maxenv = xx.maxenv
+					r0 = ht.add_run(str(xx.maxenv))
 					# ht = resulttable.cell( xcord + 1 ,col_trend ).paragraphs[ 0 ]
 					# ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.LEFT
 					ids.append(xx.id)
