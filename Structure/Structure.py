@@ -8,12 +8,13 @@ import csv
 from tkinter.filedialog import askopenfilename
 import tkinter as tkk
 from tkinter import filedialog
+#from tkinter import filedialog
 from tqdm import tqdm
 from tkinter import messagebox
 from tkinter import simpledialog
 
-host = '192.168.10.243'
-#host = 'localhost'
+#host = '192.168.10.243'
+host = 'localhost'
 devlist = list()
 def q_run(connD, querry):
 	username = connD[0]
@@ -151,13 +152,16 @@ class PointComboboxObject:
 	def __init__(self,parentframe,inlist,c,parentClass):
 		self.parentclass = parentClass
 		self.sort = c-1
+
 		self.showvalue = str(inlist[c-1])
+
 		self.valueslist = list()
 		self.var = tk.StringVar()
 		self.cbox = ttk.Combobox(parentframe, textvariable=self.var, values=inlist)
 		self.cbox.grid(row=c, column=1)
 		self.cbox.bind('<<ComboboxSelected>>',self.callback)
 		self.cbox.insert(0, inlist[c-1])
+
 		self.cbox.configure(values=inlist)
 class BearingComboboxObject:
 	def callback(self, event=None):
@@ -234,46 +238,133 @@ class chosedevicewindow():
 
 
 		self.devwindow.mainloop()
+class TypeModelWindow():
+	def ok(self):
+		if str(self.modelentry.get()).strip() != '':
+			querry = "insert into main_models (parent,name,type) values ({},'{}','{}')".format(self.makerid,self.modelentry.get(),self.cbox.get())
+			(q_run(self.connD, querry))
+			self.typewindow.destroy()
+
+			querry = "select id,name from main_models where parent is null and name <> '' and name <> ' ' order by name"
+			ans = list(q_run(self.connD, querry))
+			self.parentframe.makers = column(ans, 1)
+			self.parentframe.makersids = column(ans, 0)
+			self.parentframe.cbox.config(values=self.parentframe.makers)
+
+			self.parentframe.cbox.current(0)
+
+			querry = "select id,name,type from main_models where parent = {} order by name".format(self.parentframe.makersids[0])
+			ans = list(q_run(self.connD, querry))
+			self.parentframe.models = column(ans, 1)
+			self.parentframe.modelsids = column(ans, 0)
+			self.parentframe.types = column(ans, 2)
+			self.parentframe.cbox2.config(values=self.parentframe.models)
+
+			self.parentframe.cbox2.current(0)
+			self.parentframe.typelabel.config(text=self.parentframe.types)
+
+
+			#self.parentframe.devwindow.destroy()
+			#ModelMakerWindow(self.connD)
+		else:
+			messagebox.showinfo("Error", 'Model empty')
+	def __init__(self,connD,makerid,parentframe):
+		self.makerid = makerid
+		self.connD = connD
+		self.parentframe = parentframe
+		self.typewindow = tk.Tk()
+		self.typewindow.title("Model / Type")
+		label = tk.Label(self.typewindow, text='Model')
+		label.grid(row=0, column=0)
+
+		self.modelentry = tk.Entry(self.typewindow, width=50)
+		self.modelentry.grid(row=0, column=1)
+		label = tk.Label(self.typewindow, text='Type:')
+		label.grid(row=1, column=0)
+		self.var = tk.StringVar()
+
+		querry = "select type from devices where type is distinct from null and type <> '' group by type order by type"
+		ans = list(q_run(connD, querry))
+		self.types = column(ans, 0)
+		self.var = tk.StringVar()
+
+
+		self.cbox = ttk.Combobox(self.typewindow, textvariable=self.var,values = self.types, width=50)
+		self.cbox.grid(row=1, column=1)
+
+
+
+
+		#addbut = tk.Button(self.typewindow, text='Add device', command=insertdevice).grid(row=2, column=0)
+
+		okbut = tk.Button(self.typewindow, text='Add model', command = self.ok)
+		okbut.grid(row=2, column=1)
+
+
+		self.typewindow.mainloop()
+
+class ctdev:
+	def __init__(self):
+		self.id = ''
+		self.name = ''
+		self.nameindevice = ''
 
 
 class ModelMakerWindow():
+	def accept(self):
+		self.parentframe.lab_model_e.configure(text = self.cbox2.get())
+		self.parentframe.lab_type_e.delete(0, END)
+		self.parentframe.lab_type_e.insert(0, str(self.typelabel.cget("text")))
+
 	def maker_change(self,event):
 		idx = self.cbox.current()
 		querry = "select id,name,type from main_models where parent = {} order by name".format(self.makersids[idx])
 		ans = list(q_run(self.connD, querry))
-		models = column(ans, 1)
-		modelsids = column(ans, 0)
+		self.models = column(ans, 1)
+		self.modelsids = column(ans, 0)
 		self.types = column(ans, 2)
-		self.cbox2.config(values=models)
+		self.cbox2.config(values=self.models)
 		try:
 			self.cbox2.current(0)
 			self.typelabel.config(text = self.types[0])
 		except:
 			self.cbox2.config(text = ' ')
 			self.typelabel.config(text=' ')
-
 	def model_change(self,event):
 		idx = self.cbox2.current()
 		self.typelabel.config(text = self.types[idx])
-
 	def addmaker(self):
 		maker = simpledialog.askstring("Add maker", "Enter maker name:")
-		querry = "INSERT INTO main_models (name) VALUES ('{}')".format(maker)
-		q_run(connD, querry)
-		querry = "select id,name from main_models where parent is null and name <> '' and name <> ' ' order by name"
-		ans = list(q_run(connD, querry))
-		self.makers = column(ans, 1)
-		self.makersids = column(ans, 0)
-		self.configures
+		if str(maker).strip() != '':
+			querry = "INSERT INTO main_models (name) VALUES ('{}')".format(maker)
+			q_run(self.connD, querry)
+			querry = "select id,name from main_models where parent is null and name <> '' and name <> ' ' order by name"
+			ans = list(q_run(self.connD, querry))
+			self.makers = column(ans, 1)
+			self.makersids = column(ans, 0)
+			self.cbox.config(values = self.makers)
 
+			self.cbox.current(0)
+
+			querry = "select id,name,type from main_models where parent = {} order by name".format(self.makersids[0])
+			ans = list(q_run(self.connD, querry))
+			self.models = column(ans, 1)
+			self.modelsids = column(ans, 0)
+			self.types = column(ans, 2)
+			self.cbox2.config(values=self.models)
+
+		else:
+			messagebox.showinfo("Error", 'Maker empty')
 	def addmodel(self):
 		idx = self.cbox.current()
-
-		querry = "INSERT INTO main_models (parent,name) VALUES (EMPTY,'{}')".format(self.makersids[idx])
-		print(querry)
-
-	def __init__(self,connD):
+		print(str(self.makersids[idx]).strip())
+		if str(self.makersids[idx]).strip() != '':
+			TypeModelWindow(self.connD, self.makersids[idx],self)
+		else:
+			messagebox.showinfo("Error", 'Chose maker')
+	def __init__(self,connD,parentframe):
 		self.connD = connD
+		self.parentframe = parentframe
 		self.devwindow = tk.Tk()
 		self.devwindow.title("Structure")
 		label = tk.Label(self.devwindow, text='Maker')
@@ -286,10 +377,22 @@ class ModelMakerWindow():
 		self.cbox = ttk.Combobox(self.devwindow, textvariable=self.var, values=self.makers, state="readonly", width=50)
 		self.cbox.bind('<<ComboboxSelected>>', self.maker_change)
 		self.cbox.grid(row=0, column=1)
+		self.cbox.current(0)
+
+
+		querry = "select id,name,type from main_models where parent = {} order by name".format(self.makersids[0])
+		ans = list(q_run(self.connD, querry))
+		models = column(ans, 1)
+		modelsids = column(ans, 0)
+		self.types = column(ans, 2)
+
+
+
 		label = tk.Label(self.devwindow, text='Model')
 		label.grid(row=1, column=0)
 		self.var2 = tk.StringVar()
-		self.cbox2 = ttk.Combobox(self.devwindow, textvariable=self.var2, state="readonly", width=50)
+
+		self.cbox2 = ttk.Combobox(self.devwindow, textvariable=self.var2, state="readonly",values=models, width=50)
 		self.cbox2.grid(row=1, column=1)
 		self.cbox2.bind('<<ComboboxSelected>>', self.model_change)
 		label2 = tk.Label(self.devwindow, text = 'Type: ')
@@ -297,20 +400,183 @@ class ModelMakerWindow():
 		self.typelabel= tk.Label(self.devwindow, text = '-')
 		self.typelabel.grid(row = 2, column =1 )
 
-		#addbut = tk.Button(self.devwindow, text='Add device', command=insertdevice).grid(row=2, column=0)
+
 		addmakerbut = tk.Button(self.devwindow, text='Add maker', command = self.addmaker)
 		addmakerbut.grid(row=0, column=2)
-		addmakerbut = tk.Button(self.devwindow, text='Add model', command = self.addmodel)
-		addmakerbut.grid(row=1, column=2)
+		addmodelbut = tk.Button(self.devwindow, text='Add model', command = self.addmodel)
+		addmodelbut.grid(row=1, column=2)
 
+		addmakerbut = tk.Button(self.devwindow, text='Change model', command=self.accept)
+		addmakerbut.grid(row=3, column=1)
 
 		self.devwindow.mainloop()
 
 class StructWindow:
+
+	class CrosstableFrame:
+		# def reloadquerry(self, structuresort, shipid, connD, chagesort):
+		# 	if chagesort == False:
+		# 		if structuresort == True:
+		# 			structuresort = False
+		# 		else:
+		# 			structuresort = True
+		# 	if structuresort == True:
+		# 		querry = """select dev.id, dev.name,mm.name,dev.type,kw,rpm,pms,info,st.standard,drivenby, meas_condition,cm,(public.im_extract(dev.cbm_interval))[1] as interval_type,(public.im_extract(dev.cbm_interval))[2] as interval_len
+		# 					from devices dev
+		# 					left join ds_structure dss on cast(dev.id as text) = dss.id
+		# 					left join main_models mm on dev.model_fkey = mm.id
+		# 					left join standards st on dev.standard_fkey = st.id
+		# 					where dev.parent ={}
+		# 					order by dss.sort""".format(str(shipid))
+		# 		ans = q_run(connD, querry)
+		# 		self.structuresort = False
+		# 	else:
+		# 		querry = """select dev.id, dev.name,mm.name,dev.type,kw,rpm,pms,info,st.standard,drivenby, meas_condition,cm,(public.im_extract(dev.cbm_interval))[1] as interval_type,(public.im_extract(dev.cbm_interval))[2] as interval_len
+		# 					from devices dev
+		# 					left join ds_structure dss on cast(dev.id as text) = dss.id
+		# 					left join main_models mm on dev.model_fkey = mm.id
+		# 					left join standards st on dev.standard_fkey = st.id
+		# 					where dev.parent = {}
+		# 					order by dev.name""".format(str(shipid))
+		# 		ans = q_run(connD, querry)
+		# 		self.structuresort = True
+		# 	self.devdata = list()
+		# 	self.devdata = list()
+		# 	self.devdata.clear()
+		# 	for item in ans:
+		# 		self.devdata.append(item)
+		# 	self.loaddevices()
+
+		def namesort(self):
+			self.st = 'namesort'
+			querry = """
+			select dev.id,cr.nameindevice,dev.name
+			from devices dev
+			left join crosstable cr on cr.id = dev.id
+			left join ds_structure dss on cast(cr.id as text) = dss.id
+			where dev.parent = {}
+			order by dev.name
+			""".format(self.shipid)
+			ans = q_run(self.connD,querry)
+			self.devdata = list()
+			self.devdata = list()
+			self.devdata.clear()
+			for item in ans:
+				self.devdata.append(item)
+			self.loaddevices('namesort')
+		def crossnamesort(self):
+			self.st = 'crossnamesort'
+			querry = """
+			select dev.id,cr.nameindevice,dev.name
+			from devices dev
+			left join crosstable cr on cr.id = dev.id
+			left join ds_structure dss on cast(cr.id as text) = dss.id
+			where dev.parent = {}
+			order by cr.nameindevice
+			""".format(self.shipid)
+			ans = q_run(self.connD,querry)
+			self.devdata = list()
+			self.devdata = list()
+			self.devdata.clear()
+			for item in ans:
+				self.devdata.append(item)
+			self.loaddevices('crossnamesort')
+		def structuresort(self):
+			self.st = 'structuresort'
+			querry = """
+			select dev.id,cr.nameindevice,dev.name
+			from devices dev
+			left join crosstable cr on cr.id = dev.id
+			left join ds_structure dss on cast(cr.id as text) = dss.id
+			where dev.parent = {}
+			order by dss.sort
+			""".format(self.shipid)
+			ans = q_run(self.connD,querry)
+			self.devdata = list()
+			self.devdata = list()
+			self.devdata.clear()
+			for item in ans:
+				self.devdata.append(item)
+			self.loaddevices('structuresort')
+		def loaddevices(self,sorttype):
+			self.deviceslistbox.delete(0, END)
+			devlist.clear()
+			for line in self.devdata:
+				dev = ctdev()
+				if str(sorttype) == 'namesort':
+					self.deviceslistbox.insert(END, 'NAME: {} NAMEINDEVICE: {} ID: {}'.format(line[2],line[1],line[0]))
+				if str(sorttype) == 'crossnamesort':
+					self.deviceslistbox.insert(END, 'NAMEINDEVICE: {} NAME: {} ID: {}'.format(line[1],line[2],line[0]))
+				if str(sorttype) == 'structuresort':
+					self.deviceslistbox.insert(END, 'NAME: {} NAMEINDEVICE: {} ID: {}'.format(line[2],line[1],line[0]))
+				dev.id = str(line[0])
+				dev.nameindevice = str(line[1])
+				dev.name = str(line[2])
+				devlist.append(dev)
+
+
+			self.deviceslistbox.pack(fill=BOTH, expand = 1)
+
+
+		def __init__(self,parent,shipid,connD):
+			def getdetails(evt):
+				w = evt.widget
+				w = evt.widget
+				index = int(w.curselection()[0])
+				devname = w.get(index)
+				id = self.devdata[index][0]
+				nameindevice = self.devdata[index][1]
+				newnameindevice = simpledialog.askstring("Change routename","New crosstable name:", initialvalue= nameindevice)
+
+				if str(newnameindevice).strip() != '' and str(newnameindevice) != 'None':
+
+					querry = ("update crosstable set nameindevice = '{}' where id = {} returning *".format(newnameindevice,id))
+					if len(q_run(connD,querry)) == 0:
+						querry = ("INSERT INTO crosstable(parent,nameindevice,id) VALUES ({},'{}',{})".format(shipid,
+							newnameindevice, id))
+						q_run(connD, querry)
+					else:
+						querry = ("update crosstable set nameindevice = '{}' where id = {}".format(
+							newnameindevice, id))
+						q_run(connD, querry)
+
+
+				if self.st == 'namesort':
+					self.namesort()
+				elif self.st == 'crossnamesort':
+					self.crossnamesort()
+				elif self.st == 'structuresort':
+					self.structuresort()
+
+
+			self.connD = connD
+			self.shipid = shipid
+			self.sortbutton1 = Button(parent,text = 'Name sort', command = self.namesort )
+			self.sortbutton1.pack(side = TOP, anchor = W)
+			self.sortbutton2 = Button(parent,text = 'Crosstable sort', command = self.crossnamesort)
+			self.sortbutton2.pack(side = TOP, anchor = W)
+			self.sortbutton3 = Button(parent,text = 'Structure sort', command = self.structuresort )
+			self.sortbutton3.pack(side = TOP, anchor = W)
+			self.deviceslistbox = Listbox(parent, exportselection=False)
+			self.deviceslistbox.config(width=0)
+			self.detailframe = Frame(parent)
+			self.detailframe.pack(side=RIGHT, anchor=W, fill=BOTH, expand = 1)
+			self.structuresort()
+			self.deviceslistbox.bind('<Double-Button>', getdetails)
+			parent.pack(side=LEFT)
 	class DevicesFrame:
-		def reloadquerry(self,structuresort,shipid,connD):
+		def insertdevice(self):
+			newname = simpledialog.askstring("Add maker", "Enter maker name:")
+			if str(newname).strip() != '':
+				querry = "insert into devices (parent,name) values ({},'{}')".format(self.shipid,newname)
+				q_run(self.connD, querry)
+				self.reloadquerry(self.structuresort, self.shipid, self.connD, False)
+		def reloadquerry(self,structuresort,shipid,connD,chagesort):
+			if chagesort == False:
+				if structuresort == True: structuresort = False
+				else: structuresort = True
 			if structuresort == True:
-				querry = """select dev.id, dev.name,mm.name,dev.type,kw,rpm,pms,info,st.standard,drivenby, meas_condition,cm,interval_type,interval_length
+				querry = """select dev.id, dev.name,mm.name,dev.type,kw,rpm,pms,info,st.standard,drivenby, meas_condition,cm,(public.im_extract(dev.cbm_interval))[1] as interval_type,(public.im_extract(dev.cbm_interval))[2] as interval_len
 							from devices dev
 							left join ds_structure dss on cast(dev.id as text) = dss.id
 							left join main_models mm on dev.model_fkey = mm.id
@@ -320,7 +586,7 @@ class StructWindow:
 				ans = q_run(connD, querry)
 				self.structuresort = False
 			else:
-				querry = """select dev.id, dev.name,mm.name,dev.type,kw,rpm,pms,info,st.standard,drivenby, meas_condition,cm,interval_type,interval_length
+				querry = """select dev.id, dev.name,mm.name,dev.type,kw,rpm,pms,info,st.standard,drivenby, meas_condition,cm,(public.im_extract(dev.cbm_interval))[1] as interval_type,(public.im_extract(dev.cbm_interval))[2] as interval_len
 							from devices dev
 							left join ds_structure dss on cast(dev.id as text) = dss.id
 							left join main_models mm on dev.model_fkey = mm.id
@@ -354,17 +620,53 @@ class StructWindow:
 				dev.meas_condition = str(line[10])
 				dev.cm = str(line[11])
 
-				if str(line[12]) == '1': dev.interval_type = "Day"
-				elif str(line[12]) == '2': dev.interval_type = "Week"
-				elif str(line[12]) == '3': dev.interval_type = "Month"
-				dev.interval_length = str(line[13])
+
+				# dla cast intevral as text
+				# interval = str(line[12]).split(' ')
+				# if str(interval[1]) == 'day' or str(interval[1]) == 'days': dev.interval_type = "Day"
+				# elif str(interval[1]) == 'week' or str(interval[1]) == 'weeks': dev.interval_type = "Week"
+				# elif str(interval[1]) == 'mon' or str(interval[1]) == 'mons': dev.interval_type = "Month"
+				# elif str(interval[1]) == 'year' or str(interval[1]) == 'years': dev.interval_type = "Year"
+				# dev.interval_length = str(interval[0])
+
+
+				#przy wykorzystaniu funkcji im_extract od Antrez
+				if str(line[12]) == '1' : dev.interval_type = "Day"
+				elif str(line[12]) == '2' : dev.interval_type = "Week"
+				elif str(line[12]) == '3' : dev.interval_type = "Month"
+				elif str(line[12]) == '4': dev.interval_type = "Year"
+				dev.interval_length = line[13]
+
 				devlist.append(dev)
+
+
 			self.deviceslistbox.pack(fill=BOTH, expand = 1)
 		def showmodelframe(self):
-			ModelMakerWindow(self.connD)
+			ModelMakerWindow(self.connD,self)
 		def __init__(self,parent,shipid,connD):
 			def updatedevice():
-				print('Update')
+				if str(self.lab_model_e.cget("text")) == 'None':
+					model = ''
+				else:
+					model = self.lab_model_e.cget("text")
+
+				interval = "{} {}".format(self.lab_interval_length_e.get(), self.lab_interval_type_e.get())
+
+
+				querry = """
+				UPDATE devices 
+				SET name = '{}', model = '{}', model_fkey = (select id from main_models where name = '{}' limit 1), type ='{}',
+				kw = '{}', rpm = '{}', PMS = '{}', Info = '{}', norm = '{}', standard_fkey = (select id from standards where standard ='{}' limit 1),
+				drivenby = '{}', meas_condition = '{}', cm = '{}', cbm_interval = '{}' where id = {}
+				""".format(self.lab_name_e.get(), model, model, self.lab_type_e.get(), self.lab_kw_e.get(),
+					  self.lab_rpm_e.get(), self.lab_pms_e.get(), \
+					  self.lab_info_e.get("1.0",END), self.lab_norm_e.get(), self.lab_norm_e.get(), self.lab_drivenby_e.get(),
+					  self.lab_meas_condition_e.get(), \
+					  self.lab_cm_e.get(), interval,self.id)
+
+				q_run(connD,querry)
+
+				self.reloadquerry(self.structuresort, shipid, connD,False)
 			def getdetails(evt):
 				w = evt.widget
 				index = int(w.curselection()[0])
@@ -375,7 +677,8 @@ class StructWindow:
 					at = devname.find('@')
 					dev = devname[:at-1]
 					if str(line.name) == str(dev):
-						self.title = tk.Label(self.detailframe, text='Id: '+str(line.id))
+						self.id = str(line.id)
+						self.title = tk.Label(self.detailframe, text='Id: '+ str(self.id))
 						self.title.grid(row=0, column=2)
 						self.lab_name_l = tk.Label(self.detailframe, text="Name").grid(row=2, column=1)
 						self.lab_name_e = tk.Entry(self.detailframe, width = 50)
@@ -402,17 +705,23 @@ class StructWindow:
 						self.lab_pms_e.grid(row=7, column=2)
 						self.lab_pms_e.insert(0, str(line.pms))
 						self.lab_info_l = tk.Label(self.detailframe, text="Info").grid(row=8, column=1)
-						self.lab_info_e = tk.Entry(self.detailframe, text="", width = 50)
+						self.lab_info_e = tk.Text(self.detailframe,  width = 38, height = 10)
 						self.lab_info_e.grid(row=8, column=2)
-						self.lab_info_e.insert(0, str(line.info))
+						self.lab_info_e.insert('1.0', str(line.info))
 						self.lab_norm_l = tk.Label(self.detailframe, text="Norm").grid(row=9, column=1)
 
 						self.standardlist = list(q_run(connD,"select standard,id from standards order by standard"))
 						standards = column(self.standardlist,0)
 
-						self.lab_norm_e = ttk.Combobox(self.detailframe, text="", values=standards, width = 45)
+						self.lab_norm_e = ttk.Combobox(self.detailframe, text="", values=standards, width = 45, state="readonly")
 						self.lab_norm_e.grid(row=9, column=2)
-						self.lab_norm_e.insert(0, str(line.norm))
+						try:
+							sidx = standards.index(str(line.norm))
+							self.lab_norm_e.current(sidx)
+						except:
+							self.lab_norm_e.insert(0, 'Chose standard')
+
+
 						self.lab_drivenby_l = tk.Label(self.detailframe, text="Drivenby").grid(row=10, column=1)
 						self.lab_drivenby_e = tk.Entry(self.detailframe, text="", width = 50)
 						self.lab_drivenby_e.grid(row=10, column=2)
@@ -422,38 +731,58 @@ class StructWindow:
 						self.lab_meas_condition_e.grid(row=11, column=2)
 						self.lab_meas_condition_e.insert(0, str(line.meas_condition))
 						self.lab_cm_l = tk.Label(self.detailframe, text="CM").grid(row=12, column=1)
-						self.lab_cm_e = ttk.Combobox(self.detailframe, text="", values=["True","False"], width = 45)
+						self.lab_cm_e = ttk.Combobox(self.detailframe, text="", values=["True","False"], width = 45, state="readonly")
 						self.lab_cm_e.grid(row=12, column=2)
-						self.lab_cm_e.insert(0, str(line.cm))
+
+
+
+						sidx = ["True","False"].index(str(line.cm))
+						self.lab_cm_e.current(sidx)
+
 						self.lab_interval_type_l = tk.Label(self.detailframe, text="Interval type").grid(row=13, column=1)
-						self.lab_interval_type_e = ttk.Combobox(self.detailframe, text="", values=["Day","Week","Month"], width = 45)
+						self.lab_interval_type_e = ttk.Combobox(self.detailframe, text="", values=["Day","Week","Month","Year"], width = 45, state="readonly")
 						self.lab_interval_type_e.grid(row=13, column=2)
-						self.lab_interval_type_e.insert(0, str(line.interval_type))
+
+						sidx = ["Day","Week","Month","Year"].index(str(line.interval_type))
+						self.lab_interval_type_e.current(sidx)
+
+
+						#self.lab_interval_type_e.insert(0, str(line.interval_type))
+
+
+
+
 						self.lab_interval_length_l = tk.Label(self.detailframe, text="Interval_length").grid(row=14, column=1)
 						self.lab_interval_length_e = tk.Entry(self.detailframe, text="", width = 50)
 						self.lab_interval_length_e.grid(row=14, column=2)
 						self.lab_interval_length_e.insert(0, str(line.interval_length))
 						self.updatebut = tk.Button(self.detailframe,text = "Update device data",command = updatedevice)
 						self.updatebut.grid(row=15, column=2)
-
 			self.connD = connD
+			self.shipid = shipid
 			self.structuresort = True
-			self.sortbutton = Button(parent,text = 'Change sort', command = lambda: self.reloadquerry(self.structuresort,shipid,connD))
+			self.sortbutton = Button(parent,text = 'Change sort', command = lambda: self.reloadquerry(self.structuresort,shipid,connD,True))
 			self.sortbutton.pack(side = TOP, anchor = W)
+			self.sortbutton = Button(parent,text = 'Add device', command = lambda: self.insertdevice())
+			self.sortbutton.pack(side = TOP, anchor = W)
+
 			self.deviceslistbox = Listbox(parent, exportselection=False)
 			self.deviceslistbox.config(width=0)
 			self.detailframe = Frame(parent)
 			self.detailframe.pack(side=RIGHT, anchor=W, fill=BOTH, expand = 1)
-			self.reloadquerry(self.structuresort,shipid,connD)
+			self.reloadquerry(self.structuresort,shipid,connD,False)
 			self.deviceslistbox.bind('<Double-Button>', getdetails)
 			parent.pack(side=LEFT)
 	class PointsFrame:
 		def AddPoint(self):
+
 			querry = "select max(sort) from points where id = {}".format(self.devid)
 			maxsort = list(q_run(self.connD, querry))[0][0]
 
+			if str(maxsort).strip() =='None':	maxsort = 0
+
 			querry = "insert into points(id,point,sort,visible) values ({},(select max(_id_)+1 from points),{}, True)".format(self.devid,maxsort+1)
-			print(querry)
+
 			q_run(self.connD, querry)
 			self.reloadquerry(self.structuresort, self.shipid, self.connD, False)
 			self.makecontrols(self.devname, self.connD)
@@ -545,23 +874,22 @@ class StructWindow:
 				else: structuresort = True
 			if structuresort == True:
 				querry = """select dev.id, name, pts.point, bea.bearing,bea.seal,bea.additional, pts.sort,pts.visible
-						from points pts
+						from devices dev 
+						left join points pts on pts.id = dev.id
 						left join bearings bea on pts.id = bea.id and pts.point = bea.point
-						left join devices dev on pts.id = dev.id
 						left join ds_structure dss on cast(dev.id as text) = dss.id
-						
-						where pts.id IN (select id from devices where parent = {})
+						where dev.parent = {}
 						order by dev.name,pts.sort""".format(str(shipid))
 				ans = q_run(connD, querry)
 
 				self.structuresort = False
 			else:
 				querry = """select dev.id, name, pts.point, bea.bearing,bea.seal,bea.additional, pts.sort,pts.visible
-							from points pts
-							left join bearings bea on pts.id = bea.id and pts.point = bea.point
-							left join devices dev on pts.id = dev.id
-							left join ds_structure dss on cast(dev.id as text) = dss.id
-							where pts.id IN (select id from devices where parent = {})
+						from devices dev 
+						left join points pts on pts.id = dev.id
+						left join bearings bea on pts.id = bea.id and pts.point = bea.point
+						left join ds_structure dss on cast(dev.id as text) = dss.id
+						where dev.parent = {}
 							order by dss.sort,pts.sort""".format(str(shipid))
 				ans = q_run(connD, querry)
 
@@ -621,17 +949,19 @@ class StructWindow:
 			c=0
 			self.uploadbutton = tk.Button(self.detailframe,text = 'Upload points', command = self.UploadPoints)
 			self.uploadbutton.grid(row = c, column = 0)
-			for line in devlist:
-				if str(line.name) == str(devname):
-					c+=1
-					self.namelab = tk.Label(self.detailframe, text=str(line.sort))
-					self.namelab.grid(row=c, column=0)
-					self.CombPointList.append(PointComboboxObject(self.detailframe,pointslist,c,self))
-					self.CombBearingList.append(BearingComboboxObject(self.detailframe,line.bearing, c,2, bearingslist))
-					self.CombBearingSealList.append(
-						BearingComboboxObject(self.detailframe, line.seal, c, 3, seallist))
-					self.CombBearingAddList.append(BearingComboboxObject(self.detailframe, line.additional, c,4, addlist))
-					self.CombVisibleList.append(BearingComboboxObject(self.detailframe, line.visible, c, 5, visiblelist))
+
+			if len(pointslist)!= 0:
+				for line in devlist:
+					if str(line.name) == str(devname):
+						c+=1
+						self.namelab = tk.Label(self.detailframe, text=str(line.sort))
+						self.namelab.grid(row=c, column=0)
+						self.CombPointList.append(PointComboboxObject(self.detailframe,pointslist,c,self))
+						self.CombBearingList.append(BearingComboboxObject(self.detailframe,line.bearing, c,2, bearingslist))
+						self.CombBearingSealList.append(
+							BearingComboboxObject(self.detailframe, line.seal, c, 3, seallist))
+						self.CombBearingAddList.append(BearingComboboxObject(self.detailframe, line.additional, c,4, addlist))
+						self.CombVisibleList.append(BearingComboboxObject(self.detailframe, line.visible, c, 5, visiblelist))
 
 
 
@@ -666,6 +996,7 @@ class StructWindow:
 			left join devices dev on cast(dev.id as text) = dss.id
 			where dss.parent = {} order by dss.sort
 			""".format(shipid)
+
 			self.devlist = list(q_run(connD,querry))
 			self.loaddevices()
 		def loaddevices(self):
@@ -760,7 +1091,7 @@ class StructWindow:
 				idx = self.deviceslistbox.curselection()[0]
 			except:
 				idx = 0
-			chosedevicewindow(['testuser', 'info', 'localhost'], 160, self.deviceslistbox)
+			chosedevicewindow(self.connD, self.shipid , self.deviceslistbox)
 		def addplace(self):
 			try:
 				idx = self.deviceslistbox.curselection()[0]
@@ -802,6 +1133,10 @@ class StructWindow:
 			index = int(w.curselection()[0])
 			shipname = w.get(index)
 			self.Applistbox.delete(0, 'end')
+			self.Shiplistbox.delete(0, 'end')
+			for widget in self.Workframe.winfo_children():
+				widget.destroy()
+
 			makeships(shipname)
 		def makeships(shipname):
 			querry = "select name from main where parent =(select id from main where name = '" + str(
@@ -814,6 +1149,11 @@ class StructWindow:
 			w = evt.widget
 			index = int(w.curselection()[0])
 			shipname = w.get(index)
+
+			self.Applistbox.delete(0, 'end')
+			for widget in self.Workframe.winfo_children():
+				widget.destroy()
+
 			querry = "(select id from main where name = '{}')".format(str(shipname))
 			self.shipid = list(q_run(connD, querry))[0][0]
 			self.Applistbox.delete(0, 'end')
@@ -827,11 +1167,13 @@ class StructWindow:
 			framename = w.get(index)
 			for widget in self.Workframe.winfo_children():
 				widget.destroy()
-			if str(framename) == 'Devices':
+			if str(framename) == 'Crosstable':
+				self.CrosstableFrame(self.Workframe, self.shipid, connD)
+			elif str(framename) == 'Devices':
 				self.DevicesFrame(self.Workframe,self.shipid,connD)
-			if str(framename) == 'Points':
+			elif str(framename) == 'Points':
 				self.PointsFrame(self.Workframe, self.shipid, connD)
-			if str(framename) == 'Structure':
+			elif str(framename) == 'Structure':
 				self.StructFrame(self.Workframe,self.shipid, connD)
 		self.connD = connD
 		self.shipid = ''
@@ -861,4 +1203,4 @@ class StructWindow:
 
 
 LogApplication()
-ModelMakerWindow(['filipb','@infomarine','localhost'])
+#ModelMakerWindow(['filipb','@infomarine','localhost'])
