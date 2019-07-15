@@ -16,7 +16,7 @@ def q_run(connD, querry):
 	host = connD[2]
 	kport = "5432"
 	kdb = "postgres"
-	#cs = ' host="localhost",database="postgres", user= "postgres" , password="info" '
+
 	cs = "dbname=%s user=%s password=%s host=%s port=%s"%(kdb,username,password,host,kport)
 	conn = None
 	conn = psycopg2.connect(str(cs))
@@ -34,7 +34,7 @@ def updatemissingdata():
 	costcases =q_run(connD, querry)
 	querry = """select  fdb._id_,fdb.costflag,dev.type,dev.kw from feedbacks as fdb
 	left join devices as dev on fdb.id = dev.id
-	where fdb.costflag is not null  and( fdb.low[1] = 'no kW' or fdb.low[1] = 'no TYPE 'or fdb.low[1] = 'NO COST CASE')
+	where fdb.costflag is not null  and( fdb.low[1] = 'no kW' or fdb.low[1] = 'no TYPE' or fdb.low[1] = 'NO COST CASE')
 	order by fdb._id_ 
 	"""
 	_id_list = list(q_run(connD, querry))
@@ -69,8 +69,9 @@ def updatemissingdata():
 						", low = '{" + '"' + str(lowstr) + '" ,"' + str(lowval) + '"' + "}'" \
 						", high = '{" + '"' + str(highstr)  +'" ,"'+str(highval)+ '"' + "}'"\
 						+ ' where _id_ = ' + str (line[0])
-
+						print(querry)
 						q_run(connD,querry)
 						break
 
 
+updatemissingdata()
