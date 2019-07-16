@@ -33,7 +33,7 @@ def standards(document):
 
     H0.style=document.styles['IM HEAD']
     p0 = document.add_paragraph('Following standards may applied for assessment:').style=document.styles['IM TEXT']
-    t_std=document.add_table(6,2)
+    t_std=document.add_table(7,2)
     std=document.tables[1]
 
 
@@ -158,7 +158,14 @@ def standards(document):
     t_std.cell(5, 1).paragraphs[0].runs[0].font.size = Pt(11)
     t_std.cell(5, 1).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
     t_std.cell(5, 1).paragraphs[0].runs[0].bold = False
+
+    #makers recommedation
+    t_std.cell(6,0).merge(t_std.cell(6,1))
+    t_std.cell(6,0).text='And makers recommendations'
+
     set_col_width_std ( t_std )
+
+    t_std
     legend_IM(document)
 #legenda dla IM 'legend accordin to vib class'
 def legend_IM(document):
