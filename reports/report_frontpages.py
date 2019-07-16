@@ -88,20 +88,11 @@ def standard_with_pms(document):
 	r7=h3.add_run('Fifth column')
 	r7.underline=True
 	r7.italic=True
-	r8=h3.add_run(' contains classification of the vibration class according to proper ISO standard and other normative documents. Classification depends on highest reading of measured equipment only. ')
+	r8=h3.add_run(' contains additional readings of enveloped value of acceleration, which is helpful in detection of early stage of bearing wear. ')
 	r9=h3.add_run('Sixth column')
 	r9.italic=True
 	r9.underline=True
-	r10=h3.add_run(' contains additional readings of enveloped value of acceleration, which is helpful in detection of early stage of bearing wear.  ')
-	r11=h3.add_run('Seventh column')
-	#r10.underline=True
-	r11.italic=True
-	r11.underline=True
-	r12=h3.add_run(' contains remarks and suggestions based on the analysis of vibration signal. This column can be taken as the final conclusion about machine condition. If cell is empty, it means that there is no existing problem or defect shown in vibration signal.')
-
-
-
-
+	r10=h3.add_run(' contains remarks and suggestions based on the analysis of vibration signal. This column can be taken as the final conclusion about machine condition. If cell is empty, it means that there is no existing problem or defect shown in vibration signal.')
 
 
 #siem z limitem bez PMS

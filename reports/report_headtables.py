@@ -107,7 +107,7 @@ def standard_info_table ( connD ,document ,rn_ ):
     # footer.alignment = WD_ALIGN_PARAGRAPH.LEFT
     # footer.vertical_alignment = WD_ALIGN_VERTICAL.TOP
     set_col_width_dev(headtable)
-    headtable.style = 'Table Grid'
+    headtable.style = 'Styl1'
 
 # tabela początkowa kamtro
 def standard_Kamtro_table ( document ):
