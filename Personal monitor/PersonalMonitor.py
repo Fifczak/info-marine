@@ -99,7 +99,28 @@ class DayflowFrame():
 
 
 	def createwindow(self,connD):
-		def showChart():
+		def showMonthTasks():
+			querry = "select ini from users where full_name = '{}'".format(self.e1.get())
+			ini = list(q_run(connD,querry))[0][0]
+
+
+			datec = datetime.strptime(self.e2.get(),'%Y-%m-%d')
+
+
+			tasks = ['pomiar', 'struct', 'datasheet', 'report', 'analysis', 'accept', 'send_raport', 'remarks',
+					 'feedbacks']
+			monthtaskframe = pd.DataFrame(columns={'pomiar', 'struct', 'datasheet', 'report', 'analysis', 'accept', 'send_raport', 'remarks',
+					 'feedbacks'})
+			for item in tasks:
+				querry = "select count(lp) from harmonogram where {}_kto = '{}' and date_part('month',{}_koniec) = {} ".format(item,ini,item,datec.month)
+
+				monthtaskframe.loc[0, '{}'.format(item)] = list(q_run(connD,querry))[0][0]
+
+			print('{}_{}.xlsx'.format(ini,datec.month))
+			monthtaskframe.to_excel('{}_{}.xlsx'.format(ini,datec.month))
+
+
+		def showDayChart():
 			def tasklogbymin(taskloglist):
 				checklist = list()
 				checklist.clear()
@@ -279,11 +300,17 @@ class DayflowFrame():
 		self.e2.insert(0, datetime.now().date())
 		self.e1.grid(row=0, column=1, sticky=tk.W)
 		self.e2.grid(row=1, column=1, sticky=tk.W)
-		tk.Button(self.remWindow,command = showChart, text="Show day flow").grid(row=3,
+		tk.Button(self.remWindow,command = showDayChart, text="Show day flow").grid(row=3,
 															 column=0,
 															 sticky=tk.W,
 
 															 pady=4)
+		tk.Button(self.remWindow,command = showMonthTasks, text="Show Month stats").grid(row=3,
+															 column=1,
+															 sticky=tk.W,
+
+															 pady=4)
+
 
 		self.remWindow.mainloop()
 	def __init__(self,connD):

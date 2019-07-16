@@ -82,5 +82,5 @@ def IMVibEng(document,connD,rn):
 	s1.add_break()
 	summary.add_run(
 		'This report is prepared in good faith based on measurement diagnostic done on available running rotary machine and documentation submitted.').font.size = Pt(
-		11)
+		12)
 	document.add_paragraph()
