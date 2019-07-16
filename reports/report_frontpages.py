@@ -189,3 +189,84 @@ def standard_GSR(document):
 	H1=document.add_paragraph()
 	pict_desc=H1.add_run('(Typowa maszyna z rozmieszczonymi punktami pomiarowymi)')
 	pict_desc.font.size=Pt(10)
+
+
+def charts_and_limits(document):
+	document.add_paragraph()
+	H0=document.add_paragraph("Measurement condition")
+	H0.style=document.styles['IM HEAD']
+	document.add_paragraph('Measurements were taken during normal condition.')
+	document.add_paragraph()
+	H1=document.add_paragraph('Results presentation')
+	H1.style=document.styles['IM HEAD']
+	document.add_paragraph('Measured values are presented in the table below. Each machine if applicable is separated for driver (el. motor, diesel engine, etc.) and driven unit (pump, compressor, etc.). ')
+	p1=document.add_paragraph()
+	r1=p1.add_run('First and second column')
+	r1.italic=True
+	r1.underline=True
+	r2=p1.add_run(' of the table consist PMS number and name of the equipment. ')
+	r3=p1.add_run('Third column')
+	r3.underline=True
+	r3.italic=True
+	r4=p1.add_run(' contains ISO classification limit. ')
+	r5=p1.add_run('Fourth column')
+	r5.underline=True
+	r5.italic=True
+	r6=p1.add_run(' contains the highest value of vibration velocity measured on the equipment in all measurement points. ')
+	r7=p1.add_run('Fifth column')
+	r7.underline=True
+	r7.italic=True
+	r8=p1.add_run(' contains classification of vibration class according to proper ISO standard and other normative documents. Classification depends on highest reading of measured equipment only. ')
+	r9=p1.add_run('Sixth column')
+	r9.italic=True
+	r9.underline=True
+	r10=p1.add_run(' contains additional readings of enveloped value of acceleration, which is helpful in detection of early stage of bearing wear. ')
+	r11=p1.add_run('Seventh column')
+	r11.underline=True
+	r11.italic=True
+	r12=p1.add_run(' contains vibration trend values if previous results are available from the same source. ')
+	r13=p1.add_run('Eighth column')
+	r13.underline=True
+	r13.italic=True
+	r14=p1.add_run(' contains remarks and suggestions based on the analysis of vibration signal. This column can be taken as the final conclusion about machine condition. If cell is empty, it means that there is no existing problem or defect shown in vibration signal. ')
+	p1.alignment=WD_ALIGN_PARAGRAPH.JUSTIFY
+
+def charts_no_limits(document):
+	document.add_paragraph()
+	H0=document.add_paragraph("Measurement condition")
+	H0.style=document.styles['IM HEAD']
+	document.add_paragraph('Measurements were taken during normal condition.')
+	document.add_paragraph()
+	H1=document.add_paragraph('Results presentation')
+	H1.style=document.styles['IM HEAD']
+	document.add_paragraph('Measured values are presented in the table below. Each machine if applicable is separated for driver (el. motor, diesel engine, etc.) and driven unit (pump, compressor, etc.). ')
+	p1=document.add_paragraph()
+	r1=p1.add_run('First and second column')
+	r1.italic=True
+	r1.underline=True
+	r2=p1.add_run(' of the table consist PMS number and name of the equipment. ')
+	r3=p1.add_run('Third column')
+	r3.underline=True
+	r3.italic=True
+	r4=p1.add_run(' contains ISO classification limit. ')
+	r5=p1.add_run('Fourth column')
+	r5.underline=True
+	r5.italic=True
+	r6=p1.add_run(' contains the highest value of vibration velocity measured on the equipment in all measurement points. ')
+	r7=p1.add_run('Fifth column')
+	r7.underline=True
+	r7.italic=True
+	r8=p1.add_run(' contains classification of vibration class according to proper ISO standard and other normative documents. Classification depends on highest reading of measured equipment only. ')
+	r9=p1.add_run('Sixth column')
+	r9.italic=True
+	r9.underline=True
+	r10=p1.add_run(' contains additional readings of enveloped value of acceleration, which is helpful in detection of early stage of bearing wear. ')
+	r11=p1.add_run('Seventh column')
+	r11.underline=True
+	r11.italic=True
+	r12=p1.add_run(' contains vibration trend values if previous results are available from the same source. ')
+	r13=p1.add_run('Eighth column')
+	r13.underline=True
+	r13.italic=True
+	r14=p1.add_run(' contains remarks and suggestions based on the analysis of vibration signal. This column can be taken as the final conclusion about machine condition. If cell is empty, it means that there is no existing problem or defect shown in vibration signal. ')
+	p1.alignment=WD_ALIGN_PARAGRAPH.JUSTIFY
