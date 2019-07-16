@@ -27,7 +27,6 @@ def standard_info_table ( connD ,document ,rn_ ):
     querry = "select main.name, shd.imo, main2.name from main right join shipsdata as shd on main.id = shd.shipid right join main as main2 on main.parent = main2.id where main.id = (select shipid from harmonogram where report_number = '" + str(rn_) + "')"
     result = q_run( connD ,querry )
 
-
     shipstr = result[ 0 ][ 0 ]
 
     headtable = document.add_table( rows=2 ,cols=3 )  # trzeba usunąć enter przed
