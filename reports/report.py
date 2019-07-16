@@ -7,7 +7,7 @@ import psycopg2
 from report_styles import loadstyles
 from report_headtables import standard_info_table
 from report_frontpages import standard_with_pms
-from report_resulttables import prepare_IM ,drawtable_IM_chart_PMS,drawtable_IM_chart_PMS_limit ,trendresults
+from report_resulttables import prepare_IM ,drawtable_IM_PMS,drawtable_IM_chart_PMS,drawtable_IM_chart_PMS_limit ,trendresults
 from report_standards import legend_IM ,standards
 from time import gmtime, strftime
 from report_measurementequipment import MarVibENG
@@ -58,7 +58,7 @@ def makereport ( connD ,rn_ ):
 
 	querry = "select reporttype from main where id = (select shipid from harmonogram where report_number = '"+str(rn_)+"')"
 	reporttype = list(q_run(connD,querry))[0][0]
-
+	print(querry)
 	# fileformattype = 1  # 1 - IM; 2 - KAMTRO ; 3-Stocznia Remontowa
 	# headtabletype = 1  # 1 - IM; 2 - KAMTRO; 3 - stocznia remontowa
 	# standards #
@@ -78,8 +78,7 @@ def makereport ( connD ,rn_ ):
 		"summary": 0,
 		"signatures": 0,
 	}
-
-	if int(reporttype) == 3:
+	if int(reporttype) == 1:
 		reptypedict.update( {"fileformat": 1})
 		reptypedict.update({"headtabletype": 1})
 		reptypedict.update({"standards": 1})
@@ -89,12 +88,32 @@ def makereport ( connD ,rn_ ):
 		reptypedict.update({"summary": 1})
 		reptypedict.update({"signatures": 1})
 
-	if int(reporttype) == 5:
+	if int(reporttype) == 2:
+		reptypedict.update( {"fileformat": 1})
+		reptypedict.update({"headtabletype": 1})
+		reptypedict.update({"standards": 1})
+		reptypedict.update({"frontpagetype": 1})
+		reptypedict.update({"resulttable": 1})
+		reptypedict.update({"measurementequipment": 1})
+		reptypedict.update({"summary": 1})
+		reptypedict.update({"signatures": 1})
+
+	if int(reporttype) == 3:
 		reptypedict.update( {"fileformat": 1})
 		reptypedict.update({"headtabletype": 1})
 		reptypedict.update({"standards": 1})
 		reptypedict.update({"frontpagetype": 1})
 		reptypedict.update({"resulttable": 3})
+		reptypedict.update({"measurementequipment": 1})
+		reptypedict.update({"summary": 1})
+		reptypedict.update({"signatures": 1})
+
+	if int(reporttype) == 5:
+		reptypedict.update( {"fileformat": 1})
+		reptypedict.update({"headtabletype": 1})
+		reptypedict.update({"standards": 1})
+		reptypedict.update({"frontpagetype": 1})
+		reptypedict.update({"resulttable": 5})
 		reptypedict.update({"measurementequipment": 1})
 		reptypedict.update({"summary": 1})
 		reptypedict.update({"signatures": 1})
@@ -150,11 +169,14 @@ def makereport ( connD ,rn_ ):
 	#############################################################################################
 	######################################## V. WYNIKI ##########################################
 	#############################################################################################
-
+	print(reptypedict["resulttable"])
 	if reptypedict["resulttable"] == 1:
 		measlist = prepare_IM(connD, rn_)
-		drawtable_IM_chart_PMS ( document ,measlist ,connD ,rn_ )
+		drawtable_IM_PMS ( document ,measlist ,connD ,rn_ )
 	if reptypedict["resulttable"] == 3:
+		measlist = prepare_IM(connD, rn_)
+		drawtable_IM_chart_PMS ( document ,measlist ,connD ,rn_ )
+	if reptypedict["resulttable"] == 5:
 		measlist = prepare_IM(connD, rn_)
 		drawtable_IM_chart_PMS_limit ( document ,measlist ,connD ,rn_ )
 
@@ -202,7 +224,7 @@ def makereport ( connD ,rn_ ):
 username = 'testuser '
 password = 'info'
 host = '192.168.10.243'
-rn_ = '1952U3-2019'
+rn_ = '2063U2-2019'
 # # #rn_ ='1968-2019'
 # #
 #host = 'localhost'

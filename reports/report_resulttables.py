@@ -45,13 +45,22 @@ def set_col_width_GSR( table ):  # funkcja do stałej szerokości komórek w rap
 	for row in table.rows:
 		for idx ,width in enumerate( widths ):
 			row.cells[ idx ].width = width
-def set_col_width_results( table ):  # funkcja do stałej szerokości komórek w raportach GSR
-	widths = (Cm(2 ) ,Cm( 7 ) ,Cm( 1.6) ,Cm( 2) ,Cm( 2 ) ,Cm( 5.5 ))
+
+def set_col_width_results_standard( table ):  # funkcja do stałej szerokości komórek w raportach GSR
+	widths = (Cm(2 ) ,Cm( 7 ) ,Cm( 1.4) ,Cm( 1.4) ,Cm( 1.4 ),Cm( 1.4 ) ,Cm( 8 ))
 	for row in table.rows:
 		for idx ,width in enumerate( widths ):
 			row.cells[ idx ].width = width
+
+def set_col_width_results( table ):  # funkcja do stałej szerokości komórek w raportach GSR
+	widths = (Cm(2 ) ,Cm( 7 ) ,Cm( 1.4) ,Cm( 1.4) ,Cm( 1.4 ) ,Cm( 8 ))
+	for row in table.rows:
+		for idx ,width in enumerate( widths ):
+			row.cells[ idx ].width = width
+
+
 def set_col_width_results_pms_limit( table ):
-	widths = (Cm(2 ) ,Cm( 7 ) ,Cm( 1.6),Cm( 1.6) ,Cm( 1.8) ,Cm( 2 ) ,Cm( 5.5 ))
+	widths = (Cm(2 ) ,Cm( 6 ) ,Cm( 1.4),Cm( 1.1) ,Cm( 1.4) ,Cm( 1.4) ,Cm( 8 ))
 	for row in table.rows:
 		for idx ,width in enumerate( widths ):
 			row.cells[ idx ].width = width
@@ -216,7 +225,294 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 				measlist.append( x )
 	loadData( connD )
 	return measlist
-def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
+
+
+def drawtable_IM_PMS(document, measlist, connD, report_number):  # REPORTTYPE 3
+	def colorlimit(par, limit):
+		if limit == 'Cl. A' or limit == 'In Limit' or limit == 'V. I' or limit == 'Cl. A/B' or limit == 'In limit' or limit == 'Cl. B':
+			par.font.highlight_color = WD_COLOR_INDEX.BRIGHT_GREEN
+		elif limit == 'Cl. B':
+			par.font.highlight_color = WD_COLOR_INDEX.BRIGHT_GREEN
+		elif limit == 'Cl. C' or limit == 'V. II':
+			par.font.highlight_color = WD_COLOR_INDEX.YELLOW
+
+	os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
+	respar = document.add_paragraph('Results', 'IM HEAD')
+
+	respar.add_run().add_break()
+	resrun = respar.add_run(
+		"In table are presented only readings with max. RMS results for each device equipment:")
+	resrun.font.size = Pt(11)
+	resrun.font.name = 'Calibri'
+	resrun.font.color.rgb = RGBColor(0, 0, 0)
+
+	querry = "Select parent from measurements_low where raport_number = '" + str(report_number) + "' limit 1"
+	parent = list(q_run(connD, querry))[0][0]
+	querry = "Select sort, id from ds_structure where parent = '" + str(parent) + "' order by sort"
+	sortlistQ = q_run(connD, querry)
+	trueMeasList = list()
+	activeIdList = list()
+	activeSortList = list()
+	activeSortPList = list()
+	idlist = list()
+	drivenByList = list()
+
+	for sort in sortlistQ:
+		for meas in measlist:
+
+			if (sort[1]).isdigit == False:
+				trueMeasList.append('header')
+				drivenByList.append(997)
+				idlist.append(997)
+			if str(sort[1]) == str(meas.id):
+				trueMeasList.append(meas)
+				activeIdList.append(str(meas.id))
+				activeSortList.append(str(meas.sort))
+				activeSortPList.append(str(meas.sort2))
+				drivenByList.append(meas.drivenby)
+				idlist.append(meas.id)
+	counter = 0
+	counterCharts = 0
+	xcord = 0
+	i = -1
+
+	for measStrip in sortlistQ:
+		i += 1
+
+		if (measStrip[1]).isdigit() == False:  ######## NAGŁÓWKI
+			try:
+				if measStrip[0][-5:] == '00.00' and sortlistQ[i + 1][0][-5:] != '00.00' and \
+						sortlistQ[i + 1][0][-3:] == '.00':
+					if str(measStrip[0][:1]) in activeSortPList:
+						xcord += 1
+					continue
+				if measStrip[0][-5:] != '00.00' and measStrip[0][-3:] == '.00':
+					if str(measStrip[0][:4]) in activeSortList:
+						xcord += 1
+					continue
+			except:
+				pass
+		else:
+			p = -1
+			for xx in trueMeasList:
+				p += 1
+				#print(p)
+				if str(measStrip[1]) == str(xx.id):
+					xcord += 1
+					#try:
+					if str(xx.id) in drivenByList:
+						xcord += 2
+					#if str(drivenByList[p + 1]) == str(xx.id):
+
+					# else:
+					# 	xcord += 0
+					break
+					# except:
+					# 	xcord += 2
+	print(xcord)
+	rowscount = xcord
+	resulttable = document.add_table(rows=rowscount + 1, cols=7)
+	resulttable.style = 'Table Grid'
+
+	col_PMS = 0
+	ht = resulttable.cell(0, col_PMS).paragraphs[0]
+	ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	resulttable.cell(0, col_PMS).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+	r0 = ht.add_run('PMS').bold = True
+
+	col_name = 1
+	ht = resulttable.cell(0, col_name).paragraphs[0]
+	ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	resulttable.cell(0, col_name).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+	r0 = ht.add_run('Machine name').bold = True
+
+	col_val = 2
+	ht = resulttable.cell(0, col_val).paragraphs[0]
+	ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	resulttable.cell(0, col_val).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+	r0 = ht.add_run('Velocity RMS (mm/s) Max').bold = True
+
+	col_class = 3
+	ht = resulttable.cell(0, col_class).paragraphs[0]
+	ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	resulttable.cell(0, col_class).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+	r0 = ht.add_run('ISO standard').bold = True
+
+	col_env = 4
+	ht = resulttable.cell(0, col_env).paragraphs[0]
+	ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	resulttable.cell(0, col_env).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+	r0 = ht.add_run('Bearing Envelope 0-Peak (m/s2) Max').bold = True
+
+	col_trend = 5
+	ht = resulttable.cell( 0 ,col_trend ).paragraphs[ 0 ]
+	ht.paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
+	resulttable.cell(0,col_trend).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+	r0 = ht.add_run( 'Trend Velocity RMS (mm/s) Max' ).bold=True
+
+	col_remark = 6
+	ht = resulttable.cell(0, col_remark).paragraphs[0]
+	ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+	resulttable.cell(0, col_remark).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+	r0 = ht.add_run('Remarks and suggestions').bold = True
+	set_col_width_results_standard(resulttable)
+
+	xcord = 0
+	i = -1
+	ids = list()
+
+
+
+	for measStrip in tqdm(sortlistQ):
+		i += 1
+		if (measStrip[1]).isdigit() == False:  ######## NAGŁÓWKI
+			try:
+				ht = resulttable.cell(xcord + 1, 0).paragraphs[0]
+				resulttable.cell(xcord + 1, 0).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+				if measStrip[0][-5:] == '00.00' and sortlistQ[i + 1][0][-5:] != '00.00' and \
+						sortlistQ[i + 1][0][-3:] == '.00':
+					if str(measStrip[0][:1]) in activeSortPList:
+						xcord += 1
+						ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+						r0 = ht.add_run(measStrip[1])
+						r0.font.color.rgb = RGBColor(0, 0, 255)
+						r0.bold = True
+						resulttable.cell(xcord, 0).merge(resulttable.cell(xcord, 6))
+						resulttable.rows[xcord].height = WD_ROW_HEIGHT.EXACTLY
+						resulttable.rows[xcord].height = Cm(0.5)
+
+					continue
+				if measStrip[0][-5:] != '00.00' and measStrip[0][-3:] == '.00':
+					if str(measStrip[0][:4]) in activeSortList:
+						xcord += 1
+
+						r0 = ht.add_run(measStrip[1])
+						r0.font.color.rgb = RGBColor(128, 0, 128)
+						r0.bold = True
+						resulttable.cell(xcord, 0).merge(resulttable.cell(xcord, 6))
+						resulttable.rows[xcord].height = WD_ROW_HEIGHT.EXACTLY
+						resulttable.rows[xcord].height = Cm(0.5)
+					continue
+			except:
+				pass
+		else:  ######## POMIARY
+			p = -1
+			for xx in trueMeasList:
+				p += 1
+				if str(measStrip[1]) == str(xx.id):
+					ht = resulttable.cell(xcord + 1, col_PMS).paragraphs[0]
+					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.LEFT
+					if str(xx.pms) == '0' or str(xx.pms) == '': xx.pms = '-'
+					r0 = ht.add_run(str(xx.pms))
+					ht = resulttable.cell(xcord + 1, col_name).paragraphs[0]
+					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.LEFT
+					r0 = ht.add_run(xx.name)
+					ht = resulttable.cell(xcord + 1, col_val).paragraphs[0]
+					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+					# dodałem tu zamianę kropek na przecinki + zaokrąglenie do 3 miejsca po przecinku
+					if xx.VSG == False:
+						txt_result = str(round(xx.maxval, 3))
+						r0 = ht.add_run(txt_result.replace(".", ","))
+					else:
+						txt_result = str(round(xx.maxval, 1))
+						r0 = ht.add_run(str(txt_result.replace(".", ",")) + '(VSG)')
+
+					ht = resulttable.cell(xcord + 1, col_class).paragraphs[0]
+					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+					r0 = ht.add_run(str(xx.limit))
+
+					colorlimit(r0, str(xx.limit))
+
+					ht = resulttable.cell(xcord + 1, col_env).paragraphs[0]
+					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+					try:
+						xx.maxenv = str(round(float(xx.maxenv), 3)).replace(".", ",")
+
+					except:
+						xx.maxenv = xx.maxenv
+					r0 = ht.add_run(str(xx.maxenv))
+
+
+					ht = resulttable.cell( xcord + 1 ,col_trend ).paragraphs[ 0 ]
+					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+
+					ids.append(xx.id)
+
+					if str( xx.limit ) == 'Cl. D':  # TEGO DLA CZYTELNOSCI LEPIEJ ZROBIC FUNKCJE
+						try:
+							trendtemp1 = xx.trend[ 0 ]
+							trendtemp2 = xx.trend[ 1 ]
+							trendtemp3 = xx.trend[ 2 ]
+							if str( trendtemp3 ) == 'U':
+								r0 = ht.add_run()
+								r0.add_picture( 'up.gif' )
+							elif str( trendtemp3 ) == 'D':
+								r0 = ht.add_run()
+								r0.add_picture( 'down.gif' )
+							elif str( trendtemp3 ) == 'C':
+								r0 = ht.add_run()
+								r0.add_picture( 'none.gif' )
+							p0 = ht.add_run( '\n' + 'Last value:' )
+							p0 = ht.add_run( '\n' + str( trendtemp2 ) )
+							p0 = ht.add_run( '\n' + str( trendtemp1 ) )
+						except:
+							pass
+
+
+					resulttable.cell(xcord + 1, col_PMS).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+					resulttable.cell(xcord + 1, col_name).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+					resulttable.cell(xcord + 1, col_val).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+					resulttable.cell(xcord + 1, col_class).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+					resulttable.cell(xcord + 1, col_env).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+					resulttable.cell(xcord + 1, col_remark).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+					xcord += 1
+					# try:
+					#
+					# 	if str(drivenByList[p + 1]) == str(xx.id):
+					#
+					# 	else:
+					# 		xcord += 1
+					# 		resulttable.cell(xcord + 1, 0).merge(resulttable.cell(xcord + 1, col_remark))
+					# 		resulttable.cell(xcord + 1, 0).add_paragraph()
+					# 		ht = resulttable.cell(xcord + 1, 0).paragraphs[1]
+					#
+					# 		image = (trendchart(ids, connD, GUI, xx.VSG).giveimage())
+					#
+					# 		p0 = ht.add_run()
+					#
+					# 		p0.add_picture(image, width=Inches(6.5))
+					# 		resulttable.cell(xcord + 1, 0).add_paragraph()
+					# 		ids.clear()
+					# 		xcord += 1
+					# 	break
+					# except:  # OSTATNIA LINIA TABELI
+					# 	xcord += 1
+					# 	resulttable.cell(xcord + 1, 0).merge(resulttable.cell(xcord + 1, col_remark))
+					# 	resulttable.cell(xcord + 1, 0).add_paragraph()
+					# 	ht = resulttable.cell(xcord + 1, 0).paragraphs[1]
+					#
+					# 	image = (trendchart(ids, connD, GUI, xx.VSG).giveimage())
+					# 	p0 = ht.add_run()
+					# 	p0.add_picture(image, width=Inches(6.5))
+					# 	resulttable.cell(xcord + 1, 0).add_paragraph()
+					# 	ids.clear()
+	ht = document.add_paragraph()
+	r0 = ht.add_run()
+
+	for row in resulttable.rows:
+		for cell in row.cells:
+			paragraphs = cell.paragraphs
+			for paragraph in paragraphs:
+				for run in paragraph.runs:
+					font = run.font
+					font.size = Pt(8)
+					font.name = 'Arial'
+
+
+def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ): #REPORTTYPE 3
 	## PRZEZ OKNO Z WYKRESAMI WYWALA SIE PROGRESBAR. NIE MOGE TEZ POKAZAC JAKIEGOS OBRAZKA.
 	## NARAZIE KLEPSYDRA Z KOMBAJNA
 	def colorlimit(par,limit):
@@ -434,7 +730,8 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 					ht = resulttable.cell( xcord + 1 ,col_env ).paragraphs[ 0 ]
 					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 					try:
-						xx.maxenv = round(float(str(xx.maxenv).replace(".", ",")) ,3 )
+						xx.maxenv = str(round(float(xx.maxenv),3)).replace(".", ",")
+
 					except:
 						xx.maxenv = xx.maxenv
 					r0 = ht.add_run ( str (xx.maxenv ) )
@@ -493,9 +790,8 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ):
 					font.name='Arial'
 
 
-def drawtable_IM_chart_PMS_limit( document ,measlist ,connD ,report_number ):
-	## PRZEZ OKNO Z WYKRESAMI WYWALA SIE PROGRESBAR. NIE MOGE TEZ POKAZAC JAKIEGOS OBRAZKA.
-	## NARAZIE KLEPSYDRA Z KOMBAJNA
+def drawtable_IM_chart_PMS_limit( document ,measlist ,connD ,report_number ): #REPORTTYPE 5
+
 	def colorlimit(par,limit):
 		if limit == 'Cl. A' or limit == 'In Limit' or limit == 'V. I' or limit =='Cl. A/B' or limit == 'In limit':
 			par.font.highlight_color = WD_COLOR_INDEX.BRIGHT_GREEN
@@ -631,13 +927,6 @@ def drawtable_IM_chart_PMS_limit( document ,measlist ,connD ,report_number ):
 	r0 = ht.add_run( 'Bearing Envelope 0-Peak (m/s2) Max' ).bold=True
 
 
-	# col_trend = 6
-	# ht = resulttable.cell( 0 ,col_trend ).paragraphs[ 0 ]
-	# ht.paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
-	# resulttable.cell(0,col_trend).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
-	# r0 = ht.add_run( 'Trend Velocity RMS (mm/s) Max' ).bold=True
-
-
 	col_remark = 6
 	ht = resulttable.cell( 0 ,col_remark ).paragraphs[ 0 ]
 	ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -648,9 +937,6 @@ def drawtable_IM_chart_PMS_limit( document ,measlist ,connD ,report_number ):
 	xcord = 0
 	i = -1
 	ids = list()
-	#trzeba zmieniac dla odpalania bez konsoli(kombajn)
-	#print('Delete progress bar before xlwings use')
-	#loadstyles(document)
 	for measStrip in tqdm(sortlistQ):
 	#for measStrip in sortlistQ:
 		i += 1
@@ -725,12 +1011,14 @@ def drawtable_IM_chart_PMS_limit( document ,measlist ,connD ,report_number ):
 					ht = resulttable.cell( xcord + 1 ,col_env ).paragraphs[ 0 ]
 					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 					try:
-						xx.maxenv = round(float(str(xx.maxenv).replace(".", ",")), 3)
+						xx.maxenv = str(round(float(xx.maxenv), 3)).replace(".", ",")
+
 					except:
 						xx.maxenv = xx.maxenv
 					r0 = ht.add_run(str(xx.maxenv))
-					# ht = resulttable.cell( xcord + 1 ,col_trend ).paragraphs[ 0 ]
-					# ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+					ht = resulttable.cell( xcord + 1 ,col_trend ).paragraphs[ 0 ]
+					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.LEFT
 					ids.append(xx.id)
 
 					resulttable.cell(xcord + 1, col_PMS).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
@@ -768,24 +1056,28 @@ def drawtable_IM_chart_PMS_limit( document ,measlist ,connD ,report_number ):
 						else:
 							xcord += 1
 							resulttable.cell( xcord + 1 ,0 ).merge( resulttable.cell( xcord + 1 ,col_remark ))
-							ht = resulttable.cell( xcord + 1 ,0 ).paragraphs[ 0 ]
+							resulttable.cell(xcord + 1, 0).add_paragraph()
+							ht = resulttable.cell( xcord + 1 ,0 ).paragraphs[ 1 ]
 
 							image = (trendchart(ids, connD,GUI,xx.VSG).giveimage())
 
 							p0 = ht.add_run(  )
-							p0.add_picture(image, width=Inches(7.0))
 
+							p0.add_picture(image, width=Inches(6.5))
+							resulttable.cell(xcord + 1, 0).add_paragraph()
 							ids.clear()
 							xcord += 1
 						break
 					except:  # OSTATNIA LINIA TABELI
 						xcord += 1
 						resulttable.cell( xcord + 1 ,0 ).merge( resulttable.cell( xcord + 1 ,col_remark ) )
-						ht = resulttable.cell( xcord + 1 ,0 ).paragraphs[ 0 ]
+						resulttable.cell(xcord + 1, 0).add_paragraph()
+						ht = resulttable.cell( xcord + 1 ,0 ).paragraphs[ 1 ]
+
 						image = (trendchart(ids, connD,GUI,xx.VSG).giveimage())
 						p0 = ht.add_run()
-						p0.add_picture(image, width=Inches(7.0))
-
+						p0.add_picture(image, width=Inches(6.5))
+						resulttable.cell(xcord + 1, 0).add_paragraph()
 						ids.clear()
 	ht = document.add_paragraph()
 	r0 = ht.add_run()
