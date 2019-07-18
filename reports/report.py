@@ -3,11 +3,12 @@ import time
 from docx import Document
 from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.table import WD_ALIGN_VERTICAL
 import psycopg2
 from report_styles import loadstyles
 from report_headtables import standard_info_table
-from report_frontpages import standard_with_pms
-from report_resulttables import prepare_IM ,drawtable_IM_PMS,drawtable_IM_noPMS,drawtable_IM_chart_PMS,drawtable_IM_chart_noPMS,drawtable_IM_chart_PMS_limit ,trendresults
+from report_frontpages import standard_with_PMS,standard_without_PMS,donnelly_with_PMS,donnelly_without_PMS,siem_PMS_limit, standard_non_PMS_limit
+from report_resulttables import prepare_IM ,drawtable_IM_PMS,drawtable_IM_noPMS,drawtable_IM_chart_PMS,drawtable_IM_chart_noPMS,drawtable_IM_chart_PMS_limit, drawtable_IM_chart_noPMS_limit,trendresults
 from report_standards import legend_IM ,standards
 from time import gmtime, strftime
 from report_measurementequipment import MarVibENG
@@ -59,14 +60,7 @@ def makereport ( connD ,rn_ ):
 	querry = "select reporttype from main where id = (select shipid from harmonogram where report_number = '"+str(rn_)+"')"
 	reporttype = list(q_run(connD,querry))[0][0]
 
-	# fileformattype = 1  # 1 - IM; 2 - KAMTRO ; 3-Stocznia Remontowa
-	# headtabletype = 1  # 1 - IM; 2 - KAMTRO; 3 - stocznia remontowa
-	# standards #
-	# frontpagetype = 1
-	# resulttable = 1  # 1 - IM chart + PMS ; 2-remontowa ; 3 - IM chart + PMS + limit
-	# measurementequipment
-	# summary #1 - standard IM summary
-	# signatures
+
 
 	reptypedict = {
 		"fileformat": 0,
@@ -92,7 +86,7 @@ def makereport ( connD ,rn_ ):
 		reptypedict.update( {"fileformat": 1})
 		reptypedict.update({"headtabletype": 1})
 		reptypedict.update({"standards": 1})
-		reptypedict.update({"frontpagetype": 1})
+		reptypedict.update({"frontpagetype": 2})
 		reptypedict.update({"resulttable": 2})
 		reptypedict.update({"measurementequipment": 1})
 		reptypedict.update({"summary": 1})
@@ -102,7 +96,7 @@ def makereport ( connD ,rn_ ):
 		reptypedict.update( {"fileformat": 1})
 		reptypedict.update({"headtabletype": 1})
 		reptypedict.update({"standards": 1})
-		reptypedict.update({"frontpagetype": 1})
+		reptypedict.update({"frontpagetype": 3})
 		reptypedict.update({"resulttable": 3})
 		reptypedict.update({"measurementequipment": 1})
 		reptypedict.update({"summary": 1})
@@ -112,7 +106,7 @@ def makereport ( connD ,rn_ ):
 		reptypedict.update( {"fileformat": 1})
 		reptypedict.update({"headtabletype": 1})
 		reptypedict.update({"standards": 1})
-		reptypedict.update({"frontpagetype": 1})
+		reptypedict.update({"frontpagetype": 4})
 		reptypedict.update({"resulttable": 4})
 		reptypedict.update({"measurementequipment": 1})
 		reptypedict.update({"summary": 1})
@@ -122,11 +116,23 @@ def makereport ( connD ,rn_ ):
 		reptypedict.update( {"fileformat": 1})
 		reptypedict.update({"headtabletype": 1})
 		reptypedict.update({"standards": 1})
-		reptypedict.update({"frontpagetype": 1})
+		reptypedict.update({"frontpagetype": 5})
 		reptypedict.update({"resulttable": 5})
 		reptypedict.update({"measurementequipment": 1})
 		reptypedict.update({"summary": 1})
 		reptypedict.update({"signatures": 1})
+
+
+	if int(reporttype) == 6:
+		reptypedict.update( {"fileformat": 1})
+		reptypedict.update({"headtabletype": 1})
+		reptypedict.update({"standards": 1})
+		reptypedict.update({"frontpagetype": 6})
+		reptypedict.update({"resulttable": 6})
+		reptypedict.update({"measurementequipment": 1})
+		reptypedict.update({"summary": 1})
+		reptypedict.update({"signatures": 1})
+
 
 
 	#############################################################################################
@@ -164,8 +170,17 @@ def makereport ( connD ,rn_ ):
 
 
 	if reptypedict["frontpagetype"] == 1:
-		standard_with_pms ( document )
-
+		standard_with_PMS ( document )
+	if reptypedict["frontpagetype"] == 2:
+		standard_without_PMS ( document )
+	if reptypedict["frontpagetype"] == 3:
+		donnelly_with_PMS(document)
+	if reptypedict["frontpagetype"] == 4:
+		donnelly_without_PMS(document)
+	if reptypedict["frontpagetype"] == 5:
+		siem_PMS_limit(document)
+	if reptypedict["frontpagetype"] == 6:
+		standard_non_PMS_limit(document)
 	#############################################################################################
 	######################################## IV. NORMY ##########################################
 	#############################################################################################
@@ -197,6 +212,10 @@ def makereport ( connD ,rn_ ):
 		measlist = prepare_IM(connD, rn_)
 		drawtable_IM_chart_PMS_limit ( document ,measlist ,connD ,rn_ )
 
+	if reptypedict["resulttable"] == 6:
+		measlist = prepare_IM(connD, rn_)
+		drawtable_IM_chart_noPMS_limit(document, measlist, connD, rn_)
+
 	#############################################################################################
 	################################ VI. Urządzenie pomiarowe ###################################
 	#############################################################################################
@@ -220,6 +239,20 @@ def makereport ( connD ,rn_ ):
 	if reptypedict["standards"] == 1:
 		signatureENG ( document ,connD)
 
+	#############################################################################################
+	######################################  STOPKA  #############################################
+	#############################################################################################
+
+
+	querry = "select name from main where id = (select shipid from harmonogram where report_number = '" + str(rn_) + "')"
+	shipname = list(q_run(connD,querry))[0][0]
+	section = document.sections [ 0 ]
+	footer = section.footer.paragraphs [ 0 ]
+	footer_=footer.add_run ( shipname + ' ' + rn_)
+	footer_.font.name = 'Times New Roman'
+	footer_.font.size = Pt ( 12 )
+	footer_.alignment = WD_ALIGN_PARAGRAPH.LEFT
+	footer_.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 
 	#############################################################################################
 	##################################### ZAPISANIE  ############################################
@@ -238,15 +271,15 @@ def makereport ( connD ,rn_ ):
 
 
 #
-username = 'testuser '
-password = 'info'
-host = '192.168.10.243'
-rn_ = '2025U5-2019'
+# username = 'testuser '
+# password = 'info'
+# host = '192.168.10.243'
+# rn_ = '2042U2-2019'
 # # #rn_ ='1968-2019'
 # #
 #host = 'localhost'
 #rn_ = '2128-2019'
 # # #
-connD = [ username ,password ,host ]
+#connD = [ username ,password ,host ]
 #
-makereport(connD,rn_)
+#makereport(connD,rn_)

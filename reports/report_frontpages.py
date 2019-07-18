@@ -218,7 +218,7 @@ def siem_PMS_limit(document):
 	p1.alignment=WD_ALIGN_PARAGRAPH.JUSTIFY
 #siem z limitem bez PMS
 
-def standard_non_PMS_limit(document):
+def standard_non_PMS_limit(document):   ## TUTAJ TRZEBA POPRAWIC NA OFPOWIEDNIA FORMATKE. USUNĄŁEM PMS ale widze ze niema np max limitu ? do przejzenia
 	document.add_paragraph()
 	H0=document.add_paragraph('Measurement condition')
 	H0.style=document.styles['IM HEAD']
@@ -231,7 +231,7 @@ def standard_non_PMS_limit(document):
 	r1=p1.add_run('First column')
 	r1.underline=True
 	r1.italic=True
-	r2=p1.add_run(' of the table consist PMS number and name of the equipment. ')
+	r2=p1.add_run(' of the table consist name of the equipment. ')
 	r3=p1.add_run('Second column')
 	r3.underline=True
 	r3.italic=True

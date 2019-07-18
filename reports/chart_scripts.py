@@ -45,12 +45,12 @@ class trendchart:
                 if VSG == False:
                     querry ="select ml.raport_number,max(ml.value),max(ml.date),dev.name from measurements_low as ml"\
                             " left join devices as dev on ml.id = dev.id" \
-                            " where ml.id =" + str(devid) + " and ml.type = 'RMS' group by ml.raport_number,dev.name order by ml.raport_number desc"
+                            " where ml.id =" + str(devid) + " and ml.type = 'RMS' and ml.value != -1 group by ml.raport_number,dev.name order by ml.raport_number desc"
                 else:
                     querry = "select ml.raport_number,max(ml.value),max(ml.date),dev.name from measurements_low as ml" \
                              " left join devices as dev on ml.id = dev.id" \
                              " where ml.id =" + str(
-                        devid) + " and ml.unit = 'VSG' group by ml.raport_number,dev.name order by ml.raport_number desc"
+                        devid) + " and ml.unit = 'VSG' and ml.value != -1 group by ml.raport_number,dev.name order by ml.raport_number desc"
 
                 return q_run(connD, querry)
             dates = list()
@@ -76,7 +76,7 @@ class trendchart:
             a.plot(x, y,marker='o', label=str(name[0]))
             a.set_frame_on(False)
             a.yaxis.grid( linewidth='0.5')
-            a.legend(loc='lower center',bbox_to_anchor=(0.5,-0.3), fontsize = 'x-large', ncol=3,frameon=False)#
+            a.legend(loc='lower center',bbox_to_anchor=(0.5,-0.35), fontsize = 'x-large', ncol=3,frameon=False)#
 
             f.autofmt_xdate()
             return f
@@ -103,7 +103,7 @@ class trendchart:
         self.wdw  = tk.Tk()
         self.wdw.title("Trend Chart")
 
-        f = Figure(figsize=(12, 5), dpi=100)
+        f = Figure(figsize=(12, 4), dpi=100)
 
         a = f.add_subplot(1, 1, 1)
         canvas = FigureCanvasTkAgg(f, self.wdw)
@@ -182,14 +182,14 @@ class datasheet:
             querry = """select ml.raport_number,ml.point, ml.value,ml.date,dev.name, ml._id_ from measurements_low as ml
                         left join devices as dev on ml.id = dev.id
                         left join points as pt on ml.id = pt.id and ml.point = pt.point
-                        where ml.id = """ +str(id_) +   """ and ml.type = 'RMS' 
+                        where ml.id = """ +str(id_) +   """ and ml.type = 'RMS' and ml.value != -1
                         group by ml.raport_number,ml.point, dev.name,ml.value,ml.date ,pt.sort , ml._id_
                         order by ml.raport_number ,pt.sort  """
         else:
             querry = """select ml.raport_number,ml.point,max(ml.value),ml.date,dev.name, ml._id_,ml.type from measurements_low as ml
                         left join devices as dev on ml.id = dev.id
                         left join points as pt on ml.id = pt.id and ml.point = pt.point
-                        where ml.id = {} and ml.unit = 'VSG' 
+                        where ml.id = {} and ml.unit = 'VSG' and ml.value != -1
                         group by ml.raport_number,ml.point, dev.name,ml.date ,pt.sort , ml._id_,ml.type
                         order by ml.raport_number ,pt.sort  """.format(str(id_))
         dsd = q_run(connD,querry)
