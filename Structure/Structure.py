@@ -13,8 +13,8 @@ from tqdm import tqdm
 from tkinter import messagebox
 from tkinter import simpledialog
 
-#host = '192.168.10.243'
-host = 'localhost'
+host = '192.168.10.243'
+#host = 'localhost'
 devlist = list()
 def q_run(connD, querry):
 	username = connD[0]
@@ -105,6 +105,12 @@ class device:
 		self.interval_type = ''
 		self.interval_length = ''
 		self.points = list()
+class ctdev:
+	def __init__(self):
+		self.id = ''
+		self.name = ''
+		self.nameindevice = ''
+
 class PointComboboxObject:
 	def callback(self, event=None):
 		self.changecapt(self.showvalue,self.var.get(),self.sort)
@@ -302,14 +308,6 @@ class TypeModelWindow():
 
 
 		self.typewindow.mainloop()
-
-class ctdev:
-	def __init__(self):
-		self.id = ''
-		self.name = ''
-		self.nameindevice = ''
-
-
 class ModelMakerWindow():
 	def accept(self):
 		self.parentframe.lab_model_e.configure(text = self.cbox2.get())
@@ -410,9 +408,7 @@ class ModelMakerWindow():
 		addmakerbut.grid(row=3, column=1)
 
 		self.devwindow.mainloop()
-
 class StructWindow:
-
 	class CrosstableFrame:
 		# def reloadquerry(self, structuresort, shipid, connD, chagesort):
 		# 	if chagesort == False:
@@ -446,6 +442,16 @@ class StructWindow:
 		# 	for item in ans:
 		# 		self.devdata.append(item)
 		# 	self.loaddevices()
+		def searchinlist(self):
+			for i, listbox_entry in enumerate(self.deviceslistbox.get(0, END)):
+				if str(self.searchen.get()).strip() != '':
+					listboxname = (listbox_entry[listbox_entry.rfind('NAME:'):listbox_entry.rfind('ID:')]).strip()
+					if str(self.searchen.get()).strip().upper() in str(listboxname).upper():
+						self.deviceslistbox.itemconfig(i, bg='green')
+					else:
+						self.deviceslistbox.itemconfig(i, bg='white')
+				else:
+					self.deviceslistbox.itemconfig(i, bg='white')
 
 		def namesort(self):
 			self.st = 'namesort'
@@ -453,7 +459,7 @@ class StructWindow:
 			select dev.id,cr.nameindevice,dev.name
 			from devices dev
 			left join crosstable cr on cr.id = dev.id
-			left join ds_structure dss on cast(cr.id as text) = dss.id
+			left join ds_structure dss on cast(dev.id as text) = dss.id
 			where dev.parent = {}
 			order by dev.name
 			""".format(self.shipid)
@@ -470,9 +476,9 @@ class StructWindow:
 			select dev.id,cr.nameindevice,dev.name
 			from devices dev
 			left join crosstable cr on cr.id = dev.id
-			left join ds_structure dss on cast(cr.id as text) = dss.id
+			left join ds_structure dss on cast(dev.id as text) = dss.id
 			where dev.parent = {}
-			order by cr.nameindevice
+			order by cr.nameindevice,dev.name
 			""".format(self.shipid)
 			ans = q_run(self.connD,querry)
 			self.devdata = list()
@@ -487,9 +493,9 @@ class StructWindow:
 			select dev.id,cr.nameindevice,dev.name
 			from devices dev
 			left join crosstable cr on cr.id = dev.id
-			left join ds_structure dss on cast(cr.id as text) = dss.id
+			left join ds_structure dss on cast(dev.id as text) = dss.id
 			where dev.parent = {}
-			order by dss.sort
+			order by dss.sort,dev.name
 			""".format(self.shipid)
 			ans = q_run(self.connD,querry)
 			self.devdata = list()
@@ -504,17 +510,15 @@ class StructWindow:
 			for line in self.devdata:
 				dev = ctdev()
 				if str(sorttype) == 'namesort':
-					self.deviceslistbox.insert(END, 'NAME: {} NAMEINDEVICE: {} ID: {}'.format(line[2],line[1],line[0]))
+					self.deviceslistbox.insert(END, 'NAME: {} ID: {} NAMEINDEVICE: {} '.format(line[2],line[0],line[1]))
 				if str(sorttype) == 'crossnamesort':
 					self.deviceslistbox.insert(END, 'NAMEINDEVICE: {} NAME: {} ID: {}'.format(line[1],line[2],line[0]))
 				if str(sorttype) == 'structuresort':
-					self.deviceslistbox.insert(END, 'NAME: {} NAMEINDEVICE: {} ID: {}'.format(line[2],line[1],line[0]))
+					self.deviceslistbox.insert(END, 'NAME: {} ID: {} NAMEINDEVICE: {} '.format(line[2],line[0],line[1]))
 				dev.id = str(line[0])
 				dev.nameindevice = str(line[1])
 				dev.name = str(line[2])
 				devlist.append(dev)
-
-
 			self.deviceslistbox.pack(fill=BOTH, expand = 1)
 
 
@@ -551,6 +555,10 @@ class StructWindow:
 
 			self.connD = connD
 			self.shipid = shipid
+			self.searchen = Entry(parent)
+			self.searchen.pack(side = TOP, anchor = W)
+			self.searchbutton = Button(parent,text = 'Search', command = lambda: self.searchinlist())
+			self.searchbutton.pack(side = TOP, anchor = W)
 			self.sortbutton1 = Button(parent,text = 'Name sort', command = self.namesort )
 			self.sortbutton1.pack(side = TOP, anchor = W)
 			self.sortbutton2 = Button(parent,text = 'Crosstable sort', command = self.crossnamesort)
@@ -565,6 +573,16 @@ class StructWindow:
 			self.deviceslistbox.bind('<Double-Button>', getdetails)
 			parent.pack(side=LEFT)
 	class DevicesFrame:
+		def searchinlist(self):
+			for i, listbox_entry in enumerate(self.deviceslistbox.get(0, END)):
+				if str(self.searchen.get()).strip() != '':
+					listboxname = (listbox_entry[0:listbox_entry.rfind('@')]).strip()
+					if str(self.searchen.get()).strip().upper() in str(listboxname).upper():
+						self.deviceslistbox.itemconfig(i, bg = 'green')
+					else:
+						self.deviceslistbox.itemconfig(i, bg='white')
+				else:
+					self.deviceslistbox.itemconfig(i, bg='white')
 		def insertdevice(self):
 			newname = simpledialog.askstring("Add maker", "Enter maker name:")
 			if str(newname).strip() != '':
@@ -761,6 +779,10 @@ class StructWindow:
 			self.connD = connD
 			self.shipid = shipid
 			self.structuresort = True
+			self.searchen = Entry(parent)
+			self.searchen.pack(side = TOP, anchor = W)
+			self.searchbutton = Button(parent,text = 'Search', command = lambda: self.searchinlist())
+			self.searchbutton.pack(side = TOP, anchor = W)
 			self.sortbutton = Button(parent,text = 'Change sort', command = lambda: self.reloadquerry(self.structuresort,shipid,connD,True))
 			self.sortbutton.pack(side = TOP, anchor = W)
 			self.sortbutton = Button(parent,text = 'Add device', command = lambda: self.insertdevice())
@@ -774,6 +796,16 @@ class StructWindow:
 			self.deviceslistbox.bind('<Double-Button>', getdetails)
 			parent.pack(side=LEFT)
 	class PointsFrame:
+		def searchinlist(self):
+			for i, listbox_entry in enumerate(self.deviceslistbox.get(0, END)):
+				if str(self.searchen.get()).strip() != '':
+					listboxname = (listbox_entry).strip()
+					if str(self.searchen.get()).strip().upper() in str(listboxname).upper():
+						self.deviceslistbox.itemconfig(i, bg = 'green')
+					else:
+						self.deviceslistbox.itemconfig(i, bg='white')
+				else:
+					self.deviceslistbox.itemconfig(i, bg='white')
 		def AddPoint(self):
 
 			querry = "select max(sort) from points where id = {}".format(self.devid)
@@ -980,6 +1012,10 @@ class StructWindow:
 			self.connD = connD
 			self.shipid = shipid
 			self.structuresort = True
+			self.searchen = Entry(parent)
+			self.searchen.pack(side=TOP, anchor=W)
+			self.searchbutton = Button(parent, text='Search', command=lambda: self.searchinlist())
+			self.searchbutton.pack(side=TOP, anchor=W)
 			self.sortbutton = Button(parent,text = 'Change sort', command = lambda: self.reloadquerry(self.structuresort,shipid,connD,True))
 			self.sortbutton.pack(side = TOP, anchor = W)
 			self.deviceslistbox = Listbox(parent, exportselection=False)
@@ -990,6 +1026,16 @@ class StructWindow:
 			self.deviceslistbox.bind('<Double-Button>',getdetails )
 			parent.pack(side=LEFT)
 	class StructFrame:
+		def searchinlist(self):
+			for i, listbox_entry in enumerate(self.deviceslistbox.get(0, END)):
+				if str(self.searchen.get()).strip() != '':
+					listboxname = (listbox_entry[0:listbox_entry.rfind('@')]).strip()
+					if str(self.searchen.get()).strip().upper() in str(listboxname).upper():
+						self.deviceslistbox.itemconfig(i, bg = 'green')
+					else:
+						self.deviceslistbox.itemconfig(i, bg='white')
+				else:
+					self.deviceslistbox.itemconfig(i, bg='white')
 		def reloadquerrys(self,shipid,connD):
 			querry = """
 			select dss.id, dev.name,dss.sort from ds_structure dss 
@@ -1121,6 +1167,10 @@ class StructWindow:
 				devname = w.get(index)
 			self.shipid = shipid
 			self.connD= connD
+			self.searchen = Entry(parent)
+			self.searchen.pack(side=TOP, anchor=W)
+			self.searchbutton = Button(parent, text='Search', command=lambda: self.searchinlist())
+			self.searchbutton.pack(side=TOP, anchor=W)
 			self.deviceslistbox = DragDropListbox(parent, exportselection=False)
 			self.deviceslistbox.config(width=0)
 			self.detailframe = Frame(parent,borderwidth = 1)
