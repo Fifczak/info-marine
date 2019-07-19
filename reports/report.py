@@ -274,12 +274,12 @@ def makereport ( connD ,rn_ ):
 # username = 'testuser '
 # password = 'info'
 # host = '192.168.10.243'
-# rn_ = '2042U2-2019'
-# # #rn_ ='1968-2019'
-# #
-#host = 'localhost'
-#rn_ = '2128-2019'
+# # rn_ = '2042U2-2019'
+# # # #rn_ ='1968-2019'
 # # #
-#connD = [ username ,password ,host ]
-#
-#makereport(connD,rn_)
+# #host = 'localhost'
+# rn_ = '2035U4-2019'
+# # # #
+# connD = [ username ,password ,host ]
+# #
+# makereport(connD,rn_)

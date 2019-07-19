@@ -200,7 +200,7 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 					if drivid  not in _idlist:
 						y = meas()
 						y.id = drivid
-						y.maxval = 0
+						y.maxval = '-'
 						y.maxenv = '-'
 						querry = """select
 					 ml.id, ml.raport_number, dev.name,  max(ml.value) as RMS, ml2.max as Envelope, dev.norm ,ml.date, dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max
@@ -951,12 +951,20 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ): #REPORTT
 					ht = resulttable.cell( xcord + 1 ,col_val ).paragraphs[ 0 ]
 					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 					# dodałem tu zamianę kropek na przecinki + zaokrąglenie do 3 miejsca po przecinku
-					if xx.VSG == False:
-						txt_result = str( round( xx.maxval ,3 ) )
-						r0 = ht.add_run(txt_result.replace(".", ","))
-					else:
-						txt_result = str(round(xx.maxval, 1))
-						r0 = ht.add_run(str(txt_result.replace(".", ",")) + '(VSG)')
+					try:
+						if xx.VSG == False:
+							txt_result = str( round( xx.maxval ,3 ) )
+							r0 = ht.add_run(txt_result.replace(".", ","))
+						else:
+							txt_result = str(round(xx.maxval, 1))
+							r0 = ht.add_run(str(txt_result.replace(".", ",")) + '(VSG)')
+					except:
+						if xx.VSG == False:
+
+							r0 = ht.add_run(xx.maxval)
+						else:
+
+							r0 = ht.add_run(str(xx.maxval) + '(VSG)')
 
 					ht = resulttable.cell( xcord + 1 ,col_class ).paragraphs[ 0 ]
 					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -1217,12 +1225,20 @@ def drawtable_IM_chart_noPMS( document ,measlist ,connD ,report_number ): #REPOR
 					ht = resulttable.cell( xcord + 1 ,col_val ).paragraphs[ 0 ]
 					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 					# dodałem tu zamianę kropek na przecinki + zaokrąglenie do 3 miejsca po przecinku
-					if xx.VSG == False:
-						txt_result = str( round( xx.maxval ,3 ) )
-						r0 = ht.add_run(txt_result.replace(".", ","))
-					else:
-						txt_result = str(round(xx.maxval, 1))
-						r0 = ht.add_run(str(txt_result.replace(".", ",")) + '(VSG)')
+					try:
+						if xx.VSG == False:
+							txt_result = str( round( xx.maxval ,3 ) )
+							r0 = ht.add_run(txt_result.replace(".", ","))
+						else:
+							txt_result = str(round(xx.maxval, 1))
+							r0 = ht.add_run(str(txt_result.replace(".", ",")) + '(VSG)')
+					except:
+						if xx.VSG == False:
+
+							r0 = ht.add_run(xx.maxval)
+						else:
+
+							r0 = ht.add_run(str(xx.maxval) + '(VSG)')
 
 					ht = resulttable.cell( xcord + 1 ,col_class ).paragraphs[ 0 ]
 					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -1490,12 +1506,20 @@ def drawtable_IM_chart_PMS_limit( document ,measlist ,connD ,report_number ): #R
 					ht = resulttable.cell( xcord + 1 ,col_val ).paragraphs[ 0 ]
 					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-					if xx.VSG == False:
-						txt_result = str( round( xx.maxval ,3 ) )
-						r0 = ht.add_run(txt_result.replace(".", ","))
-					else:
-						txt_result = str(round(xx.maxval, 1))
-						r0 = ht.add_run(str(txt_result.replace(".", ",")) + '(VSG)')
+					try:
+						if xx.VSG == False:
+							txt_result = str( round( xx.maxval ,3 ) )
+							r0 = ht.add_run(txt_result.replace(".", ","))
+						else:
+							txt_result = str(round(xx.maxval, 1))
+							r0 = ht.add_run(str(txt_result.replace(".", ",")) + '(VSG)')
+					except:
+						if xx.VSG == False:
+
+							r0 = ht.add_run(xx.maxval)
+						else:
+
+							r0 = ht.add_run(str(xx.maxval) + '(VSG)')
 
 
 					ht = resulttable.cell( xcord + 1 ,col_limit ).paragraphs[ 0 ]
@@ -1792,12 +1816,21 @@ def drawtable_IM_chart_noPMS_limit( document ,measlist ,connD ,report_number ):
 					ht = resulttable.cell( xcord + 1 ,col_val ).paragraphs[ 0 ]
 					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-					if xx.VSG == False:
-						txt_result = str( round( xx.maxval ,3 ) )
-						r0 = ht.add_run(txt_result.replace(".", ","))
-					else:
-						txt_result = str(round(xx.maxval, 1))
-						r0 = ht.add_run(str(txt_result.replace(".", ",")) + '(VSG)')
+
+					try:
+						if xx.VSG == False:
+							txt_result = str( round( xx.maxval ,3 ) )
+							r0 = ht.add_run(txt_result.replace(".", ","))
+						else:
+							txt_result = str(round(xx.maxval, 1))
+							r0 = ht.add_run(str(txt_result.replace(".", ",")) + '(VSG)')
+					except:
+						if xx.VSG == False:
+
+							r0 = ht.add_run(xx.maxval)
+						else:
+
+							r0 = ht.add_run(str(xx.maxval) + '(VSG)')
 
 
 					ht = resulttable.cell( xcord + 1 ,col_limit ).paragraphs[ 0 ]

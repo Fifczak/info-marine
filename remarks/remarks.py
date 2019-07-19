@@ -120,7 +120,7 @@ class LogApplication:
 				filewriter = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
 				filewriter.writerow([user_get])
 				filewriter.writerow([pass_get])
-		connD = [user_get, pass_get, 'localhost']
+		connD = [user_get, pass_get, '192.168.10.243']
 
 
 		querry = "SELECT current_user"
@@ -822,6 +822,7 @@ group by ml.parent, ml.id,raport_number order by id) as ml
 
 		ttk.Label(header, text="Send date: " + str(senddate)).pack()
 		scrollable_body = Scrollable(body, width=16)
+
 		remlist.clear()
 		for i in devices:
 			measCframe = tk.Frame(scrollable_body, height=20, width=64)
