@@ -198,12 +198,13 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 
 				if x.id in drivingdict:
 					drivid = str(drivingdict[x.id]).strip()
-					print(_idlist)
+
 					if drivid  not in _idlist:
 						y = meas()
 						y.id = drivid
 						y.maxval = '-'
 						y.maxenv = '-'
+						print(drivid)
 						querry = """select 
 					 ml.id, ml.raport_number, dev.name,  max(ml.value) as RMS, ml2.max as Envelope, dev.norm ,ml.date, dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max
 					from measurements_low as ml
@@ -211,7 +212,7 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 								 ml.id, ml.raport_number,  max(ml.value)
 								 from measurements_low as ml
 							     left join points pts on ml.id = pts.id and ml.point = pts.point
-								 where ml.value <> -1 and type = 'envelope P-K' and parent = {} and pts.visible = True
+								 where ml.value <> -1 and type = 'envelope P-K' and ml.id = {} and pts.visible = True
 								 group by ml.id, ml.raport_number order by raport_number DESC) as ml2 on ml.id = ml2.id and ml.raport_number = ml2.raport_number
 					 left join (select ml.id, ml.raport_number,max(value) 
 									from measurements_low  ml
@@ -221,9 +222,10 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 					 left join devices as dev on ml.id = dev.id
 					 left join(select cast (id as integer), sort from ds_structure where id ~E'^\\\d+$' ) as dss on ml.id = dss.id
 					 left join standards sta on dev.norm = sta.standard
-					 where ml.date > now() - interval '2 years'  and ml.value <> -1 and ml.type = 'RMS' and ml.parent = {} and sort is distinct from null
+					 where ml.date > now() - interval '2 years'  and ml.value <> -1 and ml.type = 'RMS' and dev.id = {} and sort is distinct from null
 					 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,ml.date,dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max
-					  order by raport_number DESC""".format(drivid)
+					  order by raport_number DESC""".format(drivid,drivid)
+
 						drivline = list(q_run(connD, querry))[0]
 						y.name = drivline[2]
 						y.limit = '-'
