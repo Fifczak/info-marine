@@ -162,12 +162,14 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 					left join (select 
 								 ml.id, ml.raport_number,  max(ml.value)
 								 from measurements_low as ml
-								 where ml.value <> -1 and type = 'envelope P-K' and parent = {}
-								 group by id,raport_number order by raport_number DESC) as ml2 on ml.id = ml2.id and ml.raport_number = ml2.raport_number
-					 left join (select id,raport_number,max(value) 
-									from measurements_low 
-									where unit = 'VSG'
-									group by id,raport_number) mlVSG on ml.id = mlVSG.id and ml.raport_number = mlVSG.raport_number 
+							     left join points pts on ml.id = pts.id and ml.point = pts.point
+								 where ml.value <> -1 and type = 'envelope P-K' and parent = {} and pts.visible = True
+								 group by ml.id, ml.raport_number order by raport_number DESC) as ml2 on ml.id = ml2.id and ml.raport_number = ml2.raport_number
+					 left join (select ml.id, ml.raport_number,max(value) 
+									from measurements_low  ml
+									left join points pts on ml.id = pts.id and ml.point = pts.point
+									where unit = 'VSG' and pts.visible = True
+									group by ml.id,ml.raport_number) mlVSG on ml.id = mlVSG.id and ml.raport_number = mlVSG.raport_number 
 					 left join devices as dev on ml.id = dev.id
 					 left join(select cast (id as integer), sort from ds_structure where id ~E'^\\\d+$' ) as dss on ml.id = dss.id
 					 left join standards sta on dev.norm = sta.standard
@@ -202,22 +204,24 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 						y.id = drivid
 						y.maxval = '-'
 						y.maxenv = '-'
-						querry = """select
+						querry = """select 
 					 ml.id, ml.raport_number, dev.name,  max(ml.value) as RMS, ml2.max as Envelope, dev.norm ,ml.date, dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max
 					from measurements_low as ml
-					left join (select
+					left join (select 
 								 ml.id, ml.raport_number,  max(ml.value)
 								 from measurements_low as ml
-								 where ml.value <> -1 and type = 'envelope P-K'
-								 group by id,raport_number order by raport_number DESC) as ml2 on ml.id = ml2.id and ml.raport_number = ml2.raport_number
-					 left join (select id,raport_number,max(value)
-									from measurements_low
-									where unit = 'VSG'
-									group by id,raport_number) mlVSG on ml.id = mlVSG.id and ml.raport_number = mlVSG.raport_number
+							     left join points pts on ml.id = pts.id and ml.point = pts.point
+								 where ml.value <> -1 and type = 'envelope P-K' and parent = {} and pts.visible = True
+								 group by ml.id, ml.raport_number order by raport_number DESC) as ml2 on ml.id = ml2.id and ml.raport_number = ml2.raport_number
+					 left join (select ml.id, ml.raport_number,max(value) 
+									from measurements_low  ml
+									left join points pts on ml.id = pts.id and ml.point = pts.point
+									where unit = 'VSG' and pts.visible = True
+									group by ml.id,ml.raport_number) mlVSG on ml.id = mlVSG.id and ml.raport_number = mlVSG.raport_number 
 					 left join devices as dev on ml.id = dev.id
 					 left join(select cast (id as integer), sort from ds_structure where id ~E'^\\\d+$' ) as dss on ml.id = dss.id
 					 left join standards sta on dev.norm = sta.standard
-					 where ml.date > now() - interval '2 years'  and ml.value <> -1 and ml.type = 'RMS' and dev.id = {} and sort is distinct from null
+					 where ml.date > now() - interval '2 years'  and ml.value <> -1 and ml.type = 'RMS' and ml.parent = {} and sort is distinct from null
 					 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,ml.date,dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max
 					  order by raport_number DESC""".format(drivid)
 						drivline = list(q_run(connD, querry))[0]

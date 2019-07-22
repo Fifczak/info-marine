@@ -111,6 +111,108 @@ class ctdev:
 		self.name = ''
 		self.nameindevice = ''
 
+
+class devicetypechosewindow:
+	def insertdevice(self,type):
+		if str(type).strip() == 'empty':
+			newname = simpledialog.askstring("Add device", "Device name:")
+			if str(newname).strip() != '' and  str(newname).strip() != 'None':
+				querry = "insert into devices (parent,name) values ({},'{}') ".format(self.parentframe.shipid, newname)
+				print(querry)
+				q_run(self.parentframe.connD, querry)
+				querry = "select max(id) from devices"
+				newid = list(q_run(self.parentframe.connD, querry))[0][0]
+
+		else:
+			pointspool = list()
+			if str(type).strip() == 'hormot':
+				pointspool = ['H1', 'V1', 'H2', 'V2', 'A2']
+				type = 'el.motor'
+				inval = 'el. motor'
+			elif str(type).strip() == 'horpp':
+				pointspool = ['H3', 'V3', 'H4', 'V4']
+				type = 'Pump'
+				inval = 'pump'
+			elif str(type).strip() == 'vermot':
+				pointspool = ['H1', 'HH1', 'H2', 'HH2', 'A2']
+				type = 'el.motor'
+				inval = 'el. motor'
+			elif str(type).strip() == 'verpp':
+				pointspool = ['H3', 'HH3', 'H4', 'HH4']
+				type = 'Pump'
+				inval = 'pump'
+			elif str(type).strip() == 'sep':
+				pointspool = ['H3','HH3','H4','HH4','Foot H1','Foot HH1', 'Foot V1','Top H7']
+				type = 'Separator'
+				inval = 'Separator'
+			elif str(type).strip() == 'dg':
+				pointspool = ['NDE top H','NDE frame H','H1','H2','H3','H4','H5','H6','H7','DE top H','DE frame H']
+				type = 'Diesel engine'
+				inval = 'DG'
+			elif str(type).strip() == 'ae':
+				pointspool = ['De foot','H1','A1 for H1','V1','A1','A1 for V1','H2','A2 for H2','V2','A2 for V2','NDE foot']
+				type = 'None'
+				inval = 'Alternator'
+			elif str(type).strip() == 'me':
+				pointspool = ['C1','C2','C3','C4','C5','C6','2.3A for H1','Top 3.3 H','Top 3.3 V','Top 3.3 A','Top 3.2 H','Top 3.2 V','Top 3.1 H','Top 3.1 V','Top 3.1 A','2.1A for H7','H1','H2','H3','H4','H5','H6','H7','Found 1.1 H','Found 1.2 H','Found 1.3 H']
+				type = 'Pump'
+				inval = 'Main Engine'
+			elif str(type).strip() == 'ct':
+				pointspool = ['H1', 'HH1', 'H2', 'HH2','H3','HH3','H4','HH4','H5','HH5']
+				type = 'Cargo turbine'
+				inval = 'Cargo turbine'
+
+			newname = simpledialog.askstring("Add device", "Device name:", initialvalue=inval)
+			if str(newname).strip() != '' and  str(newname).strip() != 'None':
+
+
+
+				querry = "insert into devices (parent,name,type) values ({},'{}','{}') ".format(self.parentframe.shipid, newname,type)
+				q_run(self.parentframe.connD, querry)
+				querry = "select max(id) from devices"
+				newid = list(q_run(self.parentframe.connD, querry))[0][0]
+				i=0
+				for item in pointspool:
+					i +=1
+					querry = "INSERT INTO POINTS(id,point,sort,visible) VALUES({},'{}',{},True)".format(newid,item,i)
+					q_run(self.parentframe.connD, querry)
+
+
+
+
+
+		self.parentframe.reloadquerry(self.parentframe.structuresort, self.parentframe.shipid, self.parentframe.connD, False)
+
+
+	def __init__(self,parentframe,):
+		self.parentframe = parentframe
+
+		self.devtypewindow = tk.Tk()
+		self.devtypewindow.title("Device type")
+		self.sortbutton = Button(self.devtypewindow, text='Empty',command=lambda: self.insertdevice('empty'))
+		self.sortbutton.pack(side=TOP, anchor=W)
+		self.sortbutton = Button(self.devtypewindow, text='Horizontal motor',command=lambda: self.insertdevice('hormot'))
+		self.sortbutton.pack(side=TOP, anchor=W)
+
+		self.sortbutton = Button(self.devtypewindow, text='Horizontal pump',command=lambda: self.insertdevice('horpp'))
+		self.sortbutton.pack(side=TOP, anchor=W)
+		self.sortbutton = Button(self.devtypewindow, text='Vertical motor',command=lambda: self.insertdevice('vermot'))
+		self.sortbutton.pack(side=TOP, anchor=W)
+		self.sortbutton = Button(self.devtypewindow, text='Vertical pump',command=lambda: self.insertdevice('verpp'))
+		self.sortbutton.pack(side=TOP, anchor=W)
+		self.sortbutton = Button(self.devtypewindow, text='Separator',command=lambda: self.insertdevice('sep'))
+		self.sortbutton.pack(side=TOP, anchor=W)
+		self.sortbutton = Button(self.devtypewindow, text='Diesel Engine',command=lambda: self.insertdevice('dg'))
+		self.sortbutton.pack(side=TOP, anchor=W)
+		self.sortbutton = Button(self.devtypewindow, text='Alternator',command=lambda: self.insertdevice('ae'))
+		self.sortbutton.pack(side=TOP, anchor=W)
+		self.sortbutton = Button(self.devtypewindow, text='Main engine',command=lambda: self.insertdevice('me'))
+		self.sortbutton.pack(side=TOP, anchor=W)
+		self.sortbutton = Button(self.devtypewindow, text='Cargo turbine',command=lambda: self.insertdevice('ct'))
+		self.sortbutton.pack(side=TOP, anchor=W)
+
+		self.devtypewindow.mainloop()
+
 class PointComboboxObject:
 	def callback(self, event=None):
 		self.changecapt(self.showvalue,self.var.get(),self.sort)
@@ -521,7 +623,6 @@ class StructWindow:
 				devlist.append(dev)
 			self.deviceslistbox.pack(fill=BOTH, expand = 1)
 
-
 		def __init__(self,parent,shipid,connD):
 			def getdetails(evt):
 				w = evt.widget
@@ -572,6 +673,8 @@ class StructWindow:
 			self.structuresort()
 			self.deviceslistbox.bind('<Double-Button>', getdetails)
 			parent.pack(side=LEFT)
+
+
 	class DevicesFrame:
 		def searchinlist(self):
 			for i, listbox_entry in enumerate(self.deviceslistbox.get(0, END)):
@@ -670,18 +773,22 @@ class StructWindow:
 
 				interval = "{} {}".format(self.lab_interval_length_e.get(), self.lab_interval_type_e.get())
 
+				if str(self.lab_kw_e.get()) == 'None':kw = '0'
+				else: kw = self.lab_kw_e.get()
+
+				if str(self.lab_drivenby_e.get()) == 'None':drivenby = '0'
+				else: drivenby = self.lab_drivenby_e.get()
 
 				querry = """
 				UPDATE devices 
 				SET name = '{}', model = '{}', model_fkey = (select id from main_models where name = '{}' limit 1), type ='{}',
 				kw = '{}', rpm = '{}', PMS = '{}', Info = '{}', norm = '{}', standard_fkey = (select id from standards where standard ='{}' limit 1),
 				drivenby = '{}', meas_condition = '{}', cm = '{}', cbm_interval = '{}' where id = {}
-				""".format(self.lab_name_e.get(), model, model, self.lab_type_e.get(), self.lab_kw_e.get(),
+				""".format(self.lab_name_e.get(), model, model, self.lab_type_e.get(), kw,
 					  self.lab_rpm_e.get(), self.lab_pms_e.get(), \
-					  self.lab_info_e.get("1.0",END), self.lab_norm_e.get(), self.lab_norm_e.get(), self.lab_drivenby_e.get(),
+					  self.lab_info_e.get("1.0",END), self.lab_norm_e.get(), self.lab_norm_e.get(), drivenby,
 					  self.lab_meas_condition_e.get(), \
 					  self.lab_cm_e.get(), interval,self.id)
-
 				q_run(connD,querry)
 
 				self.reloadquerry(self.structuresort, shipid, connD,False)
@@ -785,7 +892,7 @@ class StructWindow:
 			self.searchbutton.pack(side = TOP, anchor = W)
 			self.sortbutton = Button(parent,text = 'Change sort', command = lambda: self.reloadquerry(self.structuresort,shipid,connD,True))
 			self.sortbutton.pack(side = TOP, anchor = W)
-			self.sortbutton = Button(parent,text = 'Add device', command = lambda: self.insertdevice())
+			self.sortbutton = Button(parent,text = 'Add device', command = lambda: devicetypechosewindow(self))#self.insertdevice())
 			self.sortbutton.pack(side = TOP, anchor = W)
 
 			self.deviceslistbox = Listbox(parent, exportselection=False)
@@ -1253,4 +1360,4 @@ class StructWindow:
 
 
 LogApplication()
-#ModelMakerWindow(['filipb','@infomarine','localhost'])
+

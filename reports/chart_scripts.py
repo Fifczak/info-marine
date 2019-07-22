@@ -182,14 +182,14 @@ class datasheet:
             querry = """select ml.raport_number,ml.point, ml.value,ml.date,dev.name, ml._id_ from measurements_low as ml
                         left join devices as dev on ml.id = dev.id
                         left join points as pt on ml.id = pt.id and ml.point = pt.point
-                        where ml.id = """ +str(id_) +   """ and ml.type = 'RMS' and ml.value != -1
+                        where ml.id = """ +str(id_) +   """ and ml.type = 'RMS' and ml.value != -1 and pt.visible = True
                         group by ml.raport_number,ml.point, dev.name,ml.value,ml.date ,pt.sort , ml._id_
                         order by ml.raport_number ,pt.sort  """
         else:
             querry = """select ml.raport_number,ml.point,max(ml.value),ml.date,dev.name, ml._id_,ml.type from measurements_low as ml
                         left join devices as dev on ml.id = dev.id
                         left join points as pt on ml.id = pt.id and ml.point = pt.point
-                        where ml.id = {} and ml.unit = 'VSG' and ml.value != -1
+                        where ml.id = {} and ml.unit = 'VSG' and ml.value != -1 and pt.visible = True
                         group by ml.raport_number,ml.point, dev.name,ml.date ,pt.sort , ml._id_,ml.type
                         order by ml.raport_number ,pt.sort  """.format(str(id_))
         dsd = q_run(connD,querry)
