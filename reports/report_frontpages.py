@@ -39,7 +39,7 @@ def standard_with_PMS(document):
 	r7.underline=True
 	r7.italic=True
 	r8=h3.add_run(' contains additional readings of enveloped value of acceleration, which is helpful in detection of early stage of bearing wear.  ')
-	r9=h3.add_run('Sixth column')
+	r9=h3.add_run('Sixth column ')
 	r9.italic=True
 	r9.underline=True
 	r10=h3.add_run('contains vibration trend values if previous results are available from the same source. ')
@@ -137,6 +137,7 @@ def donnelly_with_PMS(document):
 
 def donnelly_without_PMS(document):
 	document.add_paragraph()
+	T1.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
 	H1 = document.add_paragraph('Measurement condition')
 	H1.style = document.styles['IM HEAD']
 	H1.alignment = WD_ALIGN_PARAGRAPH.LEFT
