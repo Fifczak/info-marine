@@ -59,6 +59,7 @@ def makexmlfile(rn_):
 
 
 	for item in devlist:
+		print(item)
 		xmltext += """
 		<COMPONENT COMPONENT_ID="{}" COMPONEN_NAME="{}" VSLCOMP_ITEM_ID="BASS-UniqueKey" >
 			<SCHEDULE_JOB JOB_ITEM_ID="BASS-JOBUniqueKey">
