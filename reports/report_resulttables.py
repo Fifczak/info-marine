@@ -336,7 +336,7 @@ def drawtable_IM_PMS(document, measlist, connD, report_number):  # REPORTTYPE 3
 
 					break
 
-	print(xcord)
+
 	rowscount = xcord
 	resulttable = document.add_table(rows=rowscount + 1, cols=7)
 	resulttable.style = 'Table Grid'
@@ -442,8 +442,11 @@ def drawtable_IM_PMS(document, measlist, connD, report_number):  # REPORTTYPE 3
 					ht = resulttable.cell(xcord + 1, col_val).paragraphs[0]
 					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 					if xx.VSG == False:
-						txt_result = str(round(xx.maxval, 3))
-						r0 = ht.add_run(txt_result.replace(".", ","))
+						try:
+							txt_result = str(round(xx.maxval, 3))
+							r0 = ht.add_run(txt_result.replace(".", ","))
+						except:
+							print(xx.maxval)
 					else:
 						txt_result = str(round(xx.maxval, 1))
 						r0 = ht.add_run(str(txt_result.replace(".", ",")) + '(VSG)')
@@ -590,9 +593,9 @@ def drawtable_IM_noPMS(document, measlist, connD, report_number):  # REPORTTYPE 
 					if str(xx.id) in drivenByList:
 						xcord += 2
 
-					break
+					continue
 
-	print(xcord)
+
 	rowscount = xcord
 	resulttable = document.add_table(rows=rowscount + 1, cols=6)
 	resulttable.style = 'Table Grid'
@@ -679,7 +682,7 @@ def drawtable_IM_noPMS(document, measlist, connD, report_number):  # REPORTTYPE 
 				pass
 		else:  ######## POMIARY
 			p = -1
-			print(trueMeasList)
+
 			for xx in trueMeasList:
 				p += 1
 				if str(measStrip[1]) == str(xx.id):
@@ -728,6 +731,7 @@ def drawtable_IM_noPMS(document, measlist, connD, report_number):  # REPORTTYPE 
 							trendtemp1 = float(xx.trend[ 0 ])
 							trendtemp2 = xx.trend[ 1 ]
 							trendtemp3 = xx.trend[ 2 ]
+
 							if str( trendtemp3 ) == 'U':
 								r0 = ht.add_run()
 								r0.add_picture( 'up.gif' )
@@ -737,10 +741,10 @@ def drawtable_IM_noPMS(document, measlist, connD, report_number):  # REPORTTYPE 
 							elif str( trendtemp3 ) == 'C':
 								r0 = ht.add_run()
 								r0.add_picture( 'none.gif' )
-							text_trendtemp1=str('.%3f'%trendtemp1)
+							text_trendtemp1=str('%.3f'%trendtemp1)
 							p0 = ht.add_run( '\n' + 'Last value:' )
 							p0 = ht.add_run( '\n' + str( trendtemp2 ) )
-							p0 = ht.add_run( '\n' +  text_trendtemp1.replace('.',',')  )
+							p0 = ht.add_run( '\n' + text_trendtemp1.replace('.',',')  )
 							p0.bold = True
 						except:
 							pass
@@ -752,6 +756,7 @@ def drawtable_IM_noPMS(document, measlist, connD, report_number):  # REPORTTYPE 
 					resulttable.cell(xcord + 1, col_class).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 					resulttable.cell(xcord + 1, col_env).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 					resulttable.cell(xcord + 1, col_remark).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+
 					xcord += 1
 
 	ht = document.add_paragraph()
@@ -1138,7 +1143,7 @@ def drawtable_IM_chart_noPMS( document ,measlist ,connD ,report_number ): #REPOR
 							xcord += 1
 						else:
 							xcord += 2
-						break
+						continue
 					except:
 						xcord += 2
 	rowscount = xcord

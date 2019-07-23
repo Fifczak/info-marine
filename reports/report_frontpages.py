@@ -137,7 +137,6 @@ def donnelly_with_PMS(document):
 
 def donnelly_without_PMS(document):
 	document.add_paragraph()
-	T1.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
 	H1 = document.add_paragraph('Measurement condition')
 	H1.style = document.styles['IM HEAD']
 	H1.alignment = WD_ALIGN_PARAGRAPH.LEFT

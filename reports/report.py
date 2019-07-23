@@ -61,7 +61,6 @@ def makereport ( connD ,rn_ ):
 	reporttype = list(q_run(connD,querry))[0][0]
 
 
-
 	reptypedict = {
 		"fileformat": 0,
 		"headtabletype": 0,
@@ -194,7 +193,7 @@ def makereport ( connD ,rn_ ):
 	#############################################################################################
 	######################################## V. WYNIKI ##########################################
 	#############################################################################################
-	print(reptypedict["resulttable"])
+
 	if reptypedict["resulttable"] == 1:
 		measlist = prepare_IM(connD, rn_)
 		drawtable_IM_PMS ( document ,measlist ,connD ,rn_ )
@@ -267,19 +266,27 @@ def makereport ( connD ,rn_ ):
 					+ str(rn_) + '_' + str(getini(connD)) + '_' + str(strftime("%Y-%m-%d", gmtime())) + '.docx')
 
 
-
-
-
-#
-username = 'testuser '
-password = 'info'
-host = '192.168.10.243'
-rn_ = '1960U-2019'
-# # # #rn_ ='1968-2019'
-# # #
-# #host = 'localhost'
-# rn_ = '2035U4-2019'
-# # # #
-connD = [ username ,password ,host ]
 # #
-makereport(connD,rn_)
+# username = 'testuser'
+# password = 'info'
+# host = '192.168.10.243'
+# #type=1
+# #rn_ = '2079U3-2019'
+# #type=2
+# rn_='2120U2-2019'
+# #type=3
+# #rn_='2081U-2019'
+# #type=4
+# #rn_='2099U-2019'
+# #type=5
+# #rn_='2133-2019'
+# #type=6
+# #rn_ = '2079U3-2019'
+# # # # #rn_ ='1968-2019'
+# # # #
+# # #host = 'localhost'
+# # rn_ = '2035U4-2019'
+# # # # #
+# connD = [ username ,password ,host ]
+# # #
+# makereport(connD,rn_)
