@@ -13,8 +13,8 @@ from tqdm import tqdm
 from tkinter import messagebox
 from tkinter import simpledialog
 
-host = '192.168.10.243'
-#host = 'localhost'
+#host = '192.168.10.243'
+host = 'localhost'
 devlist = list()
 def q_run(connD, querry):
 	username = connD[0]
@@ -37,6 +37,27 @@ def q_run(connD, querry):
 	cur.close()
 def column(matrix, i):
     return [row[i] for row in matrix]
+
+class RightClick:
+    def __init__(self, master):
+
+        # create a popup menu
+        self.aMenu = Menu(master, tearoff=0)
+        self.aMenu.add_command(label='Delete', command=self.delete)
+        self.aMenu.add_command(label='Say Hello', command=self.hello)
+
+        self.tree_item = ''
+
+    def delete(self):
+        if self.tree_item:
+            app.tree.delete(self.tree_item)
+
+    def hello(self):
+        print ('hello!')
+
+    def popup(self, event):
+        self.aMenu.post(event.x_root, event.y_root)
+        self.tree_item = app.tree.focus()
 
 class LogApplication:
 	def __init__(self):
@@ -673,8 +694,6 @@ class StructWindow:
 			self.structuresort()
 			self.deviceslistbox.bind('<Double-Button>', getdetails)
 			parent.pack(side=LEFT)
-
-
 	class DevicesFrame:
 		def searchinlist(self):
 			for i, listbox_entry in enumerate(self.deviceslistbox.get(0, END)):
@@ -1343,6 +1362,10 @@ class StructWindow:
 		self.Shiplistbox.config(width=0)
 		self.shipid = ''
 		self.Shiplistbox.bind('<Double-Button>', getaps)
+
+		self.rclick = RightClick(self,tk)
+		self.Shiplistbox.bind('<Button-3>', self.rclick.popup)
+
 		self.Applistbox = Listbox(self.stWindow, exportselection=False)
 		self.Applistbox.config(width=0)
 		self.Applistbox.bind('<Double-Button>',makeframe)
