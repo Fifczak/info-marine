@@ -265,7 +265,7 @@ def makereport ( connD ,rn_ ):
 	document.save ( f +'/'+ str(shipname) + ' - vibration report '
 					+ str(rn_) + '_' + str(getini(connD)) + '_' + str(strftime("%Y-%m-%d", gmtime())) + '.docx')
 
-
+#
 # #
 # username = 'testuser'
 # password = 'info'
@@ -273,7 +273,7 @@ def makereport ( connD ,rn_ ):
 # #type=1
 # #rn_ = '2079U3-2019'
 # #type=2
-# rn_='2120U2-2019'
+# rn_='1978U3-2019'
 # #type=3
 # #rn_='2081U-2019'
 # #type=4

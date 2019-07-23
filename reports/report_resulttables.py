@@ -157,7 +157,7 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 					from standards"""
 		limits = q_run( connD ,querry )
 		querry = """select 
-					 ml.id, ml.raport_number, dev.name,  max(ml.value) as RMS, ml2.max as Envelope, dev.norm ,ml.date, dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max
+					 ml.id, ml.raport_number, dev.name,  max(ml.value) as RMS, ml2.max as Envelope, dev.norm ,max(ml.date), dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max
 					from measurements_low as ml
 					left join (select 
 								 ml.id, ml.raport_number,  max(ml.value)
@@ -174,7 +174,7 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 					 left join(select cast (id as integer), sort from ds_structure where id ~E'^\\\d+$' ) as dss on ml.id = dss.id
 					 left join standards sta on dev.norm = sta.standard
 					 where ml.date > now() - interval '2 years'  and ml.value <> -1 and ml.type = 'RMS' and ml.parent = {} and sort is distinct from null
-					 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,ml.date,dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max
+					 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max
 					  order by raport_number DESC""".format(str(parent),str(parent))
 		reportresults = q_run( connD ,querry )
 
@@ -698,8 +698,12 @@ def drawtable_IM_noPMS(document, measlist, connD, report_number):  # REPORTTYPE 
 					ht = resulttable.cell(xcord + 1, col_val).paragraphs[0]
 					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 					if xx.VSG == False:
-						txt_result = str(round(xx.maxval, 3))
+						try:
+							txt_result = str(round(xx.maxval, 3))
+						except:
+							txt_result = str(xx.maxval)
 						r0 = ht.add_run(txt_result.replace(".", ","))
+
 					else:
 						txt_result = str(round(xx.maxval, 1))
 						r0 = ht.add_run(str(txt_result.replace(".", ",")) + '(VSG)')
