@@ -44,42 +44,42 @@ def set_cols_width_trend ( table ):
 
 
 def set_col_width_GSR( table ):  # funkcja do stałej szerokości komórek w raportach GSR
-	widths = (Cm( 7 ) ,Cm( 1.5 ) ,Cm( 1.5 ) ,Cm( 1.5 ) ,Cm( 1.5 ) ,Cm( 1.5 ) ,Cm( 5 ))
+	widths = (Cm( 7 ) ,Cm( 1.5 ) ,Cm( 1.5 ) ,Cm( 1.5 ) ,Cm( 1.5 ) ,Cm( 1.8 ) ,Cm( 5 ))
 	for row in table.rows:
 		for idx ,width in enumerate( widths ):
 			row.cells[ idx ].width = width
 
 def set_col_width_results_standard( table ):  # funkcja do stałej szerokości komórek w raportach GSR
-	widths = (Cm(2 ) ,Cm( 6.5 ) ,Cm( 1.3) ,Cm( 1.3) ,Cm( 1.3 ),Cm( 2.5 ) ,Cm( 7.8 ))
+	widths = (Cm(2 ) ,Cm( 6.5 ) ,Cm( 1.3) ,Cm( 1.3) ,Cm( 1.3 ),Cm( 1.8 ) ,Cm( 7.8 ))
 	for row in table.rows:
 		for idx ,width in enumerate( widths ):
 			row.cells[ idx ].width = width
 def set_col_width_results_standard_nopms( table ):  # funkcja do stałej szerokości komórek w raportach GSR
-	widths = (Cm( 6.5 ) ,Cm( 1.3) ,Cm( 1.3) ,Cm( 1.3 ),Cm( 2.5 ) ,Cm( 7.8 ))
+	widths = (Cm( 6.5 ) ,Cm( 1.3) ,Cm( 1.3) ,Cm( 1.3 ),Cm( 1.8 ) ,Cm( 7.8 ))
 	for row in table.rows:
 		for idx ,width in enumerate( widths ):
 			row.cells[ idx ].width = width
 
 
 def set_col_width_results( table ):  # funkcja do stałej szerokości komórek w raportach GSR
-	widths = (Cm(2 ) ,Cm( 7 ) ,Cm( 1.4) ,Cm( 1.4) ,Cm( 1.4 ) ,Cm( 8 ))
+	widths = (Cm(2 ) ,Cm( 7 ) ,Cm( 1.4) ,Cm( 1.4) ,Cm( 1.8 ) ,Cm( 8 ))
 	for row in table.rows:
 		for idx ,width in enumerate( widths ):
 			row.cells[ idx ].width = width
 def set_col_width_results_noPMS( table ):  # funkcja do stałej szerokości komórek w raportach GSR
-	widths = (Cm( 7 ) ,Cm( 1.4) ,Cm( 1.4) ,Cm( 1.4 ) ,Cm( 8 ))
+	widths = (Cm( 7 ) ,Cm( 1.4) ,Cm( 1.4) ,Cm( 1.8 ) ,Cm( 8 ))
 	for row in table.rows:
 		for idx ,width in enumerate( widths ):
 			row.cells[ idx ].width = width
 
 def set_col_width_results_pms_limit( table ):
-	widths = (Cm(2 ) ,Cm( 6 ) ,Cm( 1.4),Cm( 1.1) ,Cm( 1.4) ,Cm( 1.4) ,Cm( 8 ))
+	widths = (Cm(2 ) ,Cm( 6 ) ,Cm( 1.4),Cm( 1.1) ,Cm( 1.4) ,Cm( 1.8) ,Cm( 8 ))
 	for row in table.rows:
 		for idx ,width in enumerate( widths ):
 			row.cells[ idx ].width = width
 
 def set_col_width_results_nopms_limit( table ):
-	widths = (Cm( 6 ) ,Cm( 1.4),Cm( 1.1) ,Cm( 1.4) ,Cm( 1.4) ,Cm( 8 ))
+	widths = (Cm( 6 ) ,Cm( 1.4),Cm( 1.1) ,Cm( 1.4) ,Cm( 1.8) ,Cm( 8 ))
 	for row in table.rows:
 		for idx ,width in enumerate( widths ):
 			row.cells[ idx ].width = width
@@ -370,7 +370,10 @@ def drawtable_IM_PMS(document, measlist, connD, report_number):  # REPORTTYPE 3
 	ht = resulttable.cell(0, col_env).paragraphs[0]
 	ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 	resulttable.cell(0, col_env).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+	resulttable.cell(0, col_env).paragraphs[0].add_run().add_break()
+
 	r0 = ht.add_run('Bearing Envelope 0-Peak (m/s2) Max').bold = True
+	resulttable.cell(0,col_env).paragraphs[0].add_run().add_break()
 
 	col_trend = 5
 	ht = resulttable.cell( 0 ,col_trend ).paragraphs[ 0 ]
@@ -383,6 +386,7 @@ def drawtable_IM_PMS(document, measlist, connD, report_number):  # REPORTTYPE 3
 	ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 	resulttable.cell(0, col_remark).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 	r0 = ht.add_run('Remarks and suggestions').bold = True
+
 	set_col_width_results_standard(resulttable)
 
 	xcord = 0
@@ -463,12 +467,13 @@ def drawtable_IM_PMS(document, measlist, connD, report_number):  # REPORTTYPE 3
 
 					ht = resulttable.cell( xcord + 1 ,col_trend ).paragraphs[ 0 ]
 					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+					resulttable.cell(xcord+1,col_trend).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 
 					ids.append(xx.id)
 
 					if str( xx.limit ) == 'Cl. D':  # TEGO DLA CZYTELNOSCI LEPIEJ ZROBIC FUNKCJE
 						try:
-							trendtemp1 = xx.trend[ 0 ]
+							trendtemp1 = float(xx.trend[ 0 ])
 							trendtemp2 = xx.trend[ 1 ]
 							trendtemp3 = xx.trend[ 2 ]
 							if str( trendtemp3 ) == 'U':
@@ -480,9 +485,10 @@ def drawtable_IM_PMS(document, measlist, connD, report_number):  # REPORTTYPE 3
 							elif str( trendtemp3 ) == 'C':
 								r0 = ht.add_run()
 								r0.add_picture( 'none.gif' )
+							text_trendtemp1 = str ( '%.3f'%trendtemp1 )
 							p0 = ht.add_run( '\n' + 'Last value:' )
 							p0 = ht.add_run( '\n' + str( trendtemp2 ) )
-							p0 = ht.add_run( '\n' + str( trendtemp1 ) )
+							p0 = ht.add_run( '\n' +  text_trendtemp1.replace('.',',')  )
 							p0.bold = True
 						except:
 							pass
@@ -616,7 +622,9 @@ def drawtable_IM_noPMS(document, measlist, connD, report_number):  # REPORTTYPE 
 	ht = resulttable.cell(0, col_env).paragraphs[0]
 	ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 	resulttable.cell(0, col_env).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+	resulttable.cell(0,col_env).paragraphs[0].add_run().add_break()
 	r0 = ht.add_run('Bearing Envelope 0-Peak (m/s2) Max').bold = True
+	resulttable.cell(0,col_env).paragraphs[0].add_run().add_break()
 
 	col_trend = 4
 	ht = resulttable.cell( 0 ,col_trend ).paragraphs[ 0 ]
@@ -672,6 +680,7 @@ def drawtable_IM_noPMS(document, measlist, connD, report_number):  # REPORTTYPE 
 				pass
 		else:  ######## POMIARY
 			p = -1
+			print(trueMeasList)
 			for xx in trueMeasList:
 				p += 1
 				if str(measStrip[1]) == str(xx.id):
@@ -679,6 +688,8 @@ def drawtable_IM_noPMS(document, measlist, connD, report_number):  # REPORTTYPE 
 					# ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.LEFT
 					# if str(xx.pms) == '0' or str(xx.pms) == '': xx.pms = '-'
 					# r0 = ht.add_run(str(xx.pms))
+
+
 					ht = resulttable.cell(xcord + 1, col_name).paragraphs[0]
 					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.LEFT
 					r0 = ht.add_run(xx.name)
@@ -709,12 +720,13 @@ def drawtable_IM_noPMS(document, measlist, connD, report_number):  # REPORTTYPE 
 
 					ht = resulttable.cell( xcord + 1 ,col_trend ).paragraphs[ 0 ]
 					ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+					resulttable.cell(xcord+1,col_trend).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
 
 					ids.append(xx.id)
 
 					if str( xx.limit ) == 'Cl. D':  # TEGO DLA CZYTELNOSCI LEPIEJ ZROBIC FUNKCJE
 						try:
-							trendtemp1 = xx.trend[ 0 ]
+							trendtemp1 = float(xx.trend[ 0 ])
 							trendtemp2 = xx.trend[ 1 ]
 							trendtemp3 = xx.trend[ 2 ]
 							if str( trendtemp3 ) == 'U':
@@ -726,9 +738,10 @@ def drawtable_IM_noPMS(document, measlist, connD, report_number):  # REPORTTYPE 
 							elif str( trendtemp3 ) == 'C':
 								r0 = ht.add_run()
 								r0.add_picture( 'none.gif' )
+							text_trendtemp1=str('.%3f'%trendtemp1)
 							p0 = ht.add_run( '\n' + 'Last value:' )
 							p0 = ht.add_run( '\n' + str( trendtemp2 ) )
-							p0 = ht.add_run( '\n' + str( trendtemp1 ) )
+							p0 = ht.add_run( '\n' +  text_trendtemp1.replace('.',',')  )
 							p0.bold = True
 						except:
 							pass
@@ -883,7 +896,9 @@ def drawtable_IM_chart_PMS( document ,measlist ,connD ,report_number ): #REPORTT
 	ht = resulttable.cell( 0 ,col_env ).paragraphs[ 0 ]
 	ht.paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
 	resulttable.cell(0,col_env).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+	resulttable.cell(0,col_env).paragraphs[0].add_run().add_break()
 	r0 = ht.add_run( 'Bearing Envelope 0-Peak (m/s2) Max' ).bold=True
+	resulttable.cell(0,col_env).paragraphs[0].add_run().add_break()
 
 
 	# col_trend = 5
@@ -1157,7 +1172,10 @@ def drawtable_IM_chart_noPMS( document ,measlist ,connD ,report_number ): #REPOR
 	ht = resulttable.cell( 0 ,col_env ).paragraphs[ 0 ]
 	ht.paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
 	resulttable.cell(0,col_env).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+	resulttable.cell(0,col_env).paragraphs[0].add_run().add_break()
+
 	r0 = ht.add_run( 'Bearing Envelope 0-Peak (m/s2) Max' ).bold=True
+	resulttable.cell(0,col_env).paragraphs[0].add_run().add_break()
 
 
 	# col_trend = 5
@@ -1328,7 +1346,7 @@ def drawtable_IM_chart_PMS_limit( document ,measlist ,connD ,report_number ): #R
 
 	os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
-	respar = document.add_paragraph('Results')
+	respar = document.add_paragraph('Results','IM HEAD')
 	respar.runs[0].bold = True
 	respar.runs[0].font.name = 'Times New Roman'
 	respar.runs[0].font.size = Pt(12)
@@ -1449,7 +1467,9 @@ def drawtable_IM_chart_PMS_limit( document ,measlist ,connD ,report_number ): #R
 	ht = resulttable.cell( 0 ,col_env ).paragraphs[ 0 ]
 	ht.paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
 	resulttable.cell(0,col_env).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+	resulttable.cell(0,col_env).paragraphs[0].add_run().add_break()
 	r0 = ht.add_run( 'Bearing Envelope 0-Peak (m/s2) Max' ).bold=True
+	resulttable.cell ( 0 , col_env ).paragraphs [ 0 ].add_run ().add_break ()
 
 
 	col_remark = 6
@@ -1759,7 +1779,9 @@ def drawtable_IM_chart_noPMS_limit( document ,measlist ,connD ,report_number ):
 	ht = resulttable.cell( 0 ,col_env ).paragraphs[ 0 ]
 	ht.paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
 	resulttable.cell(0,col_env).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+	resulttable.cell ( 0 , col_env ).paragraphs [ 0 ].add_run ().add_break ()
 	r0 = ht.add_run( 'Bearing Envelope 0-Peak (m/s2) Max' ).bold=True
+	resulttable.cell ( 0 , col_env ).paragraphs [ 0 ].add_run ().add_break ()
 
 
 	col_remark = 5

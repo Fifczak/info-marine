@@ -59,6 +59,7 @@ def makereport ( connD ,rn_ ):
 
 	querry = "select reporttype from main where id = (select shipid from harmonogram where report_number = '"+str(rn_)+"')"
 	reporttype = list(q_run(connD,querry))[0][0]
+	print(reporttype)
 
 
 
@@ -267,14 +268,22 @@ def makereport ( connD ,rn_ ):
 					+ str(rn_) + '_' + str(getini(connD)) + '_' + str(strftime("%Y-%m-%d", gmtime())) + '.docx')
 
 
-
-
-
 #
-username = 'testuser '
+username = 'testuser'
 password = 'info'
 host = '192.168.10.243'
-rn_ = '1960U-2019'
+#type=1
+#rn_ = '2079U3-2019'
+#type=2
+rn_='2116-2019'
+#type=3
+#rn_='2081U-2019'
+#type=4
+#rn_='2099U-2019'
+#type=5
+#rn_='2133-2019'
+#type=6
+#rn_ = '2079U3-2019'
 # # # #rn_ ='1968-2019'
 # # #
 # #host = 'localhost'
