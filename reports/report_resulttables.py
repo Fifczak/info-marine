@@ -204,7 +204,6 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 						y.id = drivid
 						y.maxval = '-'
 						y.maxenv = '-'
-						print(drivid)
 						querry = """select 
 					 ml.id, ml.raport_number, dev.name,  max(ml.value) as RMS, ml2.max as Envelope, dev.norm ,ml.date, dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max
 					from measurements_low as ml
