@@ -38,26 +38,6 @@ def q_run(connD, querry):
 def column(matrix, i):
     return [row[i] for row in matrix]
 
-class RightClick:
-    def __init__(self, master):
-
-        # create a popup menu
-        self.aMenu = Menu(master, tearoff=0)
-        self.aMenu.add_command(label='Delete', command=self.delete)
-        self.aMenu.add_command(label='Say Hello', command=self.hello)
-
-        self.tree_item = ''
-
-    def delete(self):
-        if self.tree_item:
-            app.tree.delete(self.tree_item)
-
-    def hello(self):
-        print ('hello!')
-
-    def popup(self, event):
-        self.aMenu.post(event.x_root, event.y_root)
-        self.tree_item = app.tree.focus()
 
 class LogApplication:
 	def __init__(self):
@@ -139,7 +119,6 @@ class devicetypechosewindow:
 			newname = simpledialog.askstring("Add device", "Device name:")
 			if str(newname).strip() != '' and  str(newname).strip() != 'None':
 				querry = "insert into devices (parent,name) values ({},'{}') ".format(self.parentframe.shipid, newname)
-				print(querry)
 				q_run(self.parentframe.connD, querry)
 				querry = "select max(id) from devices"
 				newid = list(q_run(self.parentframe.connD, querry))[0][0]
@@ -233,7 +212,6 @@ class devicetypechosewindow:
 		self.sortbutton.pack(side=TOP, anchor=W)
 
 		self.devtypewindow.mainloop()
-
 class PointComboboxObject:
 	def callback(self, event=None):
 		self.changecapt(self.showvalue,self.var.get(),self.sort)
@@ -1303,6 +1281,46 @@ class StructWindow:
 			self.detailframe.pack(side=RIGHT, anchor=W, fill=BOTH, expand = 1)
 
 			self.reloadquerrys(shipid,connD)
+	class RightClick_Owners:
+		def __init__(self, master,mframe):
+			self.mframe = mframe
+			self.master = master
+			self.aMenu = Menu(master, tearoff=0)
+			self.aMenu.add_command(label='Add owner', command=self.addowner)
+			self.aMenu.add_command(label='Add ship', command=self.addship)
+			self.tree_item = ''
+		def addowner(self):
+			ownername = simpledialog.askstring("Add owner:", "Enter owner name:")
+			if str(ownername).strip() != '' and str(ownername).strip() != 'None':
+				querry ="insert into main(parent,name) values(1,'{}')".format(ownername)
+				q_run(self.mframe.connD,querry)
+				self.mframe.putowners(self.mframe.Ownerlistbox)
+		def addship(self):
+			index = int(self.master.curselection()[0])
+			ownername = self.master.get(index)
+			shipname = simpledialog.askstring("Add ship", "Enter ship name for {} :".format(ownername))
+			if str(shipname).strip() != '' and str(shipname).strip() != 'None':
+				querry = """insert into main (parent,name,reporttype) 
+				values((select id from main where name = '{}' limit 1),'{}',1)
+				""".format(ownername,shipname)
+				q_run(self.mframe.connD,querry)
+				self.mframe.makeships(ownername)
+		def popup(self, event):
+			self.aMenu.post(event.x_root, event.y_root)
+	def putowners(self,owlbox):
+		owlbox.delete(0, END)
+		querry = "select name,id from main where parent = 1 order by name"
+		resultrr = q_run(self.connD, querry)
+		for line in resultrr:
+			owlbox.insert(END, line[0])
+	def makeships(self,shipname):
+		querry = "select name from main where parent =(select id from main where name = '" + str(
+			shipname) + "' limit 1) order by name"
+
+		ships = q_run(self.connD, querry)
+		self.Shiplistbox.delete(0, 'end')
+		for line in ships:
+			self.Shiplistbox.insert(END, line[0])
 	def __init__(self,connD):
 		def getships(evt):
 			w = evt.widget
@@ -1312,15 +1330,7 @@ class StructWindow:
 			self.Shiplistbox.delete(0, 'end')
 			for widget in self.Workframe.winfo_children():
 				widget.destroy()
-
-			makeships(shipname)
-		def makeships(shipname):
-			querry = "select name from main where parent =(select id from main where name = '" + str(
-				shipname) + "' limit 1) order by name"
-			ships = q_run(connD, querry)
-			self.Shiplistbox.delete(0, 'end')
-			for line in ships:
-				self.Shiplistbox.insert(END, line[0])
+			self.makeships(shipname)
 		def getaps(evt):
 			w = evt.widget
 			index = int(w.curselection()[0])
@@ -1358,22 +1368,16 @@ class StructWindow:
 		self.Ownerlistbox = Listbox(self.stWindow, exportselection=False)
 		self.Ownerlistbox.config(width=0)
 		self.Ownerlistbox.bind('<Double-Button>', getships)
+		self.Ownerlistbox.bind('<Button-3>', self.RightClick_Owners(self.Ownerlistbox,self).popup)
 		self.Shiplistbox = Listbox(self.stWindow, exportselection=False)
 		self.Shiplistbox.config(width=0)
 		self.shipid = ''
 		self.Shiplistbox.bind('<Double-Button>', getaps)
-
-		self.rclick = RightClick(self,tk)
-		self.Shiplistbox.bind('<Button-3>', self.rclick.popup)
-
 		self.Applistbox = Listbox(self.stWindow, exportselection=False)
 		self.Applistbox.config(width=0)
 		self.Applistbox.bind('<Double-Button>',makeframe)
 		self.Workframe = Frame(self.stWindow, borderwidth = 1)
-		querry = "select name,id from main where parent = 1 order by name"
-		resultrr = q_run(connD, querry)
-		for line in resultrr:
-			self.Ownerlistbox.insert(END, line[0])
+		self.putowners(self.Ownerlistbox)
 		self.Ownerlistbox.pack(side=LEFT, fill=BOTH)
 		self.Shiplistbox.pack(side=LEFT, fill=BOTH)
 		self.Applistbox.pack(side=LEFT, fill=BOTH)
