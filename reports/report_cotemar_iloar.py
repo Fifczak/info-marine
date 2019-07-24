@@ -237,8 +237,12 @@ def createchart ( host , username , password , id , rn , type ):
 	fig = plt.figure ( figsize=(15 , 6) , dpi=80 )
 	plt.cla ()
 	plt.plot ( Y , x , linewidth=0.3 )
+	if type == 'Vel':
+		plt.ylabel('Velocity[mm/s]')
+	elif type == 'Env':
+		plt.ylabel('Acceleration[m/s2]')
 	plt.xlabel ( 'Frequency [Hz]' )
-	plt.ylabel ( 'Velocity[mm/s]' )
+
 	axes = plt.gca ()
 
 	maxval = np.amax ( x )
