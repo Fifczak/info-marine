@@ -874,7 +874,7 @@ def makereport ( username ,password ,host ,rn_ ,id_ ):  # AUTORUN!
     l32.paragraph_format.left_indent = Inches ( 0.25 )
     document.add_paragraph ()
     t14 = document.add_paragraph (
-        'Next measurements should be done within three months period or earlier if necessary.' )
+        'Next measurements should be done within one month period or earlier if necessary.' )
     t14.style = document.styles [ 'textt1' ]
     t14.alignment = WD_ALIGN_PARAGRAPH.LEFT
     document.add_paragraph ()

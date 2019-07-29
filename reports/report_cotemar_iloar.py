@@ -237,12 +237,14 @@ def createchart ( host , username , password , id , rn , type ):
 	fig = plt.figure ( figsize=(15 , 6) , dpi=80 )
 	plt.cla ()
 	plt.plot ( Y , x , linewidth=0.3 )
-	if type == 'Vel':
-		plt.ylabel('Velocity[mm/s]')
-	elif type == 'Env':
-		plt.ylabel('Acceleration[m/s2]')
 	plt.xlabel ( 'Frequency [Hz]' )
-
+	if type=='Vel':
+		plt.ylabel('Velocity [mm/s]')
+	elif type=='Env':
+		#plt.ylabel('Envelope')
+		plt.ylabel('Acceleration [m/s2]')
+	plt.xlabel ( 'Frequency [Hz]' )
+	#plt.ylabel ( 'Velocity[mm/s]' )
 	axes = plt.gca ()
 
 	maxval = np.amax ( x )
@@ -1590,7 +1592,7 @@ def makereport ( username , password , host , rn_ , id_ ):  # AUTORUN!
 	l32.paragraph_format.left_indent = Inches ( 0.25 )
 	document.add_paragraph ()
 	t14 = document.add_paragraph (
-		'Next measurements should be done within three months period or earlier if necessary.' )
+		'Next measurements should be done within one month period or earlier if necessary.' )
 	t14.style = document.styles [ 'text' ]
 	t14.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	document.add_paragraph ()
