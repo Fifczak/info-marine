@@ -5,16 +5,20 @@ import tkinter.ttk as ttk
 from tkinter import *
 from tkinter import messagebox
 import csv
+import pandas as pd
+
 from tkinter.filedialog import askopenfilename
 import tkinter as tkk
+from tkinter import Tk
 from tkinter import filedialog
 #from tkinter import filedialog
 from tqdm import tqdm
+import xlrd
 from tkinter import messagebox
 from tkinter import simpledialog
 
-#host = '192.168.10.243'
-host = 'localhost'
+host = '192.168.10.243'
+#host = 'localhost'
 devlist = list()
 def q_run(connD, querry):
 	username = connD[0]
@@ -1307,6 +1311,90 @@ class StructWindow:
 				self.mframe.makeships(ownername)
 		def popup(self, event):
 			self.aMenu.post(event.x_root, event.y_root)
+	class RightClick_Apps:
+		def __init__(self, master, mframe):
+			self.mframe = mframe
+			self.master = master
+			self.aMenu = Menu(master, tearoff=0)
+			self.aMenu.add_command(label='Load struct from file', command=self.loadstruct)
+			self.tree_item = ''
+
+		def loadstructfromfile(self,shipid,connD):
+			Tk().withdraw()
+			file = filedialog.askopenfilename()
+			devicesdataframe = pd.DataFrame(columns=['Nameinroute', 'Name', 'tempid', 'sort'])
+			pointsdataframe = pd.DataFrame(columns=['devid', 'pointname', 'sort'])
+			with open(file, newline='') as csvfile:
+				spamreader = list(csv.reader(csvfile, delimiter='\t'))
+				lc = -1
+				tid = 1
+				for row in spamreader:
+					lc += 1
+					if str(spamreader[lc][0]) == 'eDataIdLocation' and str(spamreader[lc][1]) == 'eTypeMachine':
+						pc = 1
+						if len(str(tid)) == 1:
+							stid = '0{}'.format(tid)
+						else:
+							stid = tid
+						sortct = '01.01.{}'.format(stid)
+						devicesdataframe = devicesdataframe.append(
+							{'Nameinroute': spamreader[lc][2], 'Name': spamreader[lc][2], 'tempid': tid,
+							 'sort': sortct}, ignore_index=True)
+
+						sortc = 1
+						while str(spamreader[lc + pc][1]) != 'eTypeMachine':
+							if (lc + pc) >= len(spamreader) - 1: break
+							if str(spamreader[lc + pc][0]) == 'eDataIdLocation' and str(
+									spamreader[lc + pc][1]) == 'eTypePoint':
+								pointsdataframe = pointsdataframe.append(
+									{'pointname': spamreader[lc + pc][2], 'devid': tid, 'sort': sortc},
+									ignore_index=True)
+								sortc += 1
+							pc += 1
+						tid += 1
+			MsgBox = tk.messagebox.askquestion('Crosstable',
+											   'Do you have crosstable file?(format xls, Column 1 - name in device, Column 2 - correct name)',
+											   icon='warning')
+			if MsgBox == 'yes':
+				Tk().withdraw()
+				ctfile = filedialog.askopenfilename()
+				workbook = xlrd.open_workbook(ctfile)
+				worksheet = workbook.sheet_by_index(0)
+				for row in range(worksheet.nrows):
+					devicesdataframe['Name'] = devicesdataframe['Name'].replace(worksheet.cell(row, 0).value,
+																				worksheet.cell(row, 1).value)
+			else:
+				pass
+			querry = "insert into ds_structure (parent,id,sort) values({},'PLACE','01.00.00');insert into ds_structure (parent,id,sort) values({},'GROUP','01.01.00')".format(
+				shipid, shipid, )
+			q_run(connD, querry)
+			for line in tqdm(devicesdataframe.values):
+				querry = "insert into devices (parent,name) values ({},'{}')".format(shipid, line[1])
+				q_run(connD, querry)
+				querry = "select max(id) from devices"
+				newid = list(q_run(connD, querry))[0][0]
+				querry = "insert into ds_structure (parent,id,sort) values({},'{}','{}'); insert into crosstable (parent,id,nameindevice) values({},'{}','{}')".format(
+					shipid, newid, line[3], shipid, newid, line[0])
+				q_run(connD, querry)
+				pointsedited = pointsdataframe.loc[pointsdataframe.devid == line[2]]
+				pointsedited.loc[:, 'devid'].replace(line[2], newid, inplace=True)
+				for line2 in pointsedited.values:
+					querry = "insert into points(id,point,sort,visible) values ({},'{}',{},'True')".format(line2[0],
+																										   line2[1],
+																										   line2[2])
+					q_run(connD, querry)
+		def loadstruct(self):
+			querry = "select * from ds_structure where parent = {}".format(self.mframe.shipid)
+
+			if (len(list(q_run(self.mframe.connD,querry)))) == 0 :
+				self.loadstructfromfile(self.mframe.shipid,self.mframe.connD)
+			else:
+				messagebox.showinfo("Error", 'Structure for that ship exists')
+
+
+		def popup(self, event):
+			self.aMenu.post(event.x_root, event.y_root)
+
 	def putowners(self,owlbox):
 		owlbox.delete(0, END)
 		querry = "select name,id from main where parent = 1 order by name"
@@ -1381,6 +1469,7 @@ class StructWindow:
 		self.Ownerlistbox.pack(side=LEFT, fill=BOTH)
 		self.Shiplistbox.pack(side=LEFT, fill=BOTH)
 		self.Applistbox.pack(side=LEFT, fill=BOTH)
+		self.Applistbox.bind('<Button-3>', self.RightClick_Apps(self.Applistbox, self).popup)
 		self.Workframe.pack(side=LEFT, fill=BOTH)
 		self.stWindow.mainloop()
 
