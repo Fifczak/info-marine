@@ -8,7 +8,7 @@ import psycopg2
 from report_styles import loadstyles
 from report_headtables import standard_info_table
 from report_frontpages import standard_with_PMS,standard_without_PMS,donnelly_with_PMS,donnelly_without_PMS,siem_PMS_limit, standard_non_PMS_limit
-from report_resulttables import prepare_IM ,drawtable_IM_PMS,drawtable_IM_noPMS,drawtable_IM_chart_PMS,drawtable_IM_chart_noPMS,drawtable_IM_chart_PMS_limit, drawtable_IM_chart_noPMS_limit,trendresults
+from report_resulttables import prepare_IM ,drawtable_IM, trendresults
 from report_standards import legend_IM ,standards
 from time import gmtime, strftime
 from report_measurementequipment import MarVibENG
@@ -132,7 +132,25 @@ def makereport ( connD ,rn_ ):
 		reptypedict.update({"summary": 1})
 		reptypedict.update({"signatures": 1})
 
+	if int(reporttype) == 7:
+		reptypedict.update( {"fileformat": 1})
+		reptypedict.update({"headtabletype": 1})
+		reptypedict.update({"standards": 1})
+		reptypedict.update({"frontpagetype": 1})
+		reptypedict.update({"resulttable": 7})
+		reptypedict.update({"measurementequipment": 1})
+		reptypedict.update({"summary": 1})
+		reptypedict.update({"signatures": 1})
 
+	if int(reporttype) == 8:
+		reptypedict.update( {"fileformat": 1})
+		reptypedict.update({"headtabletype": 1})
+		reptypedict.update({"standards": 1})
+		reptypedict.update({"frontpagetype": 2})
+		reptypedict.update({"resulttable": 8})
+		reptypedict.update({"measurementequipment": 1})
+		reptypedict.update({"summary": 1})
+		reptypedict.update({"signatures": 1})
 
 	#############################################################################################
 	############################ I. WYBIERANIE FORMATKI POD RAPORT ##############################
@@ -194,26 +212,11 @@ def makereport ( connD ,rn_ ):
 	######################################## V. WYNIKI ##########################################
 	#############################################################################################
 
-	if reptypedict["resulttable"] == 1:
-		measlist = prepare_IM(connD, rn_)
-		drawtable_IM_PMS ( document ,measlist ,connD ,rn_ )
-	if reptypedict["resulttable"] == 2:
-		measlist = prepare_IM(connD, rn_)
-		drawtable_IM_noPMS ( document ,measlist ,connD ,rn_ )
-	if reptypedict["resulttable"] == 3:
-		measlist = prepare_IM(connD, rn_)
-		drawtable_IM_chart_PMS ( document ,measlist ,connD ,rn_ )
-	if reptypedict["resulttable"] == 4:
-		measlist = prepare_IM(connD, rn_)
-		drawtable_IM_chart_noPMS(document, measlist, connD, rn_)
 
-	if reptypedict["resulttable"] == 5:
 		measlist = prepare_IM(connD, rn_)
-		drawtable_IM_chart_PMS_limit ( document ,measlist ,connD ,rn_ )
+		drawtable_IM ( document ,measlist ,connD ,rn_ ,reptypedict["resulttable"])
 
-	if reptypedict["resulttable"] == 6:
-		measlist = prepare_IM(connD, rn_)
-		drawtable_IM_chart_noPMS_limit(document, measlist, connD, rn_)
+
 
 	#############################################################################################
 	################################ VI. Urządzenie pomiarowe ###################################
@@ -266,27 +269,3 @@ def makereport ( connD ,rn_ ):
 					+ str(rn_) + '_' + str(getini(connD)) + '_' + str(strftime("%Y-%m-%d", gmtime())) + '.docx')
 
 #
-# #
-# username = 'testuser'
-# password = 'info'
-# host = '192.168.10.243'
-# #type=1
-# #rn_ = '2079U3-2019'
-# #type=2
-# rn_='1978U3-2019'
-# #type=3
-# #rn_='2081U-2019'
-# #type=4
-# #rn_='2099U-2019'
-# #type=5
-# #rn_='2133-2019'
-# #type=6
-# #rn_ = '2079U3-2019'
-# # # # #rn_ ='1968-2019'
-# # # #
-# # #host = 'localhost'
-# # rn_ = '2035U4-2019'
-# # # # #
-# connD = [ username ,password ,host ]
-# # #
-# makereport(connD,rn_)

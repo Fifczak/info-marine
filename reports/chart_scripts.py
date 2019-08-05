@@ -45,12 +45,14 @@ class trendchart:
                 if VSG == False:
                     querry ="select ml.raport_number,max(ml.value),max(ml.date),dev.name from measurements_low as ml"\
                             " left join devices as dev on ml.id = dev.id" \
-                            " where ml.id =" + str(devid) + " and ml.type = 'RMS' and ml.value != -1 group by ml.raport_number,dev.name order by ml.raport_number desc"
+                            " left join points pts on ml.id = pts.id and ml.point = pts.point"\
+                            " where ml.id =" + str(devid) + " and ml.type = 'RMS' and ml.value != -1 and ml.date > now() - interval '2 years' and pts.visible = true group by ml.raport_number,dev.name order by max(ml.date) desc"
                 else:
                     querry = "select ml.raport_number,max(ml.value),max(ml.date),dev.name from measurements_low as ml" \
                              " left join devices as dev on ml.id = dev.id" \
+                             " left join points pts on ml.id = pts.id and ml.point = pts.point" \
                              " where ml.id =" + str(
-                        devid) + " and ml.unit = 'VSG' and ml.value != -1 group by ml.raport_number,dev.name order by ml.raport_number desc"
+                        devid) + " and ml.unit = 'VSG' and ml.value != -1 and  ml.date > now() - interval '2 years' and pts.visible = true group by ml.raport_number,dev.name order by max(ml.date) desc"
 
                 return q_run(connD, querry)
             dates = list()
@@ -72,14 +74,25 @@ class trendchart:
             n = names
             ans = [x, y, z,n]
             return ans
-        def draw(x,y,a,name):
+        def draw(x,y,a,name,ylim):
             a.plot(x, y,marker='o', label=str(name[0]))
             a.set_frame_on(False)
             a.yaxis.grid( linewidth='0.5')
             a.legend(loc='lower center',bbox_to_anchor=(0.5,-0.35), fontsize = 'x-large', ncol=3,frameon=False)#
 
+            a.xaxis.set_major_locator(matplotlib.dates.MonthLocator())
+            a.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%Y-%m"))
+
+
+
+            if  max(y) > ylim:
+
+                ylim = max(y)*1.2
+
+
+            a.set_ylim(0,ylim)
             f.autofmt_xdate()
-            return f
+            return f,ylim
         def details(VALS,id_,name):
             VALS = list(map(list, zip(*VALS)))
             LL = (len(VALS))
@@ -111,9 +124,10 @@ class trendchart:
         toolbar.update()
         canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         VALS =list()
+        ylim = 0
         for i in ids:
             VALS = trendresults(i)
-            self.f = draw(VALS[0],VALS[1],a,VALS[3])
+            self.f,ylim = draw(VALS[0],VALS[1],a,VALS[3],ylim)
             querry = "select name from devices where id = " + str(i)
             name = list(q_run(connD,querry))[0][0]
             details(VALS,i,name)
@@ -182,16 +196,16 @@ class datasheet:
             querry = """select ml.raport_number,ml.point, ml.value,ml.date,dev.name, ml._id_ from measurements_low as ml
                         left join devices as dev on ml.id = dev.id
                         left join points as pt on ml.id = pt.id and ml.point = pt.point
-                        where ml.id = """ +str(id_) +   """ and ml.type = 'RMS' and ml.value != -1 and pt.visible = True
+                        where ml.id = """ +str(id_) +   """ and ml.type = 'RMS' and ml.value != -1 and pt.visible = True and  ml.date > now() - interval '2 years'
                         group by ml.raport_number,ml.point, dev.name,ml.value,ml.date ,pt.sort , ml._id_
-                        order by ml.raport_number ,pt.sort  """
+                        order by ml.date ,pt.sort  """
         else:
             querry = """select ml.raport_number,ml.point,max(ml.value),ml.date,dev.name, ml._id_,ml.type from measurements_low as ml
                         left join devices as dev on ml.id = dev.id
                         left join points as pt on ml.id = pt.id and ml.point = pt.point
-                        where ml.id = {} and ml.unit = 'VSG' and ml.value != -1 and pt.visible = True
+                        where ml.id = {} and ml.unit = 'VSG' and ml.value != -1 and pt.visible = True and  ml.date > now() - interval '2 years'
                         group by ml.raport_number,ml.point, dev.name,ml.date ,pt.sort , ml._id_,ml.type
-                        order by ml.raport_number ,pt.sort  """.format(str(id_))
+                        order by ml.date ,pt.sort  """.format(str(id_))
         dsd = q_run(connD,querry)
         RapList = list()
         PointList = list()
@@ -217,4 +231,4 @@ class datasheet:
         okbutton = tk.Button(self.DSW,text = 'Reload Chart', command = lambda:self.refresh(ids,parentclass,connD,GUI)).pack()
         self.DSW.mainloop()
 
-#trendchart(['5008','5009'], connD)
+#trendchart(['19337','19338'], ['testuser','info','192.168.10.243'],True,False)

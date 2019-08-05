@@ -38,7 +38,7 @@ def MarVibENG(document,connD,rn):
 	r.bold=True
 
 
-	shiptable = document.add_table(rows=7, cols=2)  # trzeba usunąć enter przed
+	shiptable = document.add_table(rows=6, cols=2)  # trzeba usunąć enter przed
 	shiptable.style = 'Table Grid'
 	shiptable.cell(0, 0).merge(shiptable.cell(0, 1))
 	shiptable.alignment=WD_TABLE_ALIGNMENT.CENTER
@@ -64,13 +64,9 @@ def MarVibENG(document,connD,rn):
 	##SHIPTABLE [4,0]
 	ht = shiptable.cell(4, 0).paragraphs[0]
 	r0 = ht.add_run()
-	r0.text = 'Calibration to:'
+	r0.text = 'Measuring range:'
 	##SHIPTABLE [5,0]
 	ht = shiptable.cell(5, 0).paragraphs[0]
-	r0 = ht.add_run()
-	r0.text = 'Measuring range:'
-	##SHIPTABLE [6,0]
-	ht = shiptable.cell(6, 0).paragraphs[0]
 	r0 = ht.add_run()
 	r0.text = 'Indication error:'
 
@@ -89,17 +85,17 @@ def MarVibENG(document,connD,rn):
 	ht = shiptable.cell(3, 1).paragraphs[0]
 	r0 = ht.add_run()
 	r0.text = str(eqdata[1])
+	# ##SHIPTABLE [4,1]
+	# ht = shiptable.cell(4, 1).paragraphs[0]
+	# r0 = ht.add_run()
+	# r0.text = str(eqdata[2])
+
 	##SHIPTABLE [4,1]
 	ht = shiptable.cell(4, 1).paragraphs[0]
 	r0 = ht.add_run()
-	r0.text = str(eqdata[2])
-
+	r0.text = str('2Hz-30kHz / RPM = 60-20000')
 	##SHIPTABLE [5,1]
 	ht = shiptable.cell(5, 1).paragraphs[0]
-	r0 = ht.add_run()
-	r0.text = str('2Hz-30kHz / RPM = 60-20000')
-	##SHIPTABLE [6,1]
-	ht = shiptable.cell(6, 1).paragraphs[0]
 	r0 = ht.add_run()
 	r0.text = str('±0,5%')
 

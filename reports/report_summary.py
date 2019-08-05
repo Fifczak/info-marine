@@ -71,8 +71,7 @@ def IMVibEng(document,connD,rn):
 	r0 = ht.add_run()
 	r0.text = 'According to standard ISO 10816 : - procedure No. 2 Measurement report'
 
-
-
+	document.add_paragraph()
 	summary = document.add_paragraph()
 	summary.add_run('Summary:').bold = True
 	summary.runs[0].add_break()
