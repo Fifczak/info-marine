@@ -109,6 +109,8 @@ class device:
 		self.meas_condition = ''
 		self.interval_type = ''
 		self.interval_length = ''
+		self.ignore_reminder = ''
+		self.ignore_reminder_to = ''
 		self.points = list()
 class ctdev:
 	def __init__(self):
@@ -698,7 +700,7 @@ class StructWindow:
 				if structuresort == True: structuresort = False
 				else: structuresort = True
 			if structuresort == True:
-				querry = """select dev.id, dev.name,mm.name,dev.type,kw,rpm,pms,info,st.standard,drivenby, meas_condition,cm,(public.im_extract(dev.cbm_interval))[1] as interval_type,(public.im_extract(dev.cbm_interval))[2] as interval_len
+				querry = """select dev.id, dev.name,mm.name,dev.type,kw,rpm,pms,info,st.standard,drivenby, meas_condition,cm,(public.im_extract(dev.cbm_interval))[1] as interval_type,(public.im_extract(dev.cbm_interval))[2] as interval_len,dev.ignore_reminder, dev.ignore_reminder_to
 							from devices dev
 							left join ds_structure dss on cast(dev.id as text) = dss.id
 							left join main_models mm on dev.model_fkey = mm.id
@@ -708,7 +710,7 @@ class StructWindow:
 				ans = q_run(connD, querry)
 				self.structuresort = False
 			else:
-				querry = """select dev.id, dev.name,mm.name,dev.type,kw,rpm,pms,info,st.standard,drivenby, meas_condition,cm,(public.im_extract(dev.cbm_interval))[1] as interval_type,(public.im_extract(dev.cbm_interval))[2] as interval_len
+				querry = """select dev.id, dev.name,mm.name,dev.type,kw,rpm,pms,info,st.standard,drivenby, meas_condition,cm,(public.im_extract(dev.cbm_interval))[1] as interval_type,(public.im_extract(dev.cbm_interval))[2] as interval_len,dev.ignore_reminder, dev.ignore_reminder_to
 							from devices dev
 							left join ds_structure dss on cast(dev.id as text) = dss.id
 							left join main_models mm on dev.model_fkey = mm.id
@@ -759,6 +761,10 @@ class StructWindow:
 				elif str(line[12]) == '4': dev.interval_type = "Year"
 				dev.interval_length = line[13]
 
+
+				dev.ignore_reminder = str(line[14])
+				dev.ignore_reminder_to = str(line[15])
+
 				devlist.append(dev)
 
 
@@ -780,16 +786,20 @@ class StructWindow:
 				if str(self.lab_drivenby_e.get()) == 'None':drivenby = '0'
 				else: drivenby = self.lab_drivenby_e.get()
 
+				ignorerminderto = self.ig_rem_to_e.get()
+				if str(ignorerminderto) == 'None': ignorerminderto = 'Null'
+				else: ignorerminderto = "'{}'".format(ignorerminderto)
+
 				querry = """
 				UPDATE devices 
 				SET name = '{}', model = '{}', model_fkey = (select id from main_models where name = '{}' limit 1), type ='{}',
 				kw = '{}', rpm = '{}', PMS = '{}', Info = '{}', norm = '{}', standard_fkey = (select id from standards where standard ='{}' limit 1),
-				drivenby = '{}', meas_condition = '{}', cm = '{}', cbm_interval = '{}' where id = {}
+				drivenby = '{}', meas_condition = '{}', cm = '{}', cbm_interval = '{}', ignore_reminder = {},ignore_reminder_to = {} where id = {}
 				""".format(self.lab_name_e.get(), model, model, self.lab_type_e.get(), kw,
 					  self.lab_rpm_e.get(), self.lab_pms_e.get(), \
 					  self.lab_info_e.get("1.0",END), self.lab_norm_e.get(), self.lab_norm_e.get(), drivenby,
 					  self.lab_meas_condition_e.get(), \
-					  self.lab_cm_e.get(), interval,self.id)
+					  self.lab_cm_e.get(), interval,self.ig_rem_e.get(),ignorerminderto,self.id)
 				q_run(connD,querry)
 
 				self.reloadquerry(self.structuresort, shipid, connD,False)
@@ -873,17 +883,32 @@ class StructWindow:
 						self.lab_interval_type_e.current(sidx)
 
 
-						#self.lab_interval_type_e.insert(0, str(line.interval_type))
-
-
-
 
 						self.lab_interval_length_l = tk.Label(self.detailframe, text="Interval_length").grid(row=14, column=1)
 						self.lab_interval_length_e = tk.Entry(self.detailframe, text="", width = 50)
 						self.lab_interval_length_e.grid(row=14, column=2)
 						self.lab_interval_length_e.insert(0, str(line.interval_length))
+
+
+
+
+						self.ig_rem = tk.Label(self.detailframe, text="Ignore reminder always").grid(row=15, column=1)
+						self.ig_rem_e = ttk.Combobox(self.detailframe, text="", values=["True","False"], width = 45, state="readonly")
+						self.ig_rem_e.grid(row=15, column=2)
+						if str(line.ignore_reminder).strip() == 'None': line.ignore_reminder = 'False'
+						sidx = ["True", "False"].index(str(line.ignore_reminder))
+						self.ig_rem_e.current(sidx)
+
+
+						self.ig_rem_to = tk.Label(self.detailframe, text="Ignore reminder to").grid(row=16, column=1)
+						self.ig_rem_to_e = tk.Entry(self.detailframe, text="", width = 50)
+						self.ig_rem_to_e.grid(row=16, column=2)
+						self.ig_rem_to_e.insert(0, str(line.ignore_reminder_to))
+
 						self.updatebut = tk.Button(self.detailframe,text = "Update device data",command = updatedevice)
-						self.updatebut.grid(row=15, column=2)
+						self.updatebut.grid(row=17, column=2)
+
+
 			self.connD = connD
 			self.shipid = shipid
 			self.structuresort = True
@@ -966,9 +991,6 @@ class StructWindow:
 
 					querry = "update points set point = '{}',visible = '{}' where sort = {} and id = {}".format(point,self.CombVisibleList[counter].showvalue, counter+1,self.devid)
 					q_run(self.connD, querry)
-
-
-
 
 
 
