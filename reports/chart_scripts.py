@@ -75,6 +75,7 @@ class trendchart:
             ans = [x, y, z,n]
             return ans
         def draw(x,y,a,name,ylim):
+
             a.plot(x, y,marker='o', label=str(name[0]))
             a.set_frame_on(False)
             a.yaxis.grid( linewidth='0.5')
@@ -125,6 +126,7 @@ class trendchart:
         canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         VALS =list()
         ylim = 0
+
         for i in ids:
             VALS = trendresults(i)
             self.f,ylim = draw(VALS[0],VALS[1],a,VALS[3],ylim)

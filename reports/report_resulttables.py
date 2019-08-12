@@ -126,7 +126,7 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 					from standards"""
 		limits = q_run( connD ,querry )
 		querry = """select 
-					 ml.id, ml.raport_number, dev.name,  max(ml.value) as RMS, ml2.max as Envelope, dev.norm ,max(ml.date), dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max,bid.bourbon
+					 ml.id, ml.raport_number, dev.name,  max(ml.value) as RMS, ml2.max as Envelope, dev.norm ,max(ml.date), dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max,bid.bourbon, pts.visible
 					from measurements_low as ml
 					left join (select 
 								 ml.id, ml.raport_number,  max(ml.value)
@@ -143,8 +143,9 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 					 left join(select cast (id as integer), sort from ds_structure where id ~E'^\\\d+$' ) as dss on ml.id = dss.id
 					 left join standards sta on dev.norm = sta.standard
 					 left join bourbonid bid on ml.id = bid.devid
-					 where ml.date > now() - interval '2 years'  and ml.value <> -1 and ml.type = 'RMS' and ml.parent = {} and sort is distinct from null
-					 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max,bid.bourbon
+					 left join points pts on ml.id = pts.id and ml.point = pts.point
+					 where ml.date > now() - interval '2 years'  and ml.value <> -1 and ml.type = 'RMS' and ml.parent = {} and dss.sort is distinct from null and pts.visible = True
+					 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max,bid.bourbon, pts.visible
 					  order by raport_number DESC""".format(str(parent),str(parent))
 		reportresults = q_run( connD ,querry )
 
@@ -175,7 +176,7 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 						y.maxval = '-'
 						y.maxenv = '-'
 						querry = """select 
-					ml.id, ml.raport_number, dev.name,  max(ml.value) as RMS, ml2.max as Envelope, dev.norm ,max(ml.date), dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max,bid.bourbon
+					ml.id, ml.raport_number, dev.name,  max(ml.value) as RMS, ml2.max as Envelope, dev.norm ,max(ml.date), dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max,bid.bourbon, pts.visible
 					from measurements_low as ml
 					left join (select 
 								 ml.id, ml.raport_number,  max(ml.value)
@@ -192,8 +193,9 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 					 left join(select cast (id as integer), sort from ds_structure where id ~E'^\\\d+$' ) as dss on ml.id = dss.id
 					 left join standards sta on dev.norm = sta.standard
 					 left join bourbonid bid on ml.id = bid.devid
-					 where ml.date > now() - interval '2 years'  and ml.value <> -1 and ml.type = 'RMS' and dev.id = {} and sort is distinct from null
-				 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,ml.date,dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max,bid.bourbon
+					 left join points pts on ml.id = pts.id and ml.point = pts.point
+					 where ml.date > now() - interval '2 years'  and ml.value <> -1 and ml.type = 'RMS' and dev.id = {} and dss.sort is distinct from null and pts.visible = True
+				 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,ml.date,dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max,bid.bourbon, pts.visible
 				  order by raport_number DESC""".format(drivid,drivid)
 
 						drivline = list(q_run(connD, querry))[0]
@@ -201,6 +203,7 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 						y.name = drivline[2]
 						y.limit = '-'
 						y.drivenby = x.id
+						y.sort0 = drivline[8]
 						y.sort = drivline[8][:5]
 						y.sort2 = drivline[8][:2]
 						y.pms = drivline[9]
@@ -219,6 +222,7 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 				x.limit = countLimit( x.standard ,x.maxval )
 				x.drivenby = line[ 7 ]
 
+				x.sort0 = line[8]
 				x.sort = line[ 8 ][ :5 ]
 				x.sort2 = line[ 8 ][ :2 ]
 				x.pms = line [9]
@@ -237,7 +241,7 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 				y.maxval = '-'
 				y.maxenv = '-'
 				querry = """select 
-					ml.id, ml.raport_number, dev.name,  max(ml.value) as RMS, ml2.max as Envelope, dev.norm ,max(ml.date), dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max,bid.bourbon
+					ml.id, ml.raport_number, dev.name,  max(ml.value) as RMS, ml2.max as Envelope, dev.norm ,max(ml.date), dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max,bid.bourbon, pts.visible
 					from measurements_low as ml
 					left join (select 
 								 ml.id, ml.raport_number,  max(ml.value)
@@ -254,16 +258,17 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 					 left join(select cast (id as integer), sort from ds_structure where id ~E'^\\\d+$' ) as dss on ml.id = dss.id
 					 left join standards sta on dev.norm = sta.standard
 					 left join bourbonid bid on ml.id = bid.devid
-					 where ml.date > now() - interval '2 years'  and ml.value <> -1 and ml.type = 'RMS' and dev.id = {} and sort is distinct from null
-				 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,ml.date,dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max,bid.bourbon
+					 left join points pts on ml.id = pts.id and ml.point = pts.point
+					 where ml.date > now() - interval '2 years'  and ml.value <> -1 and ml.type = 'RMS' and dev.id = {} and dss.sort is distinct from null and pts.visible = True
+				 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,ml.date,dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max,bid.bourbon, pts.visible
 				  order by raport_number DESC""".format(y.id, y.id)
-				print(querry)
+
 				drivline = list(q_run(connD, querry))[0]
 
 				y.name = drivline[2]
 				y.limit = '-'
 				y.drivenby = x.id
-				y.sort = drivline[0]
+				y.sort0 = drivline[8]
 				y.sort = drivline[8][:5]
 				y.sort2 = drivline[8][:2]
 				y.pms = drivline[9]
@@ -271,6 +276,7 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 				measlist.append(y)
 
 	loadData( connD )
+
 	return measlist
 
 
@@ -334,59 +340,18 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 				activeSortPList.append(str(meas.sort2))
 				drivenByList.append(meas.drivenby)
 				idlist.append(meas.id)
+
 	counter = 0
 	counterCharts = 0
 	xcord = 0
 	i = -1
 
 
+
 	for measStrip in sortlistQ:
 		i += 1
 
-	# 	if (measStrip[1]).isdigit() == False:  ######## NAGŁÓWKI
-	#
-	# 			if measStrip[0][-5:] == '00.00' and sortlistQ[i + 1][0][-5:] != '00.00' and \
-	# 					sortlistQ[i + 1][0][-3:] == '.00':
-	#
-	# 				if str(measStrip[0][:2]) in activeSortPList:
-	# 					xcord += 1
-	# 					continue
-	# 			if measStrip[0][-5:] != '00.00' and measStrip[0][-3:] == '.00':
-	# 				if str(measStrip[0][:5]) in activeSortList:
-	# 					xcord += 1
-	# 					continue
-	#
-	# 	else:
-	# 		p = -1
-	# 		if reporttype != 1 and reporttype != 2 and reporttype != 7 and reporttype != 8:
-	# 			for xx in trueMeasList:
-	# 				p += 1
-	#
-	# 				if str(measStrip[1]) == str(xx.id):
-	# 					xcord += 2
-	#
-	# 					if str(xx.id) in drivenByList:
-	# 						xcord += 1
-	#
-	# 					continue
-	# 		else:
-	# 			for xx in trueMeasList:  # nochart
-	# 				p += 1
-	# 				if str(measStrip[1]) == str(xx.id):
-	# 					try:
-	# 						if str(drivenByList[p + 1]) == str(xx.id):
-	# 							xcord += 2
-	# 						else:
-	# 							xcord += 1
-	# 							break
-	# 					except:
-	#
-	# 						break
-	#
-	#
-	#
-	#
-	# rowscount = xcord
+
 
 
 	if reporttype == 1:
@@ -598,6 +563,7 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 				#pass
 		else:  ######## POMIARY
 			p = -1
+
 			for xx in trueMeasList:
 
 				p += 1
