@@ -190,7 +190,8 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                             'FFT'), measdomain.append('Vel'), measdomain.append('[mm/s]')
                     elif measno == '1018':
                         measdomain.append('FFT'), measdomain.append('Env'), measdomain.append('[m/s2]')
-
+                    else:
+                        measdomain.append('UNKNOWN'), measdomain.append('UNKNOWN'), measdomain.append('UNKNOWN')
 
                 if str(parent) == '103':
                     if measno == '1004' or measno == '1007' or measno == '1025' or measno == '1059':
@@ -775,7 +776,7 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                         if str(i[0]) == str(j.id):
                             if str(i[1]) < str(j.date):
 
-                                querry = "UPDATE reminder set status = 2 where  id = " + str(i[0]) + " and raport_number = '" + str(i[2]) + "'"
+                                querry = "UPDATE reminder set status = 2 where  id = " + str(i[0])
                                 q_run(connD,querry)
                                 break
 
@@ -975,4 +976,4 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 # 'Vibscanner'
 # 'Marvib'
 # 'ezThomas'
-#read_measurement_file('Vibscanner','testuser','info','192.168.10.243','2119-2019', '47')
+#read_measurement_file('Marvib','testuser','info','192.168.10.243','FIFCZAKTEST', '71')

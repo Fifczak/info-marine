@@ -155,13 +155,12 @@ def remindershow(connD):
 						from measurements_low as ml
 						left join reminder as rem on ml.id = rem.id and ml.raport_number = rem.raport_number 
 						left join harmonogram as har on ml.raport_number = har.report_number  
-						where ml.parent = """ + str(self.parent) + """ 
+						where ml.parent = """ + str(self.parent) + """  
 						group by ml.id,ml.raport_number,rem.request_date,har.send_raport_koniec, rem.remcom, rem.status order by ml.id,ml.raport_number desc
 
 								"""
 
 				self.resultr = q_run(connD, querry)
-
 			def dontsend(ID):
 				def builddevlistlocal():
 					self.devlistbox.delete(0, 'end')
@@ -215,10 +214,6 @@ def remindershow(connD):
 				preQuerrys()
 				ReminderQuerrys()
 				ColorShips(self.Shiplistbox, self.shnm )
-
-
-
-
 			def getships(evt):
 				w = evt.widget
 				index = int(w.curselection()[0])
@@ -366,8 +361,6 @@ where rem.status is distinct from 2 and rem.parent = {}
 				for line in self.results:
 					for line2 in self.resultr:
 						fullrn = line2[1][:4] + '-' + line2[1][4:]
-
-
 						if str(line[0]) == str(line2[0]): ##najnowszy na ktory trafi, potem break
 							x = device()
 							x.name = str(line[1])
@@ -440,7 +433,7 @@ where rem.status is distinct from 2 and rem.parent = {}
 				teraz = datetime.datetime.now().date()
 				delay = datetime.timedelta(days=14)
 				request = teraz + delay
-				querry = "select aliasto,aliascc from sendto where shipid = 69"
+				querry = "select aliasto,aliascc from sendto where shipid = {}".format(self.parent)
 				try:
 					mailtoq = q_run(connD, querry)[0]
 				except:
@@ -492,8 +485,9 @@ The following equipment was recommended to be controlled in our reports:
 					for line in devlist:
 
 						if str(line.status) == 'REM':
-
-							devstr +=chr(10) + "-{}(Needs to be measured up to : {})".format(line.name,line.requestdate)
+							if str(line.remcom) == 'None': line.remcom = ''
+							else: line.remcom = str(line.remcom)+ ', '
+							devstr +=chr(10) + "-{}({}Needs to be measured up to : {})".format(line.name,line.remcom,line.requestdate)
 							## UZUPEŁNIANIE REMCOM DO PRZEMYSLENIA
 							# if str(line.remcom) != 'None':
 							#     devstr += "(" + str(line.remcom) + ")"
@@ -595,8 +589,11 @@ The following equipment was recommended to be controlled in our reports:
 							self.lastfulldatemax= lastfulldate()[0]
 							nextfull = self.lastfulldatemax + datetime.timedelta(days=90)
 							#print('yellow:(request)', line2[4] ,'<(dzis +2 tyg)', request)
+							print(line2[1],line2[4],request)
 							if line2[4] < request: #jeśli jest request_date mniejsza niz dzis + 2 tygodnie
 								object.itemconfig(END, bg='yellow')
+							else:
+								object.itemconfig(END, bg='grey')
 							if str(line2[3]) == 'None': lsdate  = datetime.datetime.strptime('1900-01-01', '%Y-%m-%d').date()
 							else: lsdate  = (line2[3])
 							#print("{} nextfull: {} request: {}".format(line[0],nextfull,request))

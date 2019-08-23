@@ -29,10 +29,10 @@ class Scrollable(ttk.Frame):
 	def __init__(self, frame, width=16):
 
 		scrollbar = tk.Scrollbar(frame, width=width)
-		scrollbar.pack(side=tk.RIGHT, fill=tk.Y, expand=False)
+		scrollbar.pack(side=tk.RIGHT, fill=BOTH, expand=False)
 
-		self.canvas = tk.Canvas(frame, yscrollcommand=scrollbar.set)
-		self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+		self.canvas = tk.Canvas(frame, yscrollcommand=scrollbar.set, height = 700)
+		self.canvas.pack(side=tk.LEFT, fill=BOTH, expand=True)
 
 		scrollbar.config(command=self.canvas.yview)
 
@@ -391,23 +391,26 @@ def grabremarks():
 
 	a = filedialog.askopenfilename()
 	document = docx.Document(docx=a)
-	t=-1
+	t = -1
+	r = -1
+	c = -1
 	tableflag = False
 	rt = list()
 	namecol = list()
 	remcol = list()
+	# print ('test')
 	for table in document.tables:
-		t+=1
+		t += 1
 		r = -1
 		for row in table.rows:
-			r+=1
+			rem = remark()
+			r += 1
 			c = -1
-			if tableflag == True:
-				rem = remark()
+			# if tableflag == True:
 			for cell in row.cells:
-				c+=1
+				c += 1
 				for paragraph in cell.paragraphs:
-					coord = [t,r,c]
+					coord = [t, r, c]
 					if str(paragraph.text) == 'Machine name':
 						tableflag = True
 						namecol.append(c)
@@ -417,24 +420,24 @@ def grabremarks():
 					if tableflag == True:
 						if t not in rt:
 							rt.append(t)
-					if str(paragraph.text) ==  'Technical data':
+					if str(paragraph.text) == 'Technical data':
 						tableflag = False
-					try:
+					if tableflag == True:
 						if t in rt:
 							if c in namecol:
-								if str(paragraph.text) != '':
+								if str(paragraph.text).strip() != '':
 									rem.name = str(paragraph.text)
 							if c in remcol:
-								if str(paragraph.text) != '':
+								if str(paragraph.text).strip() != '' and str(paragraph.text).strip() not in str(
+										rem.remark).strip():
 									rem.remark += str(paragraph.text) + chr(10)
-					except:
-						pass
-			try:
-				if (str(rem.name)).strip() != '' and (str(rem.remark)).strip() != '':
-					if (str(rem.name)).strip() != (str(rem.remark)).strip():
-						remlistIN.append(rem)
-			except:
-				pass
+			if (str(rem.name)).strip() != '' and (str(rem.remark)).strip() != '':
+				if (str(rem.name)).strip() != (str(rem.remark)).strip():
+					remlistIN.append(rem)
+					print('N:', rem.name, 'R:', rem.remark)
+
+
+
 	for line2 in remlist:
 		for line in remlistIN:
 
@@ -555,7 +558,7 @@ def remarks(connD):
 		w = evt.widget
 		index = int(w.curselection()[0])
 		report = w.get(index)
-		putdevices(report)
+		putdevices(report,None)
 
 
 	class frame_reminder:
@@ -564,17 +567,20 @@ def remarks(connD):
 			self.id = dev[1]
 			self.name = dev[0]
 			self.parent =dev[2]
-			self.nameLabel = tk.Label(measCframe,text= self.name, width=40)
+			self.nameLabel = tk.Text(measCframe,height =1, width=40, borderwidth = 0)
+			self.nameLabel.insert(1.0,self.name)
 			self.nameLabel.pack(side = LEFT)
+			self.nameLabel.configure(state = 'disabled')
 
 			self.remarkframe = tk.Frame(measCframe)
 
 
-			self.textfield = tk.Text(self.remarkframe , width=55, height=7)
+			self.textfield = tk.Text(self.remarkframe , wrap=WORD,width=55, height=5)
+			self.remindertextfield = tk.Text(self.remarkframe,wrap=WORD, width=55, height=2)
 			self.dateLabel = tk.Text(self.remarkframe , width=15, height=1)
 
 			self.feedbackframe = tk.Frame(measCframe)
-			self.textfield2 = tk.Text(self.feedbackframe, width=55, height=7)
+			self.textfield2 = tk.Text(self.feedbackframe,wrap=WORD, width=55, height=7)
 			self.FDBdateLabel = tk.Text(self.feedbackframe, width=15, height=1)
 
 			try:
@@ -585,7 +591,7 @@ def remarks(connD):
 				request_date__ = remarktext[2]
 				feedback__ = remarktext[3]
 				fdbdocdate__ = remarktext[4]
-
+				remcom__ = remarktext[5]
 
 				if str(remark__) == 'None': remark__ = ''
 				self.textfield.insert(INSERT, str(remark__))
@@ -595,13 +601,17 @@ def remarks(connD):
 				self.dateLabel.insert(INSERT, str(request_date__))
 				if str(fdbdocdate__) == 'None': fdbdocdate__ = ''
 				self.FDBdateLabel.insert(INSERT, str(fdbdocdate__))
+				if str(remcom__) == 'None': remcom__ = ''
+				self.remindertextfield.insert(INSERT, str(remcom__))
+
+
 			except:
 				remark__ = ''
 				sended__ = 'None'
 				request_date__ = 'None'
 
 			self.remarkframe.pack()
-			self.textfield.pack(side=LEFT)
+			#self.textfield.pack(side=LEFT)
 
 			self.var = tk.IntVar(value=0)
 			self.var2 = tk.IntVar(value=0)
@@ -624,33 +634,36 @@ def remarks(connD):
 
 			measCframe.pack(side=TOP, fill=BOTH, expand=True)
 			self.remarkframe.pack(side=LEFT)
-			self.textfield.grid(row=1, column=0,columnspan=3)
-			self.check.grid(row=0, column=2, sticky="w")
-			self.check2.grid(row=0, column=1, sticky="w")
-			self.dateLabel.grid(row=0, column=0, sticky="w")
+
+
+
+
+
+			self.check.grid(row=1, column=0, sticky="e")
+			self.textfield.grid(row=1, column=1, columnspan=2)
+
+
+			self.check2.grid(row=2, column=0, sticky="e")
+			self.dateLabel.grid(row=3, column=0, sticky="e")
+			self.remindertextfield.grid(row=2, column=1,columnspan=2,rowspan=2)
+
+
 			tk.Label(measCframe,text= 'Feedback: ').pack(side=LEFT)
 			self.feedbackframe.pack(side=LEFT)
 			self.textfield2.grid(row=2, column = 0)
 			self.FDBdateLabel.grid(row=1, column = 0, sticky="w")
-
-
-
 		def getrem(self,id,rn,remtable):
 			for line in remtable:
 
 				if str(line[0]) == str(id) and str(line[1]) == str(rn):
-					ans = [str(line[2]),str(line[3]),str(line[4]),str(line[5]),str(line[6])]
+					ans = [str(line[2]),str(line[3]),str(line[4]),str(line[5]),str(line[6]),str(line[7])]
 
 					return ans
 
 					break
 
 			pass
-
-
-	def putdevices(report):
-
-
+	def putdevices(report,namefilter):
 		def upload():
 
 			querry = """select rem.id, rem.sended, remi.request_date
@@ -700,13 +713,17 @@ def remarks(connD):
 										 " and raport_number = '" + str(line.rn) + "'"
 
 								if len(q_run(connD, querry)) != 0 :
-									querry = "UPDATE REMINDER SET request_date = '" + str(line.requestdate) + "' " \
-									"where id = " + str(line.id) + " and raport_number = '" + str(line.rn) + "'"
+									# querry = "UPDATE REMINDER SET request_date = '" + str() + "' " \
+									# ""\
+									# "where id = " + str(line.id) + " and raport_number = '" + str(line.rn) + "'"
+									querry = "UPDATE reminder SET request_date = '{}', remcom ='{}' where id = {} and raport_number = '{}'"\
+										.format(line.requestdate,line.remindertextfield.get("1.0", END).strip(),line.id,line.rn)
+
 								else:
 									querry = "INSERT INTO REMINDER(parent,raport_number,request_date,remcom,id) VALUES (" + str(
 										line.parent) + ",'" + str(line.rn) + "','" + str(
 										line.requestdate) + "','" + str(
-										line.textfield.get("1.0", END)).strip() + "'," + str(
+										line.remindertextfield.get("1.0", END)).strip() + "'," + str(
 										line.id) + ")"
 
 								q_run(connD, querry)
@@ -728,7 +745,7 @@ def remarks(connD):
 
 								querry = "INSERT INTO REMINDER(parent,raport_number,request_date,remcom,id) VALUES (" + str(
 									line.parent) + ",'" + str(line.rn) + "','" + str(
-									line.requestdate) + "','" + str(line.textfield.get("1.0", END)).strip() + "'," + str(
+									line.requestdate) + "','" + str(line.remindertextfield.get("1.0", END)).strip() + "'," + str(
 									line.id) + ")"
 
 								q_run(connD, querry)
@@ -770,25 +787,51 @@ def remarks(connD):
 
 			messagebox.showinfo("Finish", 'Upload done: ' + str(c))
 
-		querry = """select rem.id, rem.raport_number, rem.remark, rem.sended, remi.request_date, fdb.feedback, fdb.documentdate
+
+		def filter():
+			namefilter = filterentry.get()
+			putdevices(report, namefilter)
+
+		querry = """select rem.id, rem.raport_number, rem.remark, rem.sended, remi.request_date, fdb.feedback, fdb.documentdate,remi.remcom
 		from remarks as rem
 		left join reminder as remi on rem.id = remi.id and rem.raport_number = remi.raport_number
 		left join feedbacks as fdb on rem.id = fdb.id and rem.raport_number = fdb.raport_number
 		where rem.raport_number = '""" + str(report) + """'
-		group by rem.id, rem.raport_number, rem.remark, rem.sended, remi.request_date, fdb.feedback, fdb.documentdate"""
+		group by rem.id, rem.raport_number, rem.remark, rem.sended, remi.request_date, fdb.feedback, fdb.documentdate,remi.remcom"""
 		remtable = q_run(connD,querry)
 
 
-		querry = """select dev.name ,ml.id,ml.parent
-			from (select ml.parent, id, max(value),raport_number
-from measurements_low as ml 
-where raport_number = '""" + str(report) + """'
-group by ml.parent, ml.id,raport_number order by id) as ml 
-			left join (select parent,sort, cast(id as int) as id from ds_structure where id ~E'^\\\d+$') as dss on ml.id =dss.id and ml.parent = dss.parent
-			left join devices as dev on ml.id =dev.id
-			where ml.raport_number = '""" + str(report) + """' 
-				group by ml.id,dss.sort,dev.name,ml.parent
-				order by dss.sort"""
+# 		querry = """select dev.name ,ml.id,ml.parent
+# 			from (select ml.parent, id, max(value),raport_number
+# 			from measurements_low as ml
+# 			where raport_number = '""" + str(report) + """'
+# group by ml.parent, ml.id,raport_number order by id) as ml
+# 			left join (select parent,sort, cast(id as int) as id from ds_structure where id ~E'^\\\d+$') as dss on ml.id =dss.id and ml.parent = dss.parent
+# 			left join devices as dev on ml.id =dev.id
+# 			where ml.raport_number = '""" + str(report) + """'
+# 				group by ml.id,dss.sort,dev.name,ml.parent
+# 				order by dss.sort"""
+		if str(namefilter) == 'None': namefilter = ''
+		querry = """
+		select dev.name ,ml.id,ml.parent
+						from (select ml.parent, id, max(value),raport_number
+						from measurements_low as ml 
+						where raport_number = '{}'
+						group by ml.parent, ml.id,raport_number order by id) as ml 
+						
+						left join (select parent,sort, cast(id as int) as id from ds_structure where id ~E'^\\d+$') as dss on ml.id =dss.id and ml.parent = dss.parent
+						
+						left join devices as dev on ml.id =dev.id
+						
+						where ml.raport_number = '{}' and lower(dev.name) ~'{}'
+							group by ml.id,dss.sort,dev.name,ml.parent
+							order by dss.sort""".format(report,report,str(namefilter).lower().strip())
+
+
+
+
+
+
 		try:
 			for widget in MASTERmeasframe.winfo_children():
 				widget.destroy()
@@ -798,12 +841,27 @@ group by ml.parent, ml.id,raport_number order by id) as ml
 		MASTERmeasframe.pack(side=TOP, anchor=S, fill=BOTH)
 
 
-
+		print(querry)
 		devices = q_run(connD, querry)
-		header = ttk.Frame(MASTERmeasframe)
-		body = ttk.Frame(MASTERmeasframe, width=1400,height = 1400)
-		header.pack()
+		head = tk.Frame(MASTERmeasframe, bd=1, relief=RAISED)
+		header = tk.Frame(head, bd=1, relief=RAISED)
+		searcher = tk.Frame(head, bd=1, relief=RAISED)
+		head.pack()
+		searcher.pack(side=LEFT)
+		header.pack(side=LEFT)
+
+
+		body = tk.Frame(MASTERmeasframe, bd=1, relief=RAISED )
+
 		body.pack(fill=BOTH)
+		v = StringVar(searcher, value=namefilter)
+		filterentry = Entry(searcher, textvariable=v)
+		filterentry.pack(side = TOP)
+
+
+		filterbutton = Button(searcher, text = 'Filter name',command = filter)
+		filterbutton.pack(side = TOP)
+
 		UploadButton = Button(header, text='Update remarks & Feedbacks', command=upload)
 		UploadButton.pack()
 		GetReportButton = Button(header, text='Get remarks from vibration report', command=grabremarks)
@@ -825,22 +883,25 @@ group by ml.parent, ml.id,raport_number order by id) as ml
 
 		remlist.clear()
 		for i in devices:
-			measCframe = tk.Frame(scrollable_body, height=20, width=64)
+			measCframe = tk.Frame(scrollable_body,height = 0, bd=1, relief=RAISED)
 			X = frame_reminder(measCframe,i,report,remtable)
 			remlist.append(X)
+
+
 		scrollable_body.update()
+
 
 	remarksWindow = tk.Tk()
 	remarksWindow.title("Remarks")
 	parent = 1
-	MASTERmeasframe = Frame(remarksWindow, width=600,height = 900)
-	Ownerlistbox = Listbox(remarksWindow)
+	MASTERmeasframe = Frame(remarksWindow)
+	Ownerlistbox = Listbox(remarksWindow, exportselection=False)
 	Ownerlistbox.config(width=0)
 	Ownerlistbox.bind('<Double-Button>', getships)
-	Shiplistbox = Listbox(remarksWindow)
+	Shiplistbox = Listbox(remarksWindow, exportselection=False)
 	Shiplistbox.config(width=0)
 	Shiplistbox.bind('<Double-Button>', getreports)
-	Reportlistbox = Listbox(remarksWindow)
+	Reportlistbox = Listbox(remarksWindow, exportselection=False)
 	Reportlistbox.config(width=0)
 	Reportlistbox.bind('<Double-Button>', getdevices)
 

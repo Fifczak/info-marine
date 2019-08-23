@@ -11,6 +11,7 @@ from docx.shared import RGBColor
 from report_database import *
 from report_headtables import *
 from docx.shared import Inches
+from docx.shared import RGBColor
 from tqdm import tqdm
 import os
 
@@ -105,18 +106,20 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 							trendlist.append( str( line[ 3 ] ) )  # VAL
 							trendlist.append( str( line[ 6 ] ) )  # DATE
 							change = abs( (float( line[ 3 ] ) - float( self.maxval )) / float( line[ 3 ] ) )
+							#print(self.name, change)
 							if change <= 0.05:
 								TREND = 'C'
-							if float( line[ 3 ] ) < float( self.maxval ):
+							elif float( line[ 3 ] ) < float( self.maxval ):
 								TREND = 'U'
-							if float( line[ 3 ] ) > float( self.maxval ):
+							elif float( line[ 3 ] ) > float( self.maxval ):
 								TREND = 'D'
 							trendlist.append( TREND )  # TREND=> U-UP, D-DOWN, C-CONST
 							break
 			self.trend = trendlist
 			return measlist
-		querry = "Select parent from measurements_low where raport_number = '" + str(report_number) + "' limit 1"
+		querry = "Select parent,max(date) from measurements_low where raport_number = '" + str(report_number) + "' group by parent limit 1"
 		parent = list(q_run( connD ,querry ))[0][0]
+		maxdate = list(q_run(connD, querry))[0][1]
 		querry = """select standard,
 							limit_1_value,limit_1_name,
 							limit_2_value,limit_2_name, 
@@ -144,9 +147,10 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 					 left join standards sta on dev.norm = sta.standard
 					 left join bourbonid bid on ml.id = bid.devid
 					 left join points pts on ml.id = pts.id and ml.point = pts.point
-					 where ml.date > now() - interval '2 years'  and ml.value <> -1 and ml.type = 'RMS' and ml.parent = {} and dss.sort is distinct from null and pts.visible = True
+					 left join harmonogram har on ml.raport_number = har.report_number
+					 where ml.date <= cast('{}' as date) and ml.date >= cast('{}' as date) - interval '2 years'  and ml.value <> -1 and ml.type = 'RMS' and ml.parent = {} and dss.sort is distinct from null and pts.visible = True and har.trendchart_visible_flag = True
 					 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max,bid.bourbon, pts.visible
-					  order by raport_number DESC""".format(str(parent),str(parent))
+					  order by raport_number DESC""".format(str(parent),maxdate,maxdate,str(parent))
 		reportresults = q_run( connD ,querry )
 
 		querry = "select id, drivenby from devices where drivenby IN" \
@@ -194,21 +198,24 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 					 left join standards sta on dev.norm = sta.standard
 					 left join bourbonid bid on ml.id = bid.devid
 					 left join points pts on ml.id = pts.id and ml.point = pts.point
-					 where ml.date > now() - interval '2 years'  and ml.value <> -1 and ml.type = 'RMS' and dev.id = {} and dss.sort is distinct from null and pts.visible = True
+					 left join harmonogram har on ml.raport_number = har.report_number
+					 where ml.date <= cast('{}' as date) and ml.date >= cast('{}' as date) - interval '2 years'  and ml.value <> -1 and ml.type = 'RMS' and ml.parent = {} and dss.sort is distinct from null and pts.visible = True and har.trendchart_visible_flag = True
 				 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,ml.date,dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max,bid.bourbon, pts.visible
-				  order by raport_number DESC""".format(drivid,drivid)
+				  order by raport_number DESC""".format(drivid,maxdate,maxdate,drivid)
+						try:
+							drivline = list(q_run(connD, querry))[0]
 
-						drivline = list(q_run(connD, querry))[0]
-
-						y.name = drivline[2]
-						y.limit = '-'
-						y.drivenby = x.id
-						y.sort0 = drivline[8]
-						y.sort = drivline[8][:5]
-						y.sort2 = drivline[8][:2]
-						y.pms = drivline[9]
-						y.Dlimit = drivline[10]
-						measlist.append(y)
+							y.name = drivline[2]
+							y.limit = '-'
+							y.drivenby = x.id
+							y.sort0 = drivline[8]
+							y.sort = drivline[8][:5]
+							y.sort2 = drivline[8][:2]
+							y.pms = drivline[9]
+							y.Dlimit = drivline[10]
+							measlist.append(y)
+						except:
+							print('driven by error(Driven side):',x.id, '/' , y.id)
 				x.name = line[ 2 ]
 				if str(line[11]) == 'None':
 					x.maxval = line[ 3 ]
@@ -259,21 +266,25 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 					 left join standards sta on dev.norm = sta.standard
 					 left join bourbonid bid on ml.id = bid.devid
 					 left join points pts on ml.id = pts.id and ml.point = pts.point
-					 where ml.date > now() - interval '2 years'  and ml.value <> -1 and ml.type = 'RMS' and dev.id = {} and dss.sort is distinct from null and pts.visible = True
+					 left join harmonogram har on ml.raport_number = har.report_number
+					 where ml.date <= cast('{}' as date) and ml.date >= cast('{}' as date) - interval '2 years'  and ml.value <> -1 and ml.type = 'RMS' and ml.parent = {} and dss.sort is distinct from null and pts.visible = True and har.trendchart_visible_flag = True
 				 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,ml.date,dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max,bid.bourbon, pts.visible
-				  order by raport_number DESC""".format(y.id, y.id)
+				  order by raport_number DESC""".format(y.id,maxdate,maxdate, y.id)
 
-				drivline = list(q_run(connD, querry))[0]
+				try:
+					drivline = list(q_run(connD, querry))[0]
 
-				y.name = drivline[2]
-				y.limit = '-'
-				y.drivenby = x.id
-				y.sort0 = drivline[8]
-				y.sort = drivline[8][:5]
-				y.sort2 = drivline[8][:2]
-				y.pms = drivline[9]
-				y.Dlimit = drivline[10]
-				measlist.append(y)
+					y.name = drivline[2]
+					y.limit = '-'
+					y.drivenby = x.id
+					y.sort0 = drivline[8]
+					y.sort = drivline[8][:5]
+					y.sort2 = drivline[8][:2]
+					y.pms = drivline[9]
+					y.Dlimit = drivline[10]
+					measlist.append(y)
+				except:
+					print('driven by error(Driving side) :',x.id, '/' , y.id)
 
 	loadData( connD )
 
@@ -315,8 +326,13 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 			GUI = False
 		root.destroy()
 
-	querry = "Select parent from measurements_low where raport_number = '" + str(report_number) + "' limit 1"
+	# querry = "Select parent from measurements_low where raport_number = '" + str(report_number) + "' limit 1"
+	# parent = list(q_run(connD, querry))[0][0]
+	querry = "Select parent,max(date) from measurements_low where raport_number = '" + str(
+		report_number) + "' group by parent limit 1"
 	parent = list(q_run(connD, querry))[0][0]
+	maxdate = list(q_run(connD, querry))[0][1]
+
 	querry = "Select sort, id from ds_structure where parent = '" + str(parent) + "' order by sort"
 	sortlistQ = q_run(connD, querry)
 	trueMeasList = list()
@@ -479,8 +495,7 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 		ht = resulttable.cell(0, col_val).paragraphs[0]
 		ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		resulttable.cell(0, col_val).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-		r0 = ht.add_run('Velocity RMS (mm/s) Max').bold = True
-
+		r0 = ht.add_run('Velocity' + chr(10) + 'RMS' + chr(10) + '(mm/s)' + chr(10) + 'Max').bold = True
 	if col_limit != None:
 		ht = resulttable.cell( 0 ,col_limit ).paragraphs[ 0 ]
 		ht.paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
@@ -498,7 +513,17 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 		ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		resulttable.cell(0, col_env).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 		resulttable.cell(0, col_env).paragraphs[0].add_run().add_break()
-		r0 = ht.add_run('Bearing Envelope 0-Peak (m/s2) Max').bold = True
+		if str(parent) == '150':
+			unit = '(gE)'
+			envtype = '0-Peak'
+		elif str(parent) == '234':
+			unit = '(m/s2)'
+			envtype = 'RMS'
+		else:
+			unit = '(m/s2)'
+			envtype = '0-Peak'
+
+		r0 = ht.add_run('Bearing Envelope' + chr(10) + (envtype) + chr(10) + (unit) + chr(10) +  'Max').bold = True
 
 	if col_trend != None:
 		ht = resulttable.cell( 0 ,col_trend ).paragraphs[ 0 ]
@@ -634,11 +659,16 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 							r0 = ht.add_run(str(xx.maxenv))
 
 						if col_trend != None:
-							ht = resulttable.cell( xcord + 1 ,col_trend ).paragraphs[ 0 ]
-							ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-							resulttable.cell(xcord+1,col_trend).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
+
+
 							if str( xx.limit ) == 'Cl. D':  # TEGO DLA CZYTELNOSCI LEPIEJ ZROBIC FUNKCJE
-								try:
+									ht = resulttable.cell(xcord + 1, col_trend).add_paragraph()
+									ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+									resulttable.cell(xcord + 1, col_trend).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+								#try:
+									t1 = resulttable.cell(xcord + 1, col_trend).paragraphs[0].add_run('_')
+									t1.font.size = Pt(1)
+									t1.font.color.rgb = RGBColor(255, 255, 255)
 									trendtemp1 = float(xx.trend[ 0 ])
 									trendtemp2 = xx.trend[ 1 ]
 									trendtemp3 = xx.trend[ 2 ]
@@ -653,11 +683,23 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 										r0.add_picture( 'none.gif' )
 									text_trendtemp1 = str ( '%.3f'%trendtemp1 )
 									p0 = ht.add_run( '\n' + 'Last value:' )
+									font = p0.font
+									font.size = Pt(8)
+									font.name = 'Arial'
 									p0 = ht.add_run( '\n' + str( trendtemp2 ) )
+									font = p0.font
+									font.size = Pt(8)
+									font.name = 'Arial'
 									p0 = ht.add_run( '\n' +  text_trendtemp1.replace('.',',')  )
-									p0.bold = True
-								except:
-									pass
+									font = p0.font
+									font.size = Pt(8)
+									font.name = 'Arial'
+									font.bold = True
+									t1 = resulttable.cell(xcord + 1, col_trend).add_paragraph().add_run('_')
+									t1.font.size = Pt(1)
+									t1.font.color.rgb = RGBColor(255,255,255)
+								#except:
+									#pass
 
 						#REMARKS
 						ht = resulttable.cell(xcord + 1, col_remark).paragraphs[0]
@@ -693,7 +735,7 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 
 									ht = resulttable.cell(xcord + 1, 0).add_paragraph()
 
-									image = (trendchart(ids, connD, GUI, xx.VSG).giveimage())
+									image = (trendchart(ids, connD, GUI, xx.VSG,maxdate).giveimage())
 
 									p0 = ht.add_run()
 									p0.add_picture(image, width=Inches(6.5))
@@ -736,9 +778,9 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 						cl = resulttable.cell(r, c)
 						#print('row:' ,r,' column',c,cl.text,' merged: ',  cl._tc.right - cl._tc.left)
 						#print(c,len(row.cells))
-						if r >2 and c == len(row.cells)-1:
+						if c == col_remark  and  cl._tc.right - cl._tc.left == 1 and r > 0:
 							#print('last')
-							if cl._tc.right - cl._tc.left == 1:
+							#if cl._tc.right - cl._tc.left == 1:
 								#print('no merge')
 								font = run.font
 								font.size = Pt(9)
@@ -749,6 +791,12 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 							font = run.font
 
 							font.size = Pt(1)
+						elif c == col_trend and r > 0 :
+							pass
+						elif cl._tc.right - cl._tc.left > 1:
+							font  = run.font
+							font.size = Pt(9)
+							font.name = 'Calibri'
 						else:
 							font = run.font
 							font.size = Pt(8)
@@ -762,429 +810,6 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 	else:
 		trendresults(document)
 
-
-
-
-
-def drawtable_GSR( document ,measlist ,connD ,rn_ ):
-	#print( 'Wyniki: ' )
-	H = document.add_paragraph( 'Wyniki' )
-	H.runs[ 0 ].font.name = 'Times New Roman'
-	H.runs[ 0 ].font.size = Pt( 14 )
-	H.runs[ 0 ].add_break()
-	R = H.add_run( 'W tabeli są przedstawione tylko maksymalne wartości dla każdego urządzenia:' )
-	R.font.name = 'Times New Roman'
-	R.font.size = Pt( 10 )
-
-	# tabela z wynikami, poki co na sztywno, zastanowię się nad mechanizmem do budowania tabeli na podstawie tego co jest w bazie
-	restable_gsr = document.add_table( rows=42 ,cols=7 )
-	restable_gsr.cell( 0 ,0 ).text = 'Nazwa urządzenia'
-	# proponuję rozbić poniższego stringa tak, żeby pobierał z bazy pod jakąś zmienną datę w formacie yyyy-mm (time.timenow.year,time.timenow.month)
-
-	restable_gsr.cell( 0 ,1 ).text = 'Prędkość RMS (mm/s) Freq A Max DATA_TU'
-	restable_gsr.cell( 0 ,2 ).text = 'Prędkość RMS (mm/s) Freq B Max DATA_TU'
-	restable_gsr.cell( 0 ,3 ).text = 'ISO/VDI standard'
-	restable_gsr.cell( 0 ,4 ).text = 'Obwiednia łożysk 0-Peak (gE) Max DATA_TU'
-	restable_gsr.cell( 0 ,5 ).text = 'Prędkość RMS Max (mm/s) Trend'
-	restable_gsr.cell( 0 ,6 ).text = 'Uwagi i sugestie'
-	restable_gsr.cell( 1 ,0 ).text = 'KOMPRESOROWNIA 1'
-
-	restable_gsr.cell( 1 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.color.rgb = RGBColor( 0 ,0 ,255 )
-	restable_gsr.cell( 1 ,0 ).paragraphs[ 0 ].runs[ 0 ].bold = True
-	restable_gsr.cell( 1 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-	restable_gsr.cell( 1 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-
-	restable_gsr.cell( 1 ,0 ).merge( restable_gsr.cell( 1 ,1 ).merge( restable_gsr.cell( 1 ,2 ).merge(
-		restable_gsr.cell( 1 ,3 ).merge(
-			restable_gsr.cell( 1 ,4 ).merge( restable_gsr.cell( 1 ,5 ).merge( restable_gsr.cell( 1 ,6 ) ) ) ) ) ) )
-	restable_gsr.cell( 1 ,0 ).paragraphs[ 0 ].alignment = WD_ALIGN_PARAGRAPH.CENTER
-
-	# formatowanie nagłówków tabeli
-	for i in range( 7 ):
-		restable_gsr.cell( 0 ,i ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Times New Roman'
-		restable_gsr.cell( 0 ,i ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 10 )
-		restable_gsr.cell( 0 ,i ).paragraphs[ 0 ].runs[ 0 ].bold = True
-		restable_gsr.cell( 0 ,i ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-		restable_gsr.cell( 0 ,i ).paragraphs[ 0 ].alignment = WD_ALIGN_PARAGRAPH.CENTER
-
-	# wywołanie funkcji do formatowania po szerokości w tabeli results dla gsr
-	set_col_width_GSR( restable_gsr )
-
-	restable_gsr.cell( 2 ,0 ).text = 'Kompresor nr1'
-	restable_gsr.cell( 2 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-	restable_gsr.cell( 2 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-	restable_gsr.cell( 2 ,0 ).paragraphs[ 0 ].runs[ 0 ].bold = True
-	restable_gsr.cell( 2 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.color.rgb = RGBColor( 128 ,0 ,128 )
-	restable_gsr.cell( 2 ,0 ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-	restable_gsr.cell( 2 ,0 ).paragraphs[ 0 ].vertical_alignment = WD_ALIGN_PARAGRAPH.CENTER
-	restable_gsr.cell( 2 ,0 ).merge( restable_gsr.cell( 2 ,1 ).merge( restable_gsr.cell( 2 ,2 ).merge(
-		restable_gsr.cell( 2 ,3 ).merge(
-			restable_gsr.cell( 2 ,4 ).merge( restable_gsr.cell( 2 ,5 ).merge( restable_gsr.cell( 2 ,6 ) ) ) ) ) ) )
-	compr_no = 1
-	for i in range( 4 ):
-		restable_gsr.cell( 3 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' silnik el. '
-		restable_gsr.cell( 3 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 3 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 4 ,0 ).text = 'Przekładnia'
-		restable_gsr.cell( 4 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 4 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 5 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. męska '
-		restable_gsr.cell( 5 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 5 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 6 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. żeńska '
-		restable_gsr.cell( 6 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 6 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-	compr_no = 2
-	restable_gsr.cell( 7 ,0 ).text = 'Kompresor nr2'
-	restable_gsr.cell( 7 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-	restable_gsr.cell( 7 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-	restable_gsr.cell( 7 ,0 ).paragraphs[ 0 ].runs[ 0 ].bold = True
-	restable_gsr.cell( 7 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.color.rgb = RGBColor( 128 ,0 ,128 )
-	restable_gsr.cell( 7 ,0 ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-	restable_gsr.cell( 7 ,0 ).paragraphs[ 0 ].vertical_alignment = WD_ALIGN_PARAGRAPH.CENTER
-	restable_gsr.cell( 7 ,0 ).merge( restable_gsr.cell( 7 ,1 ).merge( restable_gsr.cell( 7 ,2 ).merge(
-		restable_gsr.cell( 7 ,3 ).merge(
-			restable_gsr.cell( 7 ,4 ).merge( restable_gsr.cell( 7 ,5 ).merge( restable_gsr.cell( 7 ,6 ) ) ) ) ) ) )
-	compr_no = 2
-	for i in range( 4 ):
-		restable_gsr.cell( 8 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' silnik el. '
-		restable_gsr.cell( 8 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 8 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 9 ,0 ).text = 'Przekładnia'
-		restable_gsr.cell( 9 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 9 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 10 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. męska '
-		restable_gsr.cell( 10 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 10 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 11 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. żeńska '
-		restable_gsr.cell( 11 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 11 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-
-	compr_no = 3
-	restable_gsr.cell( 12 ,0 ).text = 'Kompresor nr3'
-	restable_gsr.cell( 12 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-	restable_gsr.cell( 12 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-	restable_gsr.cell( 12 ,0 ).paragraphs[ 0 ].runs[ 0 ].bold = True
-	restable_gsr.cell( 12 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.color.rgb = RGBColor( 128 ,0 ,128 )
-	restable_gsr.cell( 12 ,0 ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-	restable_gsr.cell( 12 ,0 ).paragraphs[ 0 ].vertical_alignment = WD_ALIGN_PARAGRAPH.CENTER
-	restable_gsr.cell( 12 ,0 ).merge( restable_gsr.cell( 12 ,1 ).merge( restable_gsr.cell( 12 ,2 ).merge(
-		restable_gsr.cell( 12 ,3 ).merge(
-			restable_gsr.cell( 12 ,4 ).merge( restable_gsr.cell( 12 ,5 ).merge( restable_gsr.cell( 12 ,6 ) ) ) ) ) ) )
-
-	for i in range( 4 ):
-		restable_gsr.cell( 13 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' silnik el. '
-		restable_gsr.cell( 13 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 13 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 14 ,0 ).text = 'Przekładnia'
-		restable_gsr.cell( 14 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 14 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 15 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. męska '
-		restable_gsr.cell( 15 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 15 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 16 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. żeńska '
-		restable_gsr.cell( 16 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 16 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-
-	compr_no = 4
-	restable_gsr.cell( 17 ,0 ).text = 'Kompresor nr4'
-	restable_gsr.cell( 17 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-	restable_gsr.cell( 17 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-	restable_gsr.cell( 17 ,0 ).paragraphs[ 0 ].runs[ 0 ].bold = True
-	restable_gsr.cell( 17 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.color.rgb = RGBColor( 128 ,0 ,128 )
-	restable_gsr.cell( 17 ,0 ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-	restable_gsr.cell( 17 ,0 ).paragraphs[ 0 ].vertical_alignment = WD_ALIGN_PARAGRAPH.CENTER
-	restable_gsr.cell( 17 ,0 ).merge( restable_gsr.cell( 17 ,1 ).merge( restable_gsr.cell( 17 ,2 ).merge(
-		restable_gsr.cell( 17 ,3 ).merge(
-			restable_gsr.cell( 17 ,4 ).merge( restable_gsr.cell( 17 ,5 ).merge( restable_gsr.cell( 17 ,6 ) ) ) ) ) ) )
-
-	for i in range( 4 ):
-		restable_gsr.cell( 18 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' silnik el. '
-		restable_gsr.cell( 18 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 18 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 19 ,0 ).text = 'Przekładnia'
-		restable_gsr.cell( 19 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 19 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 20 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. męska '
-		restable_gsr.cell( 20 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 20 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 21 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. żeńska '
-		restable_gsr.cell( 21 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 21 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-
-	compr_no = 5
-	restable_gsr.cell( 22 ,0 ).text = 'Kompresor nr5'
-	restable_gsr.cell( 22 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-	restable_gsr.cell( 22 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-	restable_gsr.cell( 22 ,0 ).paragraphs[ 0 ].runs[ 0 ].bold = True
-	restable_gsr.cell( 22 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.color.rgb = RGBColor( 128 ,0 ,128 )
-	restable_gsr.cell( 22 ,0 ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-	restable_gsr.cell( 22 ,0 ).paragraphs[ 0 ].vertical_alignment = WD_ALIGN_PARAGRAPH.CENTER
-	restable_gsr.cell( 22 ,0 ).merge( restable_gsr.cell( 22 ,1 ).merge( restable_gsr.cell( 22 ,2 ).merge(
-		restable_gsr.cell( 22 ,3 ).merge(
-			restable_gsr.cell( 22 ,4 ).merge( restable_gsr.cell( 22 ,5 ).merge( restable_gsr.cell( 22 ,6 ) ) ) ) ) ) )
-	for i in range( 4 ):
-		restable_gsr.cell( 23 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' silnik el. '
-		restable_gsr.cell( 23 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 23 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 24 ,0 ).text = 'Przekładnia'
-		restable_gsr.cell( 24 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 24 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 25 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. męska '
-		restable_gsr.cell( 25 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 25 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 26 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. żeńska '
-		restable_gsr.cell( 26 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 26 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-
-	compr_no = 6
-	restable_gsr.cell( 27 ,0 ).text = 'Kompresor nr6'
-	restable_gsr.cell( 27 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-	restable_gsr.cell( 27 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-	restable_gsr.cell( 27 ,0 ).paragraphs[ 0 ].runs[ 0 ].bold = True
-	restable_gsr.cell( 27 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.color.rgb = RGBColor( 128 ,0 ,128 )
-	restable_gsr.cell( 27 ,0 ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-	restable_gsr.cell( 27 ,0 ).paragraphs[ 0 ].vertical_alignment = WD_ALIGN_PARAGRAPH.CENTER
-	restable_gsr.cell( 27 ,0 ).merge( restable_gsr.cell( 27 ,1 ).merge( restable_gsr.cell( 27 ,2 ).merge(
-		restable_gsr.cell( 27 ,3 ).merge(
-			restable_gsr.cell( 27 ,4 ).merge( restable_gsr.cell( 27 ,5 ).merge( restable_gsr.cell( 27 ,6 ) ) ) ) ) ) )
-
-	for i in range( 4 ):
-		restable_gsr.cell( 28 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' silnik el. '
-		restable_gsr.cell( 28 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 28 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 29 ,0 ).text = 'Przekładnia'
-		restable_gsr.cell( 29 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 29 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 30 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. męska '
-		restable_gsr.cell( 30 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 30 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 31 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. żeńska '
-		restable_gsr.cell( 31 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 31 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-
-	compr_no = 7
-	restable_gsr.cell( 32 ,0 ).text = 'Kompresor nr7'
-	restable_gsr.cell( 32 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-	restable_gsr.cell( 32 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-	restable_gsr.cell( 32 ,0 ).paragraphs[ 0 ].runs[ 0 ].bold = True
-	restable_gsr.cell( 32 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.color.rgb = RGBColor( 128 ,0 ,128 )
-	restable_gsr.cell( 32 ,0 ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-	restable_gsr.cell( 32 ,0 ).paragraphs[ 0 ].vertical_alignment = WD_ALIGN_PARAGRAPH.CENTER
-	restable_gsr.cell( 32 ,0 ).merge( restable_gsr.cell( 32 ,1 ).merge( restable_gsr.cell( 32 ,2 ).merge(
-		restable_gsr.cell( 32 ,3 ).merge(
-			restable_gsr.cell( 32 ,4 ).merge( restable_gsr.cell( 32 ,5 ).merge( restable_gsr.cell( 32 ,6 ) ) ) ) ) ) )
-
-	for i in range( 4 ):
-		restable_gsr.cell( 33 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' silnik el. '
-		restable_gsr.cell( 33 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 33 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 34 ,0 ).text = 'Przekładnia'
-		restable_gsr.cell( 34 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 34 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 35 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. męska '
-		restable_gsr.cell( 35 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 35 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 36 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. żeńska '
-		restable_gsr.cell( 36 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 36 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-
-	compr_no = 8
-	restable_gsr.cell( 37 ,0 ).text = 'Kompresor nr8'
-	restable_gsr.cell( 37 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-	restable_gsr.cell( 37 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-	restable_gsr.cell( 37 ,0 ).paragraphs[ 0 ].runs[ 0 ].bold = True
-	restable_gsr.cell( 37 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.color.rgb = RGBColor( 128 ,0 ,128 )
-	restable_gsr.cell( 37 ,0 ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-	restable_gsr.cell( 37 ,0 ).paragraphs[ 0 ].vertical_alignment = WD_ALIGN_PARAGRAPH.CENTER
-	restable_gsr.cell( 37 ,0 ).merge( restable_gsr.cell( 37 ,1 ).merge( restable_gsr.cell( 37 ,2 ).merge(
-		restable_gsr.cell( 37 ,3 ).merge(
-			restable_gsr.cell( 37 ,4 ).merge( restable_gsr.cell( 37 ,5 ).merge( restable_gsr.cell( 37 ,6 ) ) ) ) ) ) )
-
-	for i in range( 4 ):
-		restable_gsr.cell( 38 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' silnik el. '
-		restable_gsr.cell( 38 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 38 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 39 ,0 ).text = 'Przekładnia'
-		restable_gsr.cell( 39 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 39 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 40 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. męska '
-		restable_gsr.cell( 40 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 40 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.cell( 41 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. żeńska '
-		restable_gsr.cell( 41 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr.cell( 41 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr.style='Table Grid'
-
-	# kompresorownia numer 2 - mała [6 kompr]
-
-	restable_gsr2 = document.add_table( rows=31 ,cols=7 )
-	restable_gsr2.cell( 0 ,0 ).text = 'KOMPRESOROWNIA 2'
-	restable_gsr2.cell( 0 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-	restable_gsr2.cell( 0 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-	restable_gsr2.cell( 0 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.color.rgb = RGBColor( 0 ,0 ,255 )
-	restable_gsr2.cell( 0 ,0 ).paragraphs[ 0 ].runs[ 0 ].bold = True
-	restable_gsr2.cell( 0 ,0 ).merge( restable_gsr2.cell( 0 ,1 ).merge( restable_gsr2.cell( 0 ,2 ).merge(
-		restable_gsr2.cell( 0 ,3 ).merge(
-			restable_gsr2.cell( 0 ,4 ).merge( restable_gsr2.cell( 0 ,5 ).merge( restable_gsr2.cell( 0 ,6 ) ) ) ) ) ) )
-	restable_gsr2.cell( 0 ,0 ).paragraphs[ 0 ].alignment = WD_ALIGN_PARAGRAPH.CENTER
-	restable_gsr2.cell( 1 ,0 ).text = 'Kompresor nr1'
-	restable_gsr2.cell( 1 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-	restable_gsr2.cell( 1 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-	restable_gsr2.cell( 1 ,0 ).paragraphs[ 0 ].runs[ 0 ].bold = True
-	restable_gsr2.cell( 1 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.color.rgb = RGBColor( 128 ,0 ,128 )
-	restable_gsr2.cell( 1 ,0 ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-	restable_gsr2.cell( 1 ,0 ).paragraphs[ 0 ].vertical_alignment = WD_ALIGN_PARAGRAPH.CENTER
-	restable_gsr2.cell( 1 ,0 ).merge( restable_gsr2.cell( 1 ,1 ).merge( restable_gsr2.cell( 1 ,2 ).merge(
-		restable_gsr2.cell( 1 ,3 ).merge(
-			restable_gsr2.cell( 1 ,4 ).merge( restable_gsr2.cell( 1 ,5 ).merge( restable_gsr2.cell( 1 ,6 ) ) ) ) ) ) )
-	compr_no = 1
-	for i in range( 4 ):
-		restable_gsr2.cell( 2 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' silnik el. '
-		restable_gsr2.cell( 2 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 2 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr2.cell( 3 ,0 ).text = 'Przekładnia'
-		restable_gsr2.cell( 3 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 3 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr2.cell( 4 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. męska '
-		restable_gsr2.cell( 4 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 4 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr2.cell( 5 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. żeńska '
-		restable_gsr2.cell( 5 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 5 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-	restable_gsr2.cell( 6 ,0 ).text = 'Kompresor nr2'
-	restable_gsr2.cell( 6 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-	restable_gsr2.cell( 6 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-	restable_gsr2.cell( 6 ,0 ).paragraphs[ 0 ].runs[ 0 ].bold = True
-	restable_gsr2.cell( 6 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.color.rgb = RGBColor( 128 ,0 ,128 )
-	restable_gsr2.cell( 6 ,0 ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-	restable_gsr2.cell( 6 ,0 ).paragraphs[ 0 ].vertical_alignment = WD_ALIGN_PARAGRAPH.CENTER
-	restable_gsr2.cell( 6 ,0 ).merge( restable_gsr2.cell( 6 ,1 ).merge( restable_gsr2.cell( 6 ,2 ).merge(
-		restable_gsr2.cell( 6 ,3 ).merge(
-			restable_gsr2.cell( 6 ,4 ).merge( restable_gsr2.cell( 6 ,5 ).merge( restable_gsr2.cell( 6 ,6 ) ) ) ) ) ) )
-
-	compr_no = 2
-	for i in range( 4 ):
-		restable_gsr2.cell( 7 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' silnik el. '
-		restable_gsr2.cell( 7 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 7 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr2.cell( 8 ,0 ).text = 'Przekładnia'
-		restable_gsr2.cell( 8 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 8 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr2.cell( 9 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. męska '
-		restable_gsr2.cell( 9 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 9 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr2.cell( 10 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. żeńska '
-		restable_gsr2.cell( 10 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 10 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-
-	restable_gsr2.cell( 11 ,0 ).text = 'Kompresor nr3'
-	restable_gsr2.cell( 11 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-	restable_gsr2.cell( 11 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-	restable_gsr2.cell( 11 ,0 ).paragraphs[ 0 ].runs[ 0 ].bold = True
-	restable_gsr2.cell( 11 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.color.rgb = RGBColor( 128 ,0 ,128 )
-	restable_gsr2.cell( 11 ,0 ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-	restable_gsr2.cell( 11 ,0 ).paragraphs[ 0 ].vertical_alignment = WD_ALIGN_PARAGRAPH.CENTER
-	restable_gsr2.cell( 11 ,0 ).merge( restable_gsr2.cell( 11 ,1 ).merge( restable_gsr2.cell( 11 ,2 ).merge(
-		restable_gsr2.cell( 11 ,3 ).merge(
-			restable_gsr2.cell( 11 ,4 ).merge(
-				restable_gsr2.cell( 11 ,5 ).merge( restable_gsr2.cell( 11 ,6 ) ) ) ) ) ) )
-	compr_no = 3
-
-	for i in range( 4 ):
-		restable_gsr2.cell( 12 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' silnik el. '
-		restable_gsr2.cell( 12 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 12 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr2.cell( 13 ,0 ).text = 'Przekładnia'
-		restable_gsr2.cell( 13 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 13 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr2.cell( 14 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. męska '
-		restable_gsr2.cell( 14 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 14 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr2.cell( 15 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. żeńska '
-		restable_gsr2.cell( 15 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 15 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-
-	restable_gsr2.cell( 16 ,0 ).text = 'Kompresor nr4'
-	restable_gsr2.cell( 16 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-	restable_gsr2.cell( 16 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-	restable_gsr2.cell( 16 ,0 ).paragraphs[ 0 ].runs[ 0 ].bold = True
-	restable_gsr2.cell( 16 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.color.rgb = RGBColor( 128 ,0 ,128 )
-	restable_gsr2.cell( 16 ,0 ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-	restable_gsr2.cell( 16 ,0 ).paragraphs[ 0 ].vertical_alignment = WD_ALIGN_PARAGRAPH.CENTER
-	restable_gsr2.cell( 16 ,0 ).merge( restable_gsr2.cell( 16 ,1 ).merge( restable_gsr2.cell( 16 ,2 ).merge(
-		restable_gsr2.cell( 16 ,3 ).merge(
-			restable_gsr2.cell( 16 ,4 ).merge(
-				restable_gsr2.cell( 16 ,5 ).merge( restable_gsr2.cell( 16 ,6 ) ) ) ) ) ) )
-	compr_no = 4
-	for i in range( 4 ):
-		restable_gsr2.cell( 17 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' silnik el. '
-		restable_gsr2.cell( 17 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 17 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr2.cell( 18 ,0 ).text = 'Przekładnia'
-		restable_gsr2.cell( 18 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 18 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr2.cell( 19 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. męska '
-		restable_gsr2.cell( 19 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 19 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr2.cell( 20 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. żeńska '
-		restable_gsr2.cell( 20 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 20 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-
-	restable_gsr2.cell( 21 ,0 ).text = 'Kompresor nr5'
-	restable_gsr2.cell( 21 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-	restable_gsr2.cell( 21 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-	restable_gsr2.cell( 21 ,0 ).paragraphs[ 0 ].runs[ 0 ].bold = True
-	restable_gsr2.cell( 21 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.color.rgb = RGBColor( 128 ,0 ,128 )
-	restable_gsr2.cell( 21 ,0 ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-	restable_gsr2.cell( 21 ,0 ).paragraphs[ 0 ].vertical_alignment = WD_ALIGN_PARAGRAPH.CENTER
-	restable_gsr2.cell( 21 ,0 ).merge( restable_gsr2.cell( 21 ,1 ).merge( restable_gsr2.cell( 21 ,2 ).merge(
-		restable_gsr2.cell( 21 ,3 ).merge(
-			restable_gsr2.cell( 21 ,4 ).merge(
-				restable_gsr2.cell( 21 ,5 ).merge( restable_gsr2.cell( 21 ,6 ) ) ) ) ) ) )
-	compr_no = 5
-	for i in range( 4 ):
-		restable_gsr2.cell( 22 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' silnik el. '
-		restable_gsr2.cell( 22 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 22 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr2.cell( 23 ,0 ).text = 'Przekładnia'
-		restable_gsr2.cell( 23 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 23 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr2.cell( 24 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. męska '
-		restable_gsr2.cell( 24 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 24 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr2.cell( 25 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. żeńska '
-		restable_gsr2.cell( 25 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 25 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr2.cell( 25 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-
-	restable_gsr2.cell( 26 ,0 ).text = 'Kompresor nr6'
-	restable_gsr2.cell( 26 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-	restable_gsr2.cell( 26 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-	restable_gsr2.cell( 26 ,0 ).paragraphs[ 0 ].runs[ 0 ].bold = True
-	restable_gsr2.cell( 26 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.color.rgb = RGBColor( 128 ,0 ,128 )
-	restable_gsr2.cell( 26 ,0 ).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-	restable_gsr2.cell( 26 ,0 ).paragraphs[ 0 ].vertical_alignment = WD_ALIGN_PARAGRAPH.CENTER
-	restable_gsr2.cell( 26 ,0 ).merge( restable_gsr2.cell( 26 ,1 ).merge( restable_gsr2.cell( 26 ,2 ).merge(
-		restable_gsr2.cell( 26 ,3 ).merge(
-			restable_gsr2.cell( 26 ,4 ).merge(
-				restable_gsr2.cell( 26 ,5 ).merge( restable_gsr2.cell( 26 ,6 ) ) ) ) ) ) )
-
-	compr_no = 6
-	for i in range( 4 ):
-		restable_gsr2.cell( 27 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' silnik el. '
-		restable_gsr2.cell( 27 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 27 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr2.cell( 28 ,0 ).text = 'Przekładnia'
-		restable_gsr2.cell( 28 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 28 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr2.cell( 29 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. męska '
-		restable_gsr2.cell( 29 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 29 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr2.cell( 30 ,0 ).text = 'Kompresor powietrza nr ' + str( compr_no ) + ' cz. żeńska '
-		restable_gsr2.cell( 30 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-		restable_gsr2.cell( 30 ,0 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt( 8 )
-		restable_gsr2.style='Table Grid'
 def trendresults ( document ) :
 	trendpar = document.add_paragraph ( 'Trend results:' )
 	trendpar.runs[ 0 ].bold = True

@@ -17,8 +17,8 @@ import xlrd
 from tkinter import messagebox
 from tkinter import simpledialog
 
-host = '192.168.10.243'
-#host = 'localhost'
+#host = '192.168.10.243'
+host = 'localhost'
 devlist = list()
 def q_run(connD, querry):
 	username = connD[0]
@@ -708,6 +708,7 @@ class StructWindow:
 							where dev.parent ={}
 							order by dss.sort""".format(str(shipid))
 				ans = q_run(connD, querry)
+
 				self.structuresort = False
 			else:
 				querry = """select dev.id, dev.name,mm.name,dev.type,kw,rpm,pms,info,st.standard,drivenby, meas_condition,cm,(public.im_extract(dev.cbm_interval))[1] as interval_type,(public.im_extract(dev.cbm_interval))[2] as interval_len,dev.ignore_reminder, dev.ignore_reminder_to
@@ -959,6 +960,15 @@ class StructWindow:
 			if (any(testlist.count(x) > 1 for x in testlist)) == True:
 				messagebox.showinfo("Brak", 'Uplooad aborted. Duplicate point names')
 			else:
+
+				querry = "select sort,_id_ from points where id = {} order by sort".format(self.devid)
+				pointsort = q_run(self.connD, querry)
+				ccp = 0
+				for ax, line in pointsort:
+					ccp += 1
+					querry = "update points set sort = {} where _id_ = {}".format(ccp, line)
+					q_run(self.connD, querry)
+					#print(querry)
 				counter = -1
 				for i in tqdm(self.CombPointList):
 					counter +=1
@@ -978,45 +988,48 @@ class StructWindow:
 					try:
 						querry = "select point from points where sort = {} and id = {}".format( counter+1,self.devid)
 						temppoint = list(q_run(self.connD, querry))[0][0]
+						#print(querry)
 					except:
 						temppoint = 'NONE'
 
 					if temppoint != 'NONE':
 						querry = "update points set point = 'TEMPCHANGE' where point = '{}' and id = {}".format(point,self.devid)
 						q_run(self.connD, querry)
-
+						#print(querry)
 
 
 
 
 					querry = "update points set point = '{}',visible = '{}' where sort = {} and id = {}".format(point,self.CombVisibleList[counter].showvalue, counter+1,self.devid)
 					q_run(self.connD, querry)
-
+					#print(querry)
 
 
 
 					if temppoint != 'NONE':
 						querry = "update points set point = '{}' where point = 'TEMPCHANGE' and id = {}".format(temppoint,self.devid)
 						q_run(self.connD, querry)
-
+						#print(querry)
 
 
 					if point != i.showvalue:
 						querry = "update measurements_low set point = '{}' where point = '{}' and id = {}".format(point,i.showvalue,self.devid)
 						q_run(self.connD, querry)
+						#print(querry)
 					querry1 = "update bearings set bearing ={}, seal = {}, additional = {} where id = {} and point = '{}' " \
 							 "returning bearing,seal,additional ".format(bearing,seal,add,self.devid,point)
 					updates = q_run(self.connD,querry1)
+					#print(querry1)
 					if len(updates) == 0:
 						querry = "INSERT INTO bearings (id,point,bearing,seal,additional)" \
 								 " VALUES ({},'{}',{},{},{}) ".format(self.devid,point,bearing,seal,add)
 						q_run(self.connD, querry)
-
+						#print(querry)
 					else:
 						querry = "update bearings set bearing ={}, seal = {}, additional = {} where id = {} and point = '{}' " \
 								  .format(bearing, seal, add, self.devid, point)
 						q_run(self.connD, querry)
-
+						#print(querry)
 				self.reloadquerry(self.structuresort, self.shipid, self.connD,False)
 				self.makecontrols(self.devname, self.connD)
 		def DeletePoint(self):
@@ -1060,6 +1073,7 @@ class StructWindow:
 			self.devdata.clear()
 			for item in ans:
 				self.devdata.append(item)
+
 			self.loadpoints()
 		def loadpoints(self):
 			self.deviceslistbox.delete(0, END)
@@ -1111,10 +1125,11 @@ class StructWindow:
 			c=0
 			self.uploadbutton = tk.Button(self.detailframe,text = 'Upload points', command = self.UploadPoints)
 			self.uploadbutton.grid(row = c, column = 0)
-
 			if len(pointslist)!= 0:
 				for line in devlist:
+
 					if str(line.name) == str(devname):
+
 						c+=1
 						self.namelab = tk.Label(self.detailframe, text=str(line.sort))
 						self.namelab.grid(row=c, column=0)

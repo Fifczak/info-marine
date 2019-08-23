@@ -38,7 +38,7 @@ def updatemissingdata():
 	order by fdb._id_ 
 	"""
 	_id_list = list(q_run(connD, querry))
-
+	print(querry)
 	class coststrings:
 		def __init__(self):
 			self.pricestr = ''

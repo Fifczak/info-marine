@@ -10,8 +10,8 @@ from tkinter import Tk
 from tkinter import filedialog
 import psycopg2
 import re
-username = 'filipb'
-password = '@infomarine'
+username = 'testuser'
+password = 'info'
 host = '192.168.10.243'
 connD = [username,password,host]
 
@@ -37,6 +37,10 @@ def q_run(connD, querry):
 		pass
 	conn.commit()
 	cur.close()
+
+
+
+###jakies stare nieznormalizowane formatki
 
 def getDOnellydata():
 	class DataFrame(object):
@@ -98,84 +102,6 @@ def getDOnellydata():
 			q_run(connD,querry)
 		except:
 			pass
-
-
-		#print(querry)
-		# if str(item.info).strip() != '':
-		# 	querry = "select info from devices where id = '" + str(int(item.id)) + "'"
-		# 	print(querry)
-		# 	# try:info = list(q_run(connD,querry))[0][0]
-		# 	# except:info = ''
-		# 	if str(info).strip() != '':infostr = str(info) + chr(10) + str(item.info).strip()
-		# 	else:infostr = str(item.info).strip()
-		# 	querry = "update devices set info = '" + str(infostr) +  "' where id = '" + str(int(item.id)) + "'"
-		# 	# q_run(connD,querry)
-		# 	print(querry)
-
-
-
-def getMakersModels():
-	class DataFrame(object):
-		def __init__(self):
-			self.maker = ''
-			self.model = ''
-
-	Tk().withdraw()
-	file = filedialog.askopenfilename()
-	workbook = xlrd.open_workbook(file)
-	worksheet = workbook.sheet_by_index(0)
-	xsize = worksheet.ncols
-	ysize = worksheet.nrows
-	dframelist = list()
-	x = 1
-	for row in range(ysize-2):
-		x += 1
-		y = 0
-		for row in range(xsize-1):
-			y += 1
-			if ((worksheet.cell(x, 1).value)) != '':
-				if ((worksheet.cell(x, 7).value)) != '-' and ((worksheet.cell(x, 8).value)) != '-':
-					dframe = DataFrame()
-					dframe.maker = worksheet.cell(x, 11).value
-					dframe.model = worksheet.cell(x, 12).value
-					if dframe not in dframelist: dframelist.append(dframe)
-					break
-	modellist = list()
-	makerslist = list()
-	modellistcheck = list()
-	for item in dframelist:
-		if item.maker not in makerslist:
-			makerslist.append(item.maker)
-		if item.model not in modellistcheck:
-			modellistcheck.append(item.model)
-			modellist.append([item.model,item.maker])
-
-	querry = "select name from main_models where parent is null"
-	DBmakers = list(q_run(connD,querry))
-
-	for item in tqdm(makerslist):
-		if item not in column(DBmakers,0):
-			querry = "insert into main_models (parent,name) VALUES (null,'" + str(item) + "')"
-			q_run(connD,querry)
-		else:
-			print('Maker exist')
-
-	querry = "select name from main_models where parent is not null"
-	DBmodels = list(q_run(connD,querry))
-
-	for item in tqdm(modellist):
-		if item[0] not in column(DBmodels,0):
-			try:
-				querry = "insert into main_models (parent,name) VALUES ((select id from main_models where name ='" + str(item[1]) + "'),'" + str(item[0]) + "')"
-
-				q_run(connD,querry)
-			except:
-				print('Empty model ? Something wrong')
-		else:
-			print('Model exist')
-
-
-
 def putintervals():
 
 	class device():
@@ -216,9 +142,6 @@ def putintervals():
 		else:
 			querry = "update devices set cbm_interval = '2 years' where id = {}".format(int(item.id))
 			q_run(connD,querry)
-
-
-
 def putbearings():
 
 
@@ -267,10 +190,6 @@ def putbearings():
 			q_run(connD,querry)
 		except:
 			('SOMEERROR')
-
-
-
-
 def putdrivenby():
 
 
@@ -304,10 +223,6 @@ def putdrivenby():
 		querry = "update devices set drivenby = {} where id = {} ".format(int(item.drivenby),int(item.id))
 		#print(querry)
 		q_run(connD,querry)
-
-
-
-
 def puttypesKW():
 
 
@@ -346,4 +261,255 @@ def puttypesKW():
 		q_run(connD,querry)
 
 
-puttypesKW()
+### NIBY JUZ NA DOCELOWE FORMATKI
+
+def update_bearings_via_point():
+
+
+	class point():
+		def __init__(self):
+			self.id = ''
+			self.point = ''
+			self.bearing = ''
+			self.seal = ''
+			self.add = ''
+			self.visible = ''
+
+	Tk().withdraw()
+	file = filedialog.askopenfilename()
+	workbook = xlrd.open_workbook(file)
+	worksheet = workbook.sheet_by_index(0)
+	xsize = worksheet.ncols
+	ysize = worksheet.nrows
+
+
+	dframelist = list()
+	x = 0
+	for row in range(ysize-2):
+		x += 1
+		y = 0
+		for col in range(xsize-1):
+			y += 1
+			if ((worksheet.cell(x, 1).value)) != '':
+				dframe = point()
+				dframe.id = worksheet.cell(x, 0).value
+				dframe.point = worksheet.cell(x, 3).value
+				dframe.bearing = worksheet.cell(x, 4).value
+				dframe.seal = worksheet.cell(x,5).value
+				dframe.add = worksheet.cell(x, 6).value
+				dframe.visible = worksheet.cell(x, 7).value
+
+				if str(dframe.point).strip() != '':
+					dframelist.append(dframe)
+					break
+	for item in tqdm(dframelist):
+		try:
+			item.bearing = int(item.bearing)
+		except:
+			item.bearing = str(item.bearing)
+
+		querry = "SELECT * FROM BEARINGS WHERE ID = {} AND POINT = '{}'".format(int(item.id),item.point)
+
+		if len(q_run(connD,querry)) == 0:
+			querry = "INSERT INTO BEARINGS (id,point,bearing,seal,additional,visible) values ({},'{}','{}','{}','{}','{}')".format(int(item.id),item.point,item.bearing,item.seal,item.add,dframe.visible )
+		else:
+			querry = "update bearings set bearing = '{}', seal = '{}', additional = '{}' where id = {} and point = '{}'".format((item.bearing),item.seal,item.add,int(item.id),item.point)
+
+		try:
+			#print(querry)
+			q_run(connD,querry)
+		except:
+			('Bearings update/insert errot')
+		querry = "UPDATE points set visible = '{}' where id = {} and point = '{}'".format(item.visible,int(item.id),item.point)
+		try:
+			#print(querry)
+			q_run(connD, querry)
+		except:
+			('Point visible errot')
+def updatedevicesdata():
+	class Device(object):
+		def __init__(self):
+			self.id = ''
+			self.name = ''
+			self.PMS = ''
+			self.drivenby = ''
+			self.kW = ''
+			self.RPM = ''
+			self.type = ''
+			self.standardfkey = ''
+			self.interval = ''
+			self.cm = ''
+			self.model = ''
+
+	Tk().withdraw()
+	file = filedialog.askopenfilename()
+	workbook = xlrd.open_workbook(file)
+	worksheet = workbook.sheet_by_index(0)
+	xsize = worksheet.ncols
+	ysize = worksheet.nrows
+
+
+	dframelist = list()
+	x = 1
+	for row in range(ysize-2):
+		x += 1
+		y = 0
+		for row in range(xsize-1):
+			y += 1
+			if ((worksheet.cell(x, 1).value)) != '':
+				dframe = Device()
+				dframe.PMS = worksheet.cell(x, 0).value
+				if str(dframe.PMS) == 'None': dframe.PMS = '-'
+				dframe.id = int(worksheet.cell(x, 1).value)
+				dframe.name = (worksheet.cell(x, 2).value)
+				try:
+					dframe.drivenby = int(worksheet.cell(x,3).value)
+				except:
+					dframe.drivenby = 0
+				try:
+					dframe.kW = float(worksheet.cell(x, 4).value)
+				except:
+					dframe.kW = '0'
+				try:
+					dframe.RPM = int(worksheet.cell(x, 5).value)
+				except:
+					dframe.RPM = 0
+				dframe.type = worksheet.cell(x, 6).value
+				dframe.standardfkey =int( worksheet.cell(x, 7).value)
+				dframe.info = worksheet.cell(x, 16).value
+				dframe.interval = worksheet.cell(x, 11).value
+				dframe.cm = worksheet.cell(x, 12).value
+
+				dframe.model = worksheet.cell(x, 14).value
+
+				if str(dframe.cm) == 'true': dframe.cm = 'True'
+				if str(dframe.cm) == 'false': dframe.cm = 'False'
+				dframelist.append(dframe)
+
+
+
+				break
+	for item in tqdm(dframelist):
+		if str(item.RPM) == '0': item.RPM = ''
+		querry = "update devices set name = '{}', pms = '{}',drivenby = {},kw = {},rpm = '{}',type = '{}',standard_fkey='{}',norm=(select standard from standards where id = {}),info='{}',cbm_interval = '{}',cm = {} where id = {}".format(\
+			item.name,item.PMS,item.drivenby,item.kW,item.RPM,item.type,item.standardfkey,item.standardfkey,item.info,item.interval, item.cm,item.id)
+		#print(querry)
+		q_run(connD, querry)
+
+		if str(item.model).strip() != '':
+			querry = "update devices set model = '{}', model_fkey = (select id from main_models where name = '{}' limit 1) where id = {}".format(\
+				item.model,item.model,item.id)
+			print(querry)
+			q_run(connD,querry)
+def LoadMakersModels():
+	class MMFrame(object):
+		def __init__(self):
+			self.maker = ''
+			self.model = ''
+
+	Tk().withdraw()
+	file = filedialog.askopenfilename()
+	workbook = xlrd.open_workbook(file)
+	worksheet = workbook.sheet_by_index(0)
+	xsize = worksheet.ncols
+	ysize = worksheet.nrows
+	dframelist = list()
+	x = 1
+	for row in range(ysize-2):
+		x += 1
+		y = 0
+		for row in range(xsize-1):
+			y += 1
+			if ((worksheet.cell(x, 1).value)) != '':
+				if ((worksheet.cell(x, 13).value)) != '' and ((worksheet.cell(x, 14).value)) != '':
+					dframe = MMFrame()
+					dframe.maker = worksheet.cell(x, 13).value
+					dframe.model = worksheet.cell(x, 14).value
+					if dframe not in dframelist: dframelist.append(dframe)
+					break
+	modellist = list()
+	makerslist = list()
+	modellistcheck = list()
+	for item in dframelist:
+		if item.maker not in makerslist:
+			makerslist.append(item.maker)
+		if item.model not in modellistcheck:
+			modellistcheck.append(item.model)
+			modellist.append([item.model,item.maker])
+
+	querry = "select name from main_models where parent is null"
+	DBmakers = list(q_run(connD,querry))
+
+	for item in tqdm(makerslist):
+		if item not in column(DBmakers,0):
+			querry = "insert into main_models (parent,name) VALUES (null,'" + str(item) + "')"
+			q_run(connD,querry)
+		else:
+			print('Maker exist')
+
+	querry = "select name from main_models where parent is not null"
+	DBmodels = list(q_run(connD,querry))
+
+	for item in tqdm(modellist):
+		if item[0] not in column(DBmodels,0):
+			try:
+				querry = "insert into main_models (parent,name) VALUES ((select id from main_models where name ='" + str(item[1]) + "'),'" + str(item[0]) + "')"
+
+				q_run(connD,querry)
+			except:
+				print('Empty model ? Something wrong')
+		else:
+			print('Model exist')
+def crosstablebyid():
+	class Device(object):
+		def __init__(self):
+			self.id = ''
+			self.nameindevice = ''
+
+
+	Tk().withdraw()
+	file = filedialog.askopenfilename()
+	workbook = xlrd.open_workbook(file)
+	worksheet = workbook.sheet_by_index(0)
+	xsize = worksheet.ncols
+	ysize = worksheet.nrows
+
+
+	dframelist = list()
+	x = 0
+	for row in range(ysize-2):
+		x += 1
+		y = 0
+		for row in range(xsize-1):
+			y += 1
+
+			if ((worksheet.cell(x, 1).value)) != '':
+
+				dframe = Device()
+				dframe.id = int(worksheet.cell(x, 0).value)
+				dframe.nameindevice = (worksheet.cell(x, 1).value)
+				dframelist.append(dframe)
+				break
+	for item in tqdm(dframelist):
+		querry = "select id from crosstable where id = {}".format(item.id)
+		if len(q_run(connD, querry)) == 0:
+			querry = "INSERT into devices(parent,nameindevice,id) VALUES ((select parent from devices where id = {} limit 1),'{}',{})".format(\
+				item.id,item.nameindevice,item.id)
+		else:
+			querry = "update crosstable set nameindevice = '{}' where id = {}".format(\
+				item.nameindevice,item.id)
+		#print(querry)
+		q_run(connD, querry)
+
+
+
+while 0 == 0:
+	t = input("[1]Update bearings via point"+chr(10)+ "[2]Load Makers/Models" + chr(10) + "[3]Update devices data"+ chr(10) + "[4]Update crosstable nameindevice by id"+ chr(10))
+	if str(t) == '1':
+		update_bearings_via_point()
+	if str(t) == '2':
+		LoadMakersModels()
+	if str (t) == '3':
+		updatedevicesdata()
+	if str(t) == '4':
+		crosstablebyid()

@@ -6,7 +6,7 @@ import psycopg2
 from tkinter import messagebox
 import csv
 
-host = 'localhost'
+host = '192.168.10.243'
 ownerlist = []
 
 
@@ -73,7 +73,7 @@ class LogApplication:
 				filewriter = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
 				filewriter.writerow([user_get])
 				filewriter.writerow([pass_get])
-		connD = [user_get, pass_get, '192.168.10.243']
+		connD = [user_get, pass_get, host]
 		querry = "SELECT current_user"
 		usercheck = ''
 		usercheck = q_run(connD, querry)  # PYINSTALLER ma problemy gdzies tu
@@ -134,7 +134,10 @@ class Datasheet():
 				if (str(x[0])).strip() == (str(id)).strip():
 					# try:
 					pointlist.insert(END, str(x[2]))
-					rmslist.insert(END, round(float(x[3]), 3))
+					try:
+						rmslist.insert(END, round(float(x[3]), 3))
+					except:
+						rmslist.insert(END, '-')
 					rmslist.bind('<Double-Button>', lambda event, id=x[0], rn=x[1]: self.onselect2(event, id, rn, connD,parent))
 					# print(str(x[5]))
 					limStr = self.countLimit(str(x[5]), x[3])
@@ -201,7 +204,10 @@ class Datasheet():
 
 		measframe.pack(side=LEFT, fill=tk.BOTH, expand=True)
 	def countLimit(self,standard, value):
-		value = float(value)
+		try:
+			value = float(value)
+		except:
+			return ('None')
 
 		for limNo in self.limits:
 			if str(limNo[0]) == standard:
@@ -278,16 +284,31 @@ class Datasheet():
 		querry2 = "SELECT dss.id, CASE WHEN dss.id ~E'^\\\d+$' THEN	(select name from devices where cast(devices.id as text)  =  dss.id limit 1) ELSE (select id from ds_structure where id  =  dss.id limit 1) END as sortint, dss.sort FROM ds_structure as dss where dss.parent = " + str(
 			parent) + " ORDER BY DSS.SORT"
 		self.results = q_run(connD, querry2)
-		querry3 = """select ml.id, ml.raport_number, ml.point,  ml.value, ml2.value, dev.norm
-						from measurements_low as ml 
-						left join points as pts on ml.id = pts.id and ml.point = pts.point
-						left join (select id,raport_number, point, value 
-												from measurements_low where parent = '""" + str(parent) + """' and type = 'envelope P-K') as ml2 
-												on ml.id=ml2.id and ml.raport_number = ml2.raport_number
-												and ml.point = ml2.point 
-						left join devices as dev on ml.id = dev.id
-						where ml.parent =  """ + str(
-			parent) + """ and ml.type = 'RMS' and ml.id <> 0 order by id, raport_number, sort"""
+
+
+
+		querry3 = """select deta.id, mlrn.raport_number, deta.point, mlrms.value, mlenv.value,deta.norm
+
+from (select dev.parent,dev.id, pts.point, pts.sort,dev.norm
+		from devices dev
+		left join points pts on dev.id = pts.id
+		order by dev.id, pts.sort
+		) as deta
+
+left join (select ml.id,ml.raport_number
+			from measurements_low ml
+			group by ml.id,ml.raport_number) mlrn on deta.id = mlrn.id
+
+left join measurements_low mlrms on deta.id = mlrms.id and deta.point = mlrms.point and mlrn.raport_number = mlrms.raport_number and mlrms.type = 'RMS'
+left join measurements_low mlenv on deta.id = mlenv.id and deta.point = mlenv.point and mlrn.raport_number = mlenv.raport_number and mlenv.type = 'envelope P-K'
+
+where deta.parent =  {}
+
+order by deta.id, mlrn.raport_number, deta.sort
+						 """.format(str(parent))
+
+
+
 		self.resultm = q_run(connD, querry3)
 		querry = "select id, raport_number, mcremark from mcdata where raport_number is not null and id is not null"
 		self.resultmc = q_run(connD, querry)
@@ -353,9 +374,13 @@ class Datasheet():
 				for x in self.resultm:
 					if str(x[1]) == str(lrn):
 						if (str(x[0])).strip() == (str(line[0])).strip():
-							if tempval < float(x[3]):
-								tempval = float(x[3])
-								limStr = self.countLimit(str(x[5]), x[3])
+							try:
+								if tempval < float(x[3]):
+									tempval = float(x[3])
+									limStr = self.countLimit(str(x[5]), x[3])
+							except:
+								pass
+
 							try:
 								if tempval2 < float(x[4]):
 									tempval2 = float(x[4])
@@ -379,7 +404,13 @@ class Datasheet():
 		def __init__(self,connD, parentclass, value,id,rn,point,parent):
 			def updateRMS():
 				try:
-					querry = "UPDATE measurements_low set value = "+str(self.Val.get("1.0",END))+",date = '"+str(self.ValDate.get("1.0",END))+"' where raport_number = '"+str(rn)+ "' and id = "+str(id)+" and type = 'RMS' and point = '"+str(point) + "'"
+					querry = "select _id_ from measurements_low where raport_number = '{}' and id = {} and type = 'RMS' and point = '{}'".format(str(rn),str(id),point)
+					if len(q_run(connD,querry)) == 1:
+						querry = """UPDATE measurements_low set value = {} ,date = '{}' where raport_number = '{}' and id = {} and type = 'RMS' and point = '{}'""".format\
+							(str(self.Val.get("1.0", END)),str(self.ValDate.get("1.0", END)),str(rn),str(id),point)
+					else:
+						querry = """INSERT INTO measurements_low (parent,id,raport_number,point,type,unit,value,date) values({},{},'{}','{}','RMS','[mm/s]',{},'{}')""".format \
+							(parent,id,rn,point,self.Val.get("1.0", END), self.ValDate.get("1.0", END))
 					q_run(connD,querry)
 					for widget in parentclass.meascanv.winfo_children():
 						widget.destroy()
@@ -408,7 +439,18 @@ class Datasheet():
 		def __init__(self,connD, parentclass, value,id,rn,point,parent):
 			def updateENV():
 				try:
-					querry = "UPDATE measurements_low set value = "+str(self.Val.get("1.0",END))+",date = '"+str(self.ValDate.get("1.0",END))+"' where raport_number = '"+str(rn)+ "' and id = "+str(id)+" and type = 'envelope P-K' and point = '"+str(point) + "'"
+
+					querry = "select _id_ from measurements_low where raport_number = '{}' and id = {} and type = 'envelope P-K' and point = '{}'".format(
+						str(rn), str(id), point)
+					if len(q_run(connD, querry)) == 1:
+						querry = """UPDATE measurements_low set value = {} ,date = '{}' where raport_number = '{}' and id = {} and type = 'envelope P-K' and point = '{}'""".format \
+							(str(self.Val.get("1.0", END)), str(self.ValDate.get("1.0", END)), str(rn), str(id), point)
+					else:
+						querry = """INSERT INTO measurements_low (parent,id,raport_number,point,type,unit,value,date) values({},{},'{}','{}','envelope P-K','[m/s2]',{},'{}')""".format \
+							(parent, id, rn, point, self.Val.get("1.0", END), self.ValDate.get("1.0", END))
+
+
+
 					q_run(connD,querry)
 					for widget in parentclass.meascanv.winfo_children():
 						widget.destroy()
@@ -437,11 +479,16 @@ class Datasheet():
 		def __init__(self,connD, parentclass, id, rn, parent):#,connD, parentclass, value,id,rn,point,parent):
 			def updateMCARD():
 				try:
-					querry = "UPDATE mcdata set mcremark = '"+str(self.MCREM.get("1.0",END))+"'," \
-					"documentdate = '"+str(self.DocDate.get("1.0",END))+"' " \
-					"where raport_number = '"+str(rn)+ "' and id = "+str(id)
-					print(querry)
-					q_run(connD,querry)
+					querry = "select * from mcdata where raport_number = '{}' and id = {}".format(
+						str(rn), str(id))
+					if len(q_run(connD, querry)) == 1:
+						querry = """UPDATE mcdata set mcremark = '{}' ,documentdate = '{}' where raport_number = '{}' and id = {} """.format \
+							(self.MCREM.get("1.0", END), self.DocDate.get("1.0", END), rn, id)
+					else:
+						querry = """INSERT INTO mcdata (parent,id,raport_number,mcremark,documentdate) values({},{},'{}','{}','{}')""".format \
+							(parent, id, rn, self.MCREM.get("1.0", END), self.DocDate.get("1.0", END))
+					q_run(connD, querry)
+
 					for widget in parentclass.meascanv.winfo_children():
 						widget.destroy()
 					parentclass.loadquerrys(parent, connD)
@@ -478,11 +525,19 @@ class Datasheet():
 					else:
 						sendflag = 'False'
 
-					querry = "UPDATE remarks set remark = '"+str(self.REM.get("1.0",END))+"'," \
-					"documentdate = '"+str(self.DocDate.get("1.0",END))+"', sended = " + str(sendflag) +  \
-					" where raport_number = '"+str(rn)+ "' and id = "+str(id)
 
-					q_run(connD,querry)
+					querry = "select * from remarks where raport_number = '{}' and id = {}".format(
+						str(rn), str(id))
+					if len(q_run(connD, querry)) == 1:
+						querry = """UPDATE remarks set remark = '{}' ,documentdate = '{}',sended = '{}' where raport_number = '{}' and id = {} """.format \
+							(self.REM.get("1.0", END), self.DocDate.get("1.0", END),sendflag, rn, id)
+					else:
+						querry = """INSERT INTO remarks (parent,id,raport_number,remark,documentdate,sended) values({},{},'{}','{}','{}','{}')""".format \
+							(parent, id, rn, self.REM.get("1.0", END), self.DocDate.get("1.0", END),sendflag)
+
+					q_run(connD, querry)
+
+
 					for widget in parentclass.meascanv.winfo_children():
 						widget.destroy()
 					parentclass.loadquerrys(parent, connD)
@@ -494,8 +549,7 @@ class Datasheet():
 			self.window.title("CHANGE REMARK")
 			self.DocDate = tk.Text(self.window, height=1, width=12)
 
-			querry = "select remark, documentdate,sended from remarks where " \
-					 "raport_number = '" + str(rn) + "' and id = " + str(id) + " limit 1"
+			querry = "select remark, documentdate,sended from remarks where raport_number = '" + str(rn) + "' and id = " + str(id) + " limit 1"
 
 			resmc = q_run(connD,querry)
 
@@ -503,8 +557,10 @@ class Datasheet():
 
 			self.var1 = IntVar(self.window )
 			self.var1.set(0)
-			print(str(resmc[0][2]))
-			if str(resmc[0][2]) == 'True':self.var1.set(1)
+			if len(resmc) != 0:
+				if str(resmc[0][2]) == 'True':self.var1.set(1)
+
+
 
 			self.sended = tk.Checkbutton(self.window, text='Sent', variable=self.var1, onvalue=1, offvalue=0)
 
@@ -527,10 +583,29 @@ class Datasheet():
 		def __init__(self,connD, parentclass, id, rn, parent):#,connD, parentclass, value,id,rn,point,parent):
 			def updateFDB():
 				try:
-					querry = "UPDATE feedbacks set feedback = '"+str(self.FDB.get("1.0",END))+"'," \
-					"documentdate = '"+str(self.DocDate.get("1.0",END))+"' " \
-					"where raport_number = '"+str(rn)+ "' and id = "+str(id)
-					q_run(connD,querry)
+
+
+
+					querry = "select * from feedbacks where raport_number = '{}' and id = {}".format(
+						str(rn), str(id))
+					if len(q_run(connD, querry)) == 1:
+						querry = """UPDATE feedbacks set feedback = '{}' ,documentdate = '{}' where raport_number = '{}' and id = {} """.format \
+							(self.FDB.get("1.0", END), self.DocDate.get("1.0", END), rn, id)
+					else:
+						querry = """INSERT INTO feedbacks (parent,id,raport_number,feedback,documentdate) values({},{},'{}','{}','{}')""".format \
+							(parent, id, rn, self.FDB.get("1.0", END), self.DocDate.get("1.0", END))
+					print(querry)
+					q_run(connD, querry)
+
+
+
+
+					# querry = "UPDATE feedbacks set feedback = '"+str(self.FDB.get("1.0",END))+"'," \
+					# "documentdate = '"+str(self.DocDate.get("1.0",END))+"' " \
+					# "where raport_number = '"+str(rn)+ "' and id = "+str(id)
+					# q_run(connD,querry)
+
+
 					for widget in parentclass.meascanv.winfo_children():
 						widget.destroy()
 					parentclass.loadquerrys(parent, connD)
@@ -572,7 +647,7 @@ class Datasheet():
 		self.devicesscrollbar.pack(side=LEFT, fill=Y)
 		devicesscrollbarX = Scrollbar(self.Fwindow, orient=HORIZONTAL)
 		devicesscrollbarX.pack( side=BOTTOM, fill=X )
-		self.mylist = Listbox(self.Fwindow, yscrollcommand=self.devicesscrollbar.set)
+		self.mylist = Listbox(self.Fwindow, yscrollcommand=self.devicesscrollbar.set, exportselection=False)
 		self.mylist.config(width=0)
 		self.deviceslist(connD,self.mylist, parent)
 
@@ -581,7 +656,7 @@ class Datasheet():
 		self.deviceid = tk.Label(self.deviceframe, text="id")
 		self.devicetype = tk.Label(self.deviceframe, text="TYPE: ")
 		self.devicemodel = tk.Label(self.deviceframe, text="MODEL: ")
-		self.raportlist = Listbox(self.deviceframe)
+		self.raportlist = Listbox(self.deviceframe, exportselection=False)
 		self.raportlist.config(width=0)
 		self.raportlist.bind('<<ListboxSelect>>', lambda event : self.RAPonselect(event, connD,parent))
 							 #self.RAPonselect)

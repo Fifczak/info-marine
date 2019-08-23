@@ -23,9 +23,10 @@ def q_run(connD, querry):
 	cur.close()
 def column(matrix, i):
     return [row[i] for row in matrix]
+
 ###
-
-
+import datetime
+import pandas.io.sql as sqlio
 import pandas as pd
 from tkinter import *
 import tkinter as tk
@@ -37,7 +38,7 @@ import matplotlib.dates as mdates
 import matplotlib.cbook as cbook
 import re
 import csv
-connD=['testuser','info','192.168.10.243']
+#conn = psycopg2.connect("host='{}' port={} dbname='{}' user={} password={}".format('192.168.10.243', '5432', 'postgres', 'testuser', 'info'))
 class LogApplication:
 
 	def __init__(self):
@@ -82,7 +83,9 @@ class LogApplication:
 				filewriter.writerow([user_get])
 				filewriter.writerow([pass_get])
 		connD = [user_get, pass_get, '192.168.10.243']
-
+		conn = psycopg2.connect(
+			"host='{}' port={} dbname='{}' user={} password={}".format('192.168.10.243', '5432', 'postgres', user_get,
+																	   pass_get))
 
 		querry = "SELECT current_user"
 		usercheck = ''
@@ -90,7 +93,7 @@ class LogApplication:
 		usercheck = q_run(connD, querry)  # PYINSTALLER ma problemy gdzies tu
 		if usercheck != '':
 			self.root.destroy()
-			DayflowFrame(connD)
+			DayflowFrame(connD,conn)
 
 
 
@@ -98,7 +101,7 @@ class LogApplication:
 class DayflowFrame():
 
 
-	def createwindow(self,connD):
+	def createwindow(self,connD,conn):
 		def showMonthTasks():
 			querry = "select ini from users where full_name = '{}'".format(self.e1.get())
 			ini = list(q_run(connD,querry))[0][0]
@@ -116,10 +119,8 @@ class DayflowFrame():
 
 				monthtaskframe.loc[0, '{}'.format(item)] = list(q_run(connD,querry))[0][0]
 
-			print('{}_{}.xlsx'.format(ini,datec.month))
+
 			monthtaskframe.to_excel('{}_{}.xlsx'.format(ini,datec.month))
-
-
 		def showDayChart():
 			def tasklogbymin(taskloglist):
 				checklist = list()
@@ -283,6 +284,35 @@ class DayflowFrame():
 
 			fig.autofmt_xdate()
 			plt.show()
+		def showOvertime():
+
+			querry = "select login from users where full_name = '{}'".format(self.e1.get())
+			who = list(q_run(connD, querry))[0][0]
+
+			date = datetime.strptime(self.e2.get(),'%Y-%m-%d').date()
+
+			querry = "select tstamp,id from logging.t_history where who = '{}' and tstamp >= timestamp '{} 00:00:00' and tstamp < timestamp '{} 23:59:59' order by tstamp".format(who,date,date)
+
+
+			dayflow = sqlio.read_sql_query(querry, conn)
+			dayflow['tstamp'] = dayflow['tstamp'].apply(
+				lambda dt: datetime(dt.year, dt.month, dt.day, dt.hour, 15 * (dt.minute // 15)))
+
+			dayflow['tstamp'] = dayflow['tstamp'].apply(
+				lambda dt: datetime(dt.year, dt.month, dt.day, dt.hour, 15 * (dt.minute // 15)))
+			byquart = dayflow.groupby('tstamp')['id'].nunique()
+			byquart = byquart.to_frame()
+			byquart.columns = ['count']
+			byquart = byquart.reset_index()
+
+			fig, ax = plt.subplots(figsize=(15, 7))
+			ax.bar(byquart['tstamp'], byquart['count'], width=0.01)
+			ax.xaxis_date()
+			plt.yscale('log')
+			ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M:%S'))
+			fig.autofmt_xdate()
+			ax.plot()
+			plt.show()
 
 		self.remWindow = tk.Tk()
 		tk.Label(self.remWindow,
@@ -300,20 +330,26 @@ class DayflowFrame():
 		self.e2.insert(0, datetime.now().date())
 		self.e1.grid(row=0, column=1, sticky=tk.W)
 		self.e2.grid(row=1, column=1, sticky=tk.W)
-		tk.Button(self.remWindow,command = showDayChart, text="Show day flow").grid(row=3,
+		tk.Button(self.remWindow,command = showDayChart, text="Show 8h Day flow").grid(row=3,
 															 column=0,
 															 sticky=tk.W,
 
 															 pady=4)
-		tk.Button(self.remWindow,command = showMonthTasks, text="Show Month stats").grid(row=3,
-															 column=1,
+
+		tk.Button(self.remWindow,command = showOvertime, text="Show 24h Day flow").grid(row=5,
+															 column=0,
+															 sticky=tk.W,
+
+															 pady=4)
+		tk.Button(self.remWindow,command = showMonthTasks, text="Show Month stats").grid(row=6,
+															 column=0,
 															 sticky=tk.W,
 
 															 pady=4)
 
 
 		self.remWindow.mainloop()
-	def __init__(self,connD):
-		self.createwindow(connD)
+	def __init__(self,connD,conn):
+		self.createwindow(connD,conn)
 
 LogApplication()
