@@ -662,10 +662,10 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 
 
 							if str( xx.limit ) == 'Cl. D':  # TEGO DLA CZYTELNOSCI LEPIEJ ZROBIC FUNKCJE
-									ht = resulttable.cell(xcord + 1, col_trend).add_paragraph()
-									ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-									resulttable.cell(xcord + 1, col_trend).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-								#try:
+								ht = resulttable.cell(xcord + 1, col_trend).add_paragraph()
+								ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+								resulttable.cell(xcord + 1, col_trend).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+								try:
 									t1 = resulttable.cell(xcord + 1, col_trend).paragraphs[0].add_run('_')
 									t1.font.size = Pt(1)
 									t1.font.color.rgb = RGBColor(255, 255, 255)
@@ -698,8 +698,8 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 									t1 = resulttable.cell(xcord + 1, col_trend).add_paragraph().add_run('_')
 									t1.font.size = Pt(1)
 									t1.font.color.rgb = RGBColor(255,255,255)
-								#except:
-									#pass
+								except:
+									pass
 
 						#REMARKS
 						ht = resulttable.cell(xcord + 1, col_remark).paragraphs[0]
