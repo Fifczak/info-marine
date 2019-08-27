@@ -18,7 +18,7 @@ import pandas as pd
 
 
 
-connD=['testuser','info','localhost']
+#connD=['testuser','info','localhost']
 def q_run(connD, querry):
 	username = connD[0]
 	password = connD[1]
@@ -191,7 +191,7 @@ class feedbackswindow:
 					(pd.isnull(self.fdbdFrame.costflag))]
 			else:
 				self.presentfeedbacks = self.fdbdFrame.loc[self.fdbdFrame.costflag == int(filterby)]
-		elif str(filtertype) == 'Missing':
+		elif str(filtertype) == 'Cost calc. missing':
 			self.presentfeedbacks = self.fdbdFrame.loc[
 				self.fdbdFrame['price'].astype(str).str.contains(filterdet) == True]
 
@@ -280,7 +280,10 @@ class feedbackswindow:
 			self.fdbtext.configure(state='normal')
 
 			self.remarktext.delete('1.0', END)
-			self.remarktext.insert(END, fdbstrip[4])
+			try:
+				self.remarktext.insert(END, fdbstrip[4])
+			except:
+				self.remarktext.insert(END, '#ERROR: MISSING REMARK IN DB')
 			self.fdbtext.delete('1.0', END)
 			self.fdbtext.insert(END, fdbstrip[6])
 			self.fdbflagstring.current(fdbstrip[7])
@@ -311,6 +314,82 @@ class feedbackswindow:
 
 	def makefeedbackwindow(self, frame):
 		def setflags():
+			def loadcost():
+				devid = (list(self.presentfeedbacks.loc[self.presentfeedbacks.fdbid == _id_, 'id'])[0])
+				querry = 'select kw,type from devices where id = {}'.format(devid)
+				devkw, devtype = list(q_run(self.connD, querry))[0]
+
+				querry = "select costflag,typ, kwrange[1],kwrange[2], price[1],price[2], low[1],low[2] , high[1],high[2]from costcases"
+				costcases = list(q_run(self.connD, querry))
+				for case in costcases: #iteracja po costcase
+					devcostflag = list(self.presentfeedbacks.loc[self.presentfeedbacks.fdbid == _id_,'costflag'])
+					if costflag== 0:
+						pricestr = ''
+						priceval = ''
+						lowstr = ''
+						lowval = ''
+						highstr = ''
+						highval = ''
+						querry = "update feedbacks set price = null, low = null, high = null where _id_ = {}".format(str(_id_))
+						break
+					elif len(devtype) == 0:
+						pricestr = 'no TYPE'
+						priceval = '?'
+						lowstr = 'no TYPE'
+						lowval = '?'
+						highstr = 'no TYPE'
+						highval = '?'
+						querry = "update feedbacks set " \
+								 "price[0] = '{}', price[1] = '{}', " \
+								 "low[0] ='{}', low[1] = '{}', " \
+								"high[0] = '{}', high[1] ='{}' " \
+								"where _id_ ={}".format(pricestr,priceval,lowstr,lowval,highstr,highval,_id_)
+
+
+
+
+					elif self.costflagstring.current() in column(costcases,0): #jest flaga w bazie
+						if  str(self.costflagstring.current()) == str(case[0]): #flaga sie zgadza
+							if str(devtype).strip() == str(case[1]).strip(): # tutaj typ
+								#TODO: ZROBIC WSTAWIANIE NO TYPE ITP ITD
+								kw = (re.findall(r'\d+\.*\d*', str(devkw))[0])
+								if (float(kw) >= float(case[2]) and float(kw) <= float(case[3])) or (case[2] == 0 and case[3] == 0):
+									pricestr = case[4]
+									priceval = case[5]
+									lowstr = case[6]
+									lowval = case[7]
+									highstr = case[8]
+									highval = case[9]
+									querry = "update feedbacks set " \
+											 "price[0] = '{}', price[1] = '{}', " \
+											 "low[0] ='{}', low[1] = '{}', " \
+											 "high[0] = '{}', high[1] ='{}' " \
+											 "where _id_ ={} ".format(pricestr, priceval, lowstr, lowval, highstr,
+																	 highval, _id_)
+									break
+							else:
+								pricestr = 'NO COST CASE'
+								priceval = '?'
+								lowstr = 'NO COST CASE'
+								lowval = '?'
+								highstr = 'NO COST CASE'
+								highval = '?'
+								querry = "update feedbacks set " \
+										 "price[0] = '{}', price[1] = '{}', " \
+										 "low[0] ='{}', low[1] = '{}', " \
+										 "high[0] = '{}', high[1] ='{}' " \
+										 "where _id_ ={}".format(pricestr, priceval, lowstr, lowval, highstr,
+																 highval,_id_)
+
+
+				q_run(self.connD, querry)
+				self.getquerry()
+				self.filterdframe(self.filterlisboxtype.get(), self.filterlisboxdet.get())
+				self.fillfdblist(self.presentfeedbacks)
+				dflisted = self.presentfeedbacks.values.tolist()
+				self.updatefeedbackwindows(dflisted[index])
+				self.feedbacklist.select_set(index)
+				self.feedbacklist.see(index)
 			index = self.feedbacklist.curselection()[0]
 			fdbflag = self.fdbflagstring.current()
 			costflag = self.costflagstring.current()
@@ -320,51 +399,16 @@ class feedbackswindow:
 			querry = """UPDATE feedbacks set fdbflag = {},costflag = {}
 	            where _id_ = {}""".format(fdbflag, costflag, _id_)
 			q_run(self.connD, querry)
+			if str(fdbflag) == 'Null': fdbflag = 0
+			if str(costflag) == 'Null': costflag = 0
 			self.presentfeedbacks.loc[self.presentfeedbacks.fdbid == _id_,'fdbflag'] = fdbflag
 			self.fdbdFrame.loc[self.fdbdFrame.fdbid == _id_,'fdbflag'] = fdbflag
+			self.presentfeedbacks.loc[self.presentfeedbacks.fdbid == _id_,'costflag'] = costflag
+			self.fdbdFrame.loc[self.fdbdFrame.fdbid == _id_,'costflag'] = costflag
 			self.filterdframe(self.filterlisboxtype.get(), self.filterlisboxdet.get())
 			self.fillfdblist(self.presentfeedbacks)
-
-
-			# TODO: przeliczanie cost flag na koszty
-			def loadcost():
-
-				# for line in tqdm(_id_list):
-				querry = "select costflag,typ, kwrange[1],kwrange[2], price[1],price[2], low[1],low[2] , high[1],high[2]from costcases"
-				costcases = list(q_run(connD, querry))
-				for case in costcases:
-
-					devcostflag = list(self.presentfeedbacks.loc[self.presentfeedbacks.fdbid == _id_,'costflag'])
-
-					print((devcostflag), '==', case[0])
-					if  str(devcostflag[0]) == str(case[0]): #case sie zgadza
-						devid = (list(self.presentfeedbacks.loc[self.presentfeedbacks.fdbid == _id_, 'id'])[0])
-						querry = 'select kw,type from devices where id = {}'.format(devid)
-						#print(self.presentfeedbacks.loc[self.presentfeedbacks.fdbid == _id_,'id'][0])
-						devkw, devtype = list(q_run(connD, querry))[0]
-						print(str(devtype).strip(), str(case[1]).strip())
-						if str(devtype).strip() == str(case[1]).strip(): #TU ZNAJDUJE TYP
-							#TODO: ZROBIC WSTAWIANIE NO TYPE ITP ITD
-							kw = (re.findall(r'\d+\.*\d*', str(devkw))[0])
-							if (float(kw) >= float(case[2]) and float(kw) <= float(case[3])) or (case[2] == 0 and case[3] == 0):
-								pricestr = case[4]
-								priceval = case[5]
-								lowstr = case[6]
-								lowval = case[7]
-								highstr = case[8]
-								highval = case[9]
-								querry = "update feedbacks set " \
-										 "price = '{" + '"' + str(pricestr) + '" ,"' + str(priceval) + '"' + "}'" \
-																											 ", low = '{" + '"' + str(
-									lowstr) + '" ,"' + str(lowval) + '"' + "}'" \
-																		   ", high = '{" + '"' + str(highstr) + '" ,"' + str(
-									highval) + '"' + "}'" \
-										 + ' where _id_ = ' + str(_id_)
-								print(querry)
-								#q_run(connD, querry)
-								break
-
 			loadcost()
+
 
 		def updatecosts():
 			index = self.feedbacklist.curselection()[0]
@@ -393,7 +437,8 @@ class feedbackswindow:
 			self.getquerry()
 			self.filterdframe(self.filterlisboxtype.get(), self.filterlisboxdet.get())
 			self.fillfdblist(self.presentfeedbacks)
-
+			self.feedbacklist.select_set(index)
+			self.feedbacklist.see(index)
 
 
 		## + FUNKCJA DO PRZELICZANIA COST FLAG
@@ -411,7 +456,7 @@ class feedbackswindow:
 		self.remarktext.configure(state='disabled')
 		self.fdbtext.configure(state='disabled')
 		self.setflagbut = tk.Button(frame, text='Update flags', command=setflags)
-		updatecosts
+
 		self.pricetext = tk.Text(frame, height=1, width=30, wrap=WORD)
 		self.priceval = tk.Text(frame, height=1, width=30, wrap=WORD)
 
@@ -455,5 +500,5 @@ class feedbackswindow:
 
 
 if __name__ == '__main__' :
-	#LogApplication()
-	feedbackswindow(connD)
+	LogApplication()
+	#feedbackswindow(connD)
