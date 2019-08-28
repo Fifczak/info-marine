@@ -17,7 +17,6 @@ import pandas.io.sql as sqlio
 import pandas as pd
 
 
-
 #connD=['testuser','info','localhost']
 def q_run(connD, querry):
 	username = connD[0]
@@ -96,7 +95,6 @@ class LogApplication:
 
 class feedbackswindow:
 	def __init__(self,connD):
-
 		self.connD = connD
 		self. conn = psycopg2.connect(
 			"host='{}' port={} dbname='{}' user={} password={}".format(self.connD[2], '5432', 'postgres', self.connD[0], self.connD[1]))
@@ -130,11 +128,11 @@ class feedbackswindow:
 		self.costflagz.append(['0', 'No flag'])
 		for item in (list(q_run(self.connD, querry))):
 			self.costflagz.append(item)
-
 	def fillfdblist(self, fdbdfr):
 		self.feedbacklist.delete(0, 'end')
-		dflisted = fdbdfr.values.tolist()
-		for row in dflisted:
+		#dflisted = fdbdfr.values.tolist()
+		for row in fdbdfr.values:
+			#print(row)
 			liststring = (row[1], row[3], row[2])
 			self.feedbacklist.insert(END, liststring)
 
@@ -164,16 +162,13 @@ class feedbackswindow:
 		self.feedbacklist.pack(side=TOP, fill=Y, expand=1)
 
 		self.root.mainloop()
-
-
-
 	def filterdframe(self,filtertype, filterdet):
 		if str(filtertype) == 'None':
 			self.presentfeedbacks = self.fdbdFrame
 		elif str(filtertype) == 'Ship':
-			self.presentfeedbacks = self.fdbdFrame[self.fdbdFrame.shipname == str(filterdet)]
+			self.presentfeedbacks = self.fdbdFrame.loc[self.fdbdFrame.shipname == str(filterdet)]
 		elif str(filtertype) == 'Report':
-			self.presentfeedbacks = self.fdbdFrame[self.fdbdFrame.raport_number == str(filterdet)]
+			self.presentfeedbacks = self.fdbdFrame.loc[self.fdbdFrame.raport_number == str(filterdet)]
 		elif str(filtertype) == 'Fdb flag':
 			filterby = str(filterdet)[filterdet.index('(') + 1:filterdet.index(')')]
 			if int(filterby) == 0:
@@ -196,7 +191,6 @@ class feedbackswindow:
 				self.fdbdFrame['price'].astype(str).str.contains(filterdet) == True]
 
 		self.fillfdblist(self.presentfeedbacks)
-
 	def makefilterwindow(self, frame):
 		def boxtypechange(evt):
 			getdetvalues(self.filterlisboxtype.get())
@@ -266,7 +260,6 @@ class feedbackswindow:
 		self.filterlisboxdet.grid(row=0, column=2)
 		self.label2.grid(row=1, column=0)
 		self.sortlist.grid(row=1, column=1)
-
 	def updatefeedbackwindows(self, fdbstrip):
 		def updateheadlabel(fdbstrip):
 			headtext = """
@@ -311,11 +304,11 @@ class feedbackswindow:
 				self.highval.insert(END, fdbstrip[11][1])
 
 		updateheadlabel(fdbstrip)
-
 	def makefeedbackwindow(self, frame):
 		def setflags():
-			def loadcost():
-				devid = (list(self.presentfeedbacks.loc[self.presentfeedbacks.fdbid == _id_, 'id'])[0])
+			def loadcost():#devid):
+
+				devid = (list(self.fdbdFrame.loc[self.fdbdFrame.fdbid == _id_, 'id'])[0])
 				querry = 'select kw,type from devices where id = {}'.format(devid)
 				devkw, devtype = list(q_run(self.connD, querry))[0]
 
@@ -339,11 +332,11 @@ class feedbackswindow:
 						lowval = '?'
 						highstr = 'no TYPE'
 						highval = '?'
-						querry = "update feedbacks set " \
-								 "price[0] = '{}', price[1] = '{}', " \
-								 "low[0] ='{}', low[1] = '{}', " \
-								"high[0] = '{}', high[1] ='{}' " \
-								"where _id_ ={}".format(pricestr,priceval,lowstr,lowval,highstr,highval,_id_)
+						querry = """UPDATE feedbacks set
+							price = ARRAY['{}','{}'],
+				            low  = ARRAY['{}','{}'],
+				            high = ARRAY['{}','{}']
+				            where _id_ = {}""".format(pricestr,priceval,lowstr,lowval,highstr,highval,_id_)
 
 
 
@@ -351,7 +344,6 @@ class feedbackswindow:
 					elif self.costflagstring.current() in column(costcases,0): #jest flaga w bazie
 						if  str(self.costflagstring.current()) == str(case[0]): #flaga sie zgadza
 							if str(devtype).strip() == str(case[1]).strip(): # tutaj typ
-								#TODO: ZROBIC WSTAWIANIE NO TYPE ITP ITD
 								kw = (re.findall(r'\d+\.*\d*', str(devkw))[0])
 								if (float(kw) >= float(case[2]) and float(kw) <= float(case[3])) or (case[2] == 0 and case[3] == 0):
 									pricestr = case[4]
@@ -360,12 +352,12 @@ class feedbackswindow:
 									lowval = case[7]
 									highstr = case[8]
 									highval = case[9]
-									querry = "update feedbacks set " \
-											 "price[0] = '{}', price[1] = '{}', " \
-											 "low[0] ='{}', low[1] = '{}', " \
-											 "high[0] = '{}', high[1] ='{}' " \
-											 "where _id_ ={} ".format(pricestr, priceval, lowstr, lowval, highstr,
-																	 highval, _id_)
+									querry = """UPDATE feedbacks set
+								price = ARRAY['{}','{}'],
+								low  = ARRAY['{}','{}'],
+								high = ARRAY['{}','{}']
+								where _id_ = {}""".format(pricestr, priceval, lowstr, lowval, highstr,
+																		 highval, _id_)
 									break
 							else:
 								pricestr = 'NO COST CASE'
@@ -374,11 +366,11 @@ class feedbackswindow:
 								lowval = '?'
 								highstr = 'NO COST CASE'
 								highval = '?'
-								querry = "update feedbacks set " \
-										 "price[0] = '{}', price[1] = '{}', " \
-										 "low[0] ='{}', low[1] = '{}', " \
-										 "high[0] = '{}', high[1] ='{}' " \
-										 "where _id_ ={}".format(pricestr, priceval, lowstr, lowval, highstr,
+								querry = """UPDATE feedbacks set
+							price = ARRAY['{}','{}'],
+				            low  = ARRAY['{}','{}'],
+				            high = ARRAY['{}','{}']
+				            where _id_ = {}""".format(pricestr, priceval, lowstr, lowval, highstr,
 																 highval,_id_)
 
 
@@ -390,6 +382,7 @@ class feedbackswindow:
 				self.updatefeedbackwindows(dflisted[index])
 				self.feedbacklist.select_set(index)
 				self.feedbacklist.see(index)
+
 			index = self.feedbacklist.curselection()[0]
 			fdbflag = self.fdbflagstring.current()
 			costflag = self.costflagstring.current()
@@ -401,12 +394,14 @@ class feedbackswindow:
 			q_run(self.connD, querry)
 			if str(fdbflag) == 'Null': fdbflag = 0
 			if str(costflag) == 'Null': costflag = 0
-			self.presentfeedbacks.loc[self.presentfeedbacks.fdbid == _id_,'fdbflag'] = fdbflag
-			self.fdbdFrame.loc[self.fdbdFrame.fdbid == _id_,'fdbflag'] = fdbflag
-			self.presentfeedbacks.loc[self.presentfeedbacks.fdbid == _id_,'costflag'] = costflag
-			self.fdbdFrame.loc[self.fdbdFrame.fdbid == _id_,'costflag'] = costflag
+
+
+			self.getquerry()
 			self.filterdframe(self.filterlisboxtype.get(), self.filterlisboxdet.get())
 			self.fillfdblist(self.presentfeedbacks)
+			self.feedbacklist.select_set(index)
+			self.feedbacklist.see(index)
+
 			loadcost()
 
 
@@ -423,9 +418,9 @@ class feedbackswindow:
 
 
 			querry = """UPDATE feedbacks set
-							price[0] = '{}',price[1] = '{}',
-				            low[0] = '{}',low[1] = '{}',
-				            high[0] = '{}',high[1] = '{}'
+							price = ARRAY['{}','{}'],
+				            low  = ARRAY['{}','{}'],
+				            high = ARRAY['{}','{}']
 				            where _id_ = {}""".format(
 												price0, price1,
 												low0, low1,
