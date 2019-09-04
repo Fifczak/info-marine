@@ -483,7 +483,7 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                                                 x.unit = '[m/s2]'
                                             elif cols2[1] == '1':
                                                 x.type = 'Vel'
-                                                x.unit = '[m/s]'
+                                                x.unit = '[mm/s]'
                                             elif cols2[1] == '2':
                                                 x.type = 'Dis'
                                                 x.unit = '[m]'
@@ -976,4 +976,4 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 # 'Vibscanner'
 # 'Marvib'
 # 'ezThomas'
-#read_measurement_file('Marvib','testuser','info','192.168.10.243','FIFCZAKTEST', '71')
+read_measurement_file('Marvib','testuser','info','192.168.10.243','FIFCZAKTEST', '71')
