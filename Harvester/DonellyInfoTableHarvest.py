@@ -12,7 +12,7 @@ import psycopg2
 import re
 username = 'testuser'
 password = 'info'
-host = '192.168.10.243'
+host = 'localhost'
 connD = [username,password,host]
 
 def column(matrix, i):
@@ -285,7 +285,7 @@ def update_bearings_via_point():
 
 	dframelist = list()
 	x = 0
-	for row in range(ysize-2):
+	for row in range(ysize-1):
 		x += 1
 		y = 0
 		for col in range(xsize-1):
@@ -309,17 +309,17 @@ def update_bearings_via_point():
 			item.bearing = str(item.bearing)
 
 		querry = "SELECT * FROM BEARINGS WHERE ID = {} AND POINT = '{}'".format(int(item.id),item.point)
-
 		if len(q_run(connD,querry)) == 0:
-			querry = "INSERT INTO BEARINGS (id,point,bearing,seal,additional,visible) values ({},'{}','{}','{}','{}','{}')".format(int(item.id),item.point,item.bearing,item.seal,item.add,dframe.visible )
+			querry = "INSERT INTO BEARINGS (id,point,bearing,seal,additional) values ({},'{}','{}','{}','{}')".format(int(item.id),item.point,item.bearing,item.seal,item.add )
 		else:
 			querry = "update bearings set bearing = '{}', seal = '{}', additional = '{}' where id = {} and point = '{}'".format((item.bearing),item.seal,item.add,int(item.id),item.point)
 
 		try:
-			#print(querry)
+
 			q_run(connD,querry)
 		except:
 			('Bearings update/insert errot')
+
 		querry = "UPDATE points set visible = '{}' where id = {} and point = '{}'".format(item.visible,int(item.id),item.point)
 		try:
 			#print(querry)
@@ -350,8 +350,8 @@ def updatedevicesdata():
 
 
 	dframelist = list()
-	x = 1
-	for row in range(ysize-2):
+	x = 0
+	for row in range(ysize-1):
 		x += 1
 		y = 0
 		for row in range(xsize-1):
@@ -393,7 +393,7 @@ def updatedevicesdata():
 		if str(item.RPM) == '0': item.RPM = ''
 		querry = "update devices set name = '{}', pms = '{}',drivenby = {},kw = {},rpm = '{}',type = '{}',standard_fkey='{}',norm=(select standard from standards where id = {}),info='{}',cbm_interval = '{}',cm = {} where id = {}".format(\
 			item.name,item.PMS,item.drivenby,item.kW,item.RPM,item.type,item.standardfkey,item.standardfkey,item.info,item.interval, item.cm,item.id)
-		#print(querry)
+		print(querry)
 		q_run(connD, querry)
 
 		if str(item.model).strip() != '':
@@ -414,8 +414,8 @@ def LoadMakersModels():
 	xsize = worksheet.ncols
 	ysize = worksheet.nrows
 	dframelist = list()
-	x = 1
-	for row in range(ysize-2):
+	x = 0
+	for row in range(ysize-1):
 		x += 1
 		y = 0
 		for row in range(xsize-1):
@@ -501,15 +501,57 @@ def crosstablebyid():
 		#print(querry)
 		q_run(connD, querry)
 
+def mccard():
+	class Device(object):
+		def __init__(self):
+			self.id = ''
+			self.rhs = ''
+			self.rpm = ''
 
 
-while 0 == 0:
-	t = input("[1]Update bearings via point"+chr(10)+ "[2]Load Makers/Models" + chr(10) + "[3]Update devices data"+ chr(10) + "[4]Update crosstable nameindevice by id"+ chr(10))
-	if str(t) == '1':
-		update_bearings_via_point()
-	if str(t) == '2':
-		LoadMakersModels()
-	if str (t) == '3':
-		updatedevicesdata()
-	if str(t) == '4':
-		crosstablebyid()
+
+	Tk().withdraw()
+	file = filedialog.askopenfilename()
+	workbook = xlrd.open_workbook(file)
+	worksheet = workbook.sheet_by_index(0)
+	xsize = worksheet.ncols
+	ysize = worksheet.nrows
+
+
+	dframelist = list()
+	x = 0
+	for row in range(ysize-2):
+		x += 1
+		y = 0
+		for row in range(xsize-1):
+			y += 1
+
+			if ((worksheet.cell(x, 1).value)) != '':
+				try:
+					dframe = Device()
+					dframe.id = int(worksheet.cell(x, 0).value)
+					dframe.rhs = (worksheet.cell(x, 1).value)
+					if str(dframe.rhs).strip() == '': dframe.rhs = '-'
+					dframe.rpm = (worksheet.cell(x, 2).value)
+					if str(dframe.rpm).strip() == '': dframe.rpm = '-'
+					dframelist.append(dframe)
+					break
+				except:
+					#print('No int in col A')
+					break
+	for item in tqdm(dframelist):
+		querry = "INSERT INTO mcdata (id, raport_number, mcremark, documentdate) values ({},'2166-2019','{}','2019-08-30')".format(item.id,"RHs: {}{}RPM: {}".format(item.rhs,chr(10),item.rpm))
+		q_run(connD,querry)
+
+# while 0 == 0:
+# 	t = input("[1]Update bearings via point"+chr(10)+ "[2]Load Makers/Models" + chr(10) + "[3]Update devices data"+ chr(10) + "[4]Update crosstable nameindevice by id"+ chr(10))
+# 	if str(t) == '1':
+# 		update_bearings_via_point()
+# 	if str(t) == '2':
+# 		LoadMakersModels()
+# 	if str (t) == '3':
+# 		updatedevicesdata()
+# 	if str(t) == '4':
+# 		crosstablebyid()
+# 	if str(t) == '5':
+mccard()
