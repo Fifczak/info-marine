@@ -165,7 +165,6 @@ class feedbackswindow:
         self.measurementsaftertab.tag_configure('red', background='red')
         self.measurementsaftertab.tag_configure('grey', background='grey')
         self.measurementsaftertab.tag_configure('white', background='white')
-
     def updatefdbmeas(self):
         if (int(self.var.get())) == 1:
             self.generatetrendvalues()
@@ -211,6 +210,7 @@ class feedbackswindow:
             where mlrms.id = {} and mlrms.raport_number = '{}'
             group by mlrms.point, reportbefore , rmsbefore, pkbefore,pts.sort,reportafter,rmsafter,pkafter
             order by pts.sort""".format(rn,rn,did,rn,rn,did,did,rn)
+
             self.measresults = sqlio.read_sql_query(querry, self.conn)
             self.measresults['blrms'] = None
             self.measresults['alrms'] = None
@@ -274,15 +274,19 @@ class feedbackswindow:
             elif self.chosecolortype.current() == 1:
                 if str(item[11]) == 'UP':
                     self.measurementsbeforetab.insert('', 'end', text=item[0], values=(item[2], item[3]),tags =('red'))
+                    self.measurementsaftertab.insert('', 'end', text=item[0], values=(item[6], item[7]), tags=('red'))
                 else:
                     self.measurementsbeforetab.insert('', 'end', text=item[0], values=(item[2], item[3]), tags=('green'))
-                self.measurementsaftertab.insert('', 'end', text=item[0], values=(item[6], item[7]),tags =('white'))
+                    self.measurementsaftertab.insert('', 'end', text=item[0], values=(item[6], item[7]), tags=('green'))
+
             elif self.chosecolortype.current() == 2:
                 if str(item[12]) == 'UP':
                     self.measurementsbeforetab.insert('', 'end', text=item[0], values=(item[2], item[3]),tags =('red'))
+                    self.measurementsaftertab.insert('', 'end', text=item[0], values=(item[6], item[7]), tags=('red'))
                 else:
                     self.measurementsbeforetab.insert('', 'end', text=item[0], values=(item[2], item[3]), tags=('green'))
-                self.measurementsaftertab.insert('', 'end', text=item[0], values=(item[6], item[7]),tags =('white'))
+                    self.measurementsaftertab.insert('', 'end', text=item[0], values=(item[6], item[7]), tags=('green'))
+
             elif self.chosecolortype.current() == 3:
                 if str(item[9]) == 'Cl. A' or \
                     str(item[9]) == 'Cl. B':
@@ -299,15 +303,15 @@ class feedbackswindow:
 
                 if str(item[10]) == 'Cl. A' or \
                     str(item[10]) == 'Cl. B':
-                    self.measurementsaftertab.insert('', 'end', text=item[0], values=(item[2], item[3]),tags =('green'))
+                    self.measurementsaftertab.insert('', 'end', text=item[0], values=(item[6], item[7]),tags =('green'))
                 elif str(item[10]) == 'Cl. C':
-                    self.measurementsaftertab.insert('', 'end', text=item[0], values=(item[2], item[3]),
+                    self.measurementsaftertab.insert('', 'end', text=item[0], values=(item[6], item[7]),
                                                       tags=('yellow'))
                 elif str(item[10]) == 'Cl. D':
-                    self.measurementsaftertab.insert('', 'end', text=item[0], values=(item[2], item[3]),
+                    self.measurementsaftertab.insert('', 'end', text=item[0], values=(item[6], item[7]),
                                                       tags=('red'))
                 else:
-                    self.measurementsaftertab.insert('', 'end', text=item[0], values=(item[2], item[3]),
+                    self.measurementsaftertab.insert('', 'end', text=item[0], values=(item[6], item[7]),
                                                       tags=('grey'))
 
         self.updatecolor()
@@ -367,7 +371,29 @@ class feedbackswindow:
             self.presentfeedbacks = self.fdbdFrame.loc[
                 self.fdbdFrame['price'].astype(str).str.contains(filterdet) == True]
 
+        self.sortby(self.sortlist.get())
         self.fillfdblist(self.presentfeedbacks)
+
+    def sortby(self,filterby):
+        if filterby == 'Ship':
+            filterby = 'shipname'
+        elif filterby == 'Device':
+            filterby = 'devname'
+        elif filterby == 'Structure':
+            filterby = 'sort'
+        elif filterby == 'Report':
+            filterby = 'raport_number'
+        elif filterby == 'Fdb flag':
+            filterby = 'fdbflag'
+        elif filterby == 'Cost flag':
+            filterby = 'costflag'
+        else:
+            filterby = None
+        if filterby != None:
+            self.presentfeedbacks = self.presentfeedbacks.sort_values(by=[filterby])
+
+        self.fillfdblist(self.presentfeedbacks)
+
     def makefilterwindow(self, frame):
         def boxtypechange(evt):
             getdetvalues(self.filterlisboxtype.get())
@@ -398,25 +424,9 @@ class feedbackswindow:
             self.filterlisboxdet.current(0)
         def boxdetailchange(evt):
             self.filterdframe(self.filterlisboxtype.get(), self.filterlisboxdet.get())
-
         def sortchange(evt):
-            sortby(self.sortlist.get())
-        def sortby(filterby):
-            if filterby == 'Ship':
-                filterby = 'shipname'
-            elif filterby == 'Device':
-                filterby = 'devname'
-            elif filterby == 'Structure':
-                filterby = 'sort'
-            elif filterby == 'Report':
-                filterby = 'raport_number'
-            elif filterby == 'Fdb flag':
-                filterby = 'fdbflag'
-            elif filterby == 'Cost flag':
-                filterby = 'costflag'
+            self.sortby(self.sortlist.get())
 
-            self.presentfeedbacks = self.presentfeedbacks.sort_values(by=[filterby])
-            self.fillfdblist(self.presentfeedbacks)
 
         self.label1 = tk.Label(frame, text='Filter by: ')
         self.filterlisboxtype = ttk.Combobox(frame, text="",
@@ -560,11 +570,12 @@ class feedbackswindow:
                 q_run(self.connD, querry)
                 self.getquerry()
                 self.filterdframe(self.filterlisboxtype.get(), self.filterlisboxdet.get())
-                self.fillfdblist(self.presentfeedbacks)
-                dflisted = self.presentfeedbacks.values.tolist()
-                self.updatefeedbackwindows(dflisted[index])
+                # self.fillfdblist(self.presentfeedbacks)
+                # dflisted = self.presentfeedbacks.values.tolist()
+                # self.updatefeedbackwindows(dflisted[index])
                 self.feedbacklist.select_set(index)
                 self.feedbacklist.see(index)
+
             index = self.feedbacklist.curselection()[0]
             fdbflag = self.fdbflagstring.current()
             costflag = self.costflagstring.current()
@@ -577,14 +588,8 @@ class feedbackswindow:
             if str(fdbflag) == 'Null': fdbflag = 0
             if str(costflag) == 'Null': costflag = 0
 
-
-            self.getquerry()
-            self.filterdframe(self.filterlisboxtype.get(), self.filterlisboxdet.get())
-            self.fillfdblist(self.presentfeedbacks)
-            self.feedbacklist.select_set(index)
-            self.feedbacklist.see(index)
-
             loadcost()
+
         def updatecosts():
             index = self.feedbacklist.curselection()[0]
             _id_ = self.presentfeedbacks.iloc[index].loc['fdbid']
