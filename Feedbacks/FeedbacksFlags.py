@@ -87,7 +87,7 @@ class LogApplication:
                 filewriter = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
                 filewriter.writerow([user_get])
                 filewriter.writerow([pass_get])
-        connD = [user_get, pass_get, '192.168.10.243']
+        connD = [user_get, pass_get, 'localhost']
 
 
         querry = "SELECT current_user"
@@ -472,8 +472,8 @@ class feedbackswindow:
                 self.remarktext.insert(END, '#ERROR: MISSING REMARK IN DB')
             self.fdbtext.delete('1.0', END)
             self.fdbtext.insert(END, fdbstrip[6])
-            self.fdbflagstring.current(fdbstrip[7])
-            self.costflagstring.current(fdbstrip[8])
+            self.fdbflagstring.current(int(fdbstrip[7]))
+            self.costflagstring.current(int(fdbstrip[8]))
 
             self.remarktext.configure(state='disabled')
             self.fdbtext.configure(state='disabled')
@@ -570,9 +570,9 @@ class feedbackswindow:
                 q_run(self.connD, querry)
                 self.getquerry()
                 self.filterdframe(self.filterlisboxtype.get(), self.filterlisboxdet.get())
-                # self.fillfdblist(self.presentfeedbacks)
-                # dflisted = self.presentfeedbacks.values.tolist()
-                # self.updatefeedbackwindows(dflisted[index])
+                self.fillfdblist(self.presentfeedbacks)
+                dflisted = self.presentfeedbacks.values.tolist()
+                self.updatefeedbackwindows(dflisted[index])
                 self.feedbacklist.select_set(index)
                 self.feedbacklist.see(index)
 
