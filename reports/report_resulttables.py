@@ -199,7 +199,7 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 					 left join bourbonid bid on ml.id = bid.devid
 					 left join points pts on ml.id = pts.id and ml.point = pts.point
 					 left join harmonogram har on ml.raport_number = har.report_number
-					 where ml.date <= cast('{}' as date) and ml.date >= cast('{}' as date) - interval '2 years'  and ml.value <> -1 and ml.type = 'RMS' and ml.parent = {} and dss.sort is distinct from null and pts.visible = True and har.trendchart_visible_flag = True
+					 where ml.date <= cast('{}' as date) and ml.date >= cast('{}' as date) - interval '2 years'  and ml.value <> -1 and ml.type = 'RMS' and ml.id = {} and dss.sort is distinct from null and pts.visible = True and har.trendchart_visible_flag = True
 				 group by ml.id, ml.raport_number, ml2.max,dev.name, dev.norm,ml.date,dev.drivenby,dss.sort,dev.pms,sta.limit_4_value,mlVSG.max,bid.bourbon, pts.visible
 				  order by raport_number DESC""".format(drivid,maxdate,maxdate,drivid)
 						try:
@@ -215,6 +215,7 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 							y.Dlimit = drivline[10]
 							measlist.append(y)
 						except:
+							#print(querry)
 							print('driven by error(Driven side):',x.id, '/' , y.id)
 				x.name = line[ 2 ]
 				if str(line[11]) == 'None':
@@ -734,12 +735,14 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 
 
 									ht = resulttable.cell(xcord + 1, 0).add_paragraph()
+									try:
+										image = (trendchart(ids, connD, GUI, xx.VSG,maxdate).giveimage())
 
-									image = (trendchart(ids, connD, GUI, xx.VSG,maxdate).giveimage())
-
-									p0 = ht.add_run()
-									p0.add_picture(image, width=Inches(6.5))
-									resulttable.cell(xcord + 1, 0).add_paragraph().add_run(' ')
+										p0 = ht.add_run()
+										p0.add_picture(image, width=Inches(6.5))
+										resulttable.cell(xcord + 1, 0).add_paragraph().add_run(' ')
+									except:
+										print('Chart generate error')
 									ids.clear()
 									xcord += 1
 								break
