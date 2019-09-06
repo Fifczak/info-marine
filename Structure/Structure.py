@@ -17,8 +17,8 @@ import xlrd
 from tkinter import messagebox
 from tkinter import simpledialog
 
-#host = '192.168.10.243'
-host = 'localhost'
+host = '192.168.10.243'
+#host = 'localhost'
 devlist = list()
 def q_run(connD, querry):
 	username = connD[0]
@@ -1098,8 +1098,10 @@ class StructWindow:
 
 			self.deviceslistbox.pack(fill=BOTH, expand = 1)
 		def makecontrols(self,devname,connD):
+
 			querry = "select id from devices where name = '{}' and parent = {}".format(devname,self.shipid)
 			self.devid = list(q_run(connD,querry))[0][0]
+			self.devlabel.config(text='{}(ID:{})'.format(devname,self.devid))
 			querry = "select point,visible from points where id =(select id from devices where name = '{}' and parent = {}) order by sort".format(devname,self.shipid)
 			pointslist = column(list(q_run(connD,querry)),0)
 			querry ="select bearing from bearings_freq group by bearing order by bearing"
@@ -1125,6 +1127,11 @@ class StructWindow:
 			c=0
 			self.uploadbutton = tk.Button(self.detailframe,text = 'Upload points', command = self.UploadPoints)
 			self.uploadbutton.grid(row = c, column = 0)
+			tk.Label(self.detailframe, text = 'Point').grid(row = c, column = 1)
+			tk.Label(self.detailframe, text = 'Bearing').grid(row = c, column = 2)
+			tk.Label(self.detailframe, text = 'Seal').grid(row = c, column = 3)
+			tk.Label(self.detailframe, text = 'Additional').grid(row = c, column = 4)
+			tk.Label(self.detailframe, text = 'Visible').grid(row = c, column = 5)
 			if len(pointslist)!= 0:
 				for line in devlist:
 
@@ -1165,6 +1172,10 @@ class StructWindow:
 			self.sortbutton.pack(side = TOP, anchor = W)
 			self.deviceslistbox = Listbox(parent, exportselection=False)
 			self.deviceslistbox.config(width=0)
+			self.devdetailframe = Frame(parent,borderwidth = 1)
+			self.devlabel = tk.Label(self.devdetailframe)
+			self.devlabel.pack()
+			self.devdetailframe.pack(side=TOP, anchor=N)
 			self.detailframe = Frame(parent,borderwidth = 1)
 			self.detailframe.pack(side=RIGHT, anchor=W, fill=BOTH, expand = 1)
 			self.reloadquerry(self.structuresort, shipid, connD,True)
@@ -1439,13 +1450,13 @@ class StructWindow:
 		for line in resultrr:
 			owlbox.insert(END, line[0])
 	def makeships(self,shipname):
-		querry = "select name from main where parent =(select id from main where name = '" + str(
+		querry = "select name,id from main where parent =(select id from main where name = '" + str(
 			shipname) + "' limit 1) order by name"
 
 		ships = q_run(self.connD, querry)
 		self.Shiplistbox.delete(0, 'end')
 		for line in ships:
-			self.Shiplistbox.insert(END, line[0])
+			self.Shiplistbox.insert(END, '{}(ID:{})'.format(line[0],line[1]))
 	def __init__(self,connD):
 		def getships(evt):
 			w = evt.widget
@@ -1459,7 +1470,10 @@ class StructWindow:
 		def getaps(evt):
 			w = evt.widget
 			index = int(w.curselection()[0])
-			shipname = w.get(index)
+
+			tempname = w.get(index)
+			shipname = tempname[0:str(tempname).rfind('(ID:')]
+
 
 			self.Applistbox.delete(0, 'end')
 			for widget in self.Workframe.winfo_children():
