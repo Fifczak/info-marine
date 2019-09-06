@@ -680,6 +680,7 @@ def remarks(connD):
                     break
 
             pass
+
     def putdevices(report,namefilter):
         def upload():
 
@@ -807,6 +808,38 @@ def remarks(connD):
             namefilter = filterentry.get()
             putdevices(report, namefilter)
 
+
+
+
+        def noresponse():
+
+            MsgBox = tk.messagebox.askquestion('Mark feedbacks ', 'Mark sent feedbacks as no response?',
+                                               icon='question')
+            if MsgBox == 'yes':
+                try:
+                    for line in remlist:
+                        if line.var.get() == 1:
+                            querry = "SELECT id from feedbacks where id = {} and raport_number = '{}'".format(line.id, report)
+                            if len(q_run(connD, querry)) == 0:
+                                line.textfield2.delete('1.0', END)
+                                line.textfield2.insert(INSERT, 'No response')
+                                line.FDBdateLabel.delete('1.0', END)
+                                line.FDBdateLabel.insert(INSERT,datetime.datetime.now().date())
+
+                                querry = "INSERT INTO feedbacks(parent,feedback,documentdate,fdbflag,raport_number,id) VALUES"\
+                                "({},'No response','{}',8,'{}',{})".format(line.parent,datetime.datetime.now().date(),report,line.id )
+                                q_run(connD, querry)
+
+                    querry = "UPDATE harmonogram SET feedbacks_kto = (select ini from users where login = '{}' limit 1),feedbacks = 'True', feedbacks_start = '{}', feedbacks_koniec = '{}' where report_number = '{}'".format(\
+                        connD[0],datetime.datetime.now(),datetime.datetime.now(), report)
+                    q_run(connD, querry)
+                    tk.messagebox.showinfo('Return', 'Upload done',icon='info')
+                except:
+                    tk.messagebox.showinfo('Error', 'UPLOAD ERROR',icon='error')
+            else:
+                pass
+
+
         querry = """select rem.id, rem.raport_number, rem.remark, rem.sended, remi.request_date, fdb.feedback, fdb.documentdate,remi.remcom
 		from remarks as rem
 		left join reminder as remi on rem.id = remi.id and rem.raport_number = remi.raport_number
@@ -815,17 +848,6 @@ def remarks(connD):
 		group by rem.id, rem.raport_number, rem.remark, rem.sended, remi.request_date, fdb.feedback, fdb.documentdate,remi.remcom"""
         remtable = q_run(connD,querry)
 
-
-        # 		querry = """select dev.name ,ml.id,ml.parent
-        # 			from (select ml.parent, id, max(value),raport_number
-        # 			from measurements_low as ml
-        # 			where raport_number = '""" + str(report) + """'
-        # group by ml.parent, ml.id,raport_number order by id) as ml
-        # 			left join (select parent,sort, cast(id as int) as id from ds_structure where id ~E'^\\\d+$') as dss on ml.id =dss.id and ml.parent = dss.parent
-        # 			left join devices as dev on ml.id =dev.id
-        # 			where ml.raport_number = '""" + str(report) + """'
-        # 				group by ml.id,dss.sort,dev.name,ml.parent
-        # 				order by dss.sort"""
         if str(namefilter) == 'None': namefilter = ''
         querry = """
 		select dev.name ,ml.id,ml.parent,max(ml.date)
@@ -883,6 +905,8 @@ def remarks(connD):
         Makefdbrepbut.pack()
         Grabfeedback = Button(header, text='Get feedbacks from report', command= lambda rn = str(report), connD = connD : grabfeedbacks())
         Grabfeedback.pack()
+        NoResponseBut = Button(header, text='No response', command = noresponse)
+        NoResponseBut.pack()
         try:
             querry = "Select send_raport_koniec from harmonogram where report_number = '" + str(report) + "'"
             senddate = q_run(connD, querry)[0][0]
