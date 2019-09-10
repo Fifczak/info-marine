@@ -15,7 +15,7 @@ from tkinter import filedialog
 import datetime
 import xlrd
 from math import *
-
+import math
 
 def q_run(connD, querry):
     username = connD[0]
@@ -44,6 +44,9 @@ def is_empty(any_structure):
     else:
         return True
 
+def column(matrix, i):
+    return [row[i] for row in matrix]
+
 
 class meas(object):
     def __init__(self):
@@ -71,6 +74,8 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
     connD = [username, password, host]
 
     def get_meas():
+
+
         def readomnitrend():
             def READoverall(lines,start):
                 xcord2 = -1
@@ -278,7 +283,6 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                                     continue
 
         def readmarvib():
-
             a = filedialog.askopenfilename()
             # a = 'C:\Overmind\data\hara.csv'
             f = open(a, "r")
@@ -641,6 +645,7 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                                 measlist.append(countoverall(x))
                             break
 
+
         if str(device) == 'Vibscanner':
             readomnitrend()
         elif str(device) == 'Marvib':
@@ -780,8 +785,127 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                                 q_run(connD,querry)
                                 break
 
+            def checkvsg():
+                querry = "select dev.id from devices dev where dev.parent = {} and standard_fkey = 45".format(parent)
+                VSGidslist = column(list(q_run(connD,querry)),0)
+                return VSGidslist
+
+            def countVSG(chartstr,type):
+                range = [0,0]
+                if str(type) == 'Dis':
+                   range = [2,10]
+                elif str(type) == 'Vel':
+                    range = [10, 250]
+                elif str(type) == 'Acc':
+                    range = [250, 1000]
+
+
+                chartlist = chartstr.split(';')
+                df = float(chartlist[0])
+                f0 = df
+                fmax = float(chartlist[1])
+                xlines = chartlist[2:]
+                f = f0
+                sum = 0
+                for mm in xlines:
+                    if f >= range[0] and f <= range[1] :
+
+                        sum += math.pow( float(mm), 2 )
+                        if str(type) == 'Acc':
+                            print(f,'+',mm,sum)
+                    f += df
+                sum = math.sqrt(sum)
+                print('SUM :', sum)
+                if str(type) == 'Dis':
+                    if sum <= 17.8:
+                        VSG = 1.1
+                    elif sum <= 28.3 :
+                        VSG = 1.8
+                    elif sum <= 44.8 :
+                        VSG = 2.8
+                    elif sum <= 71.1 :
+                        VSG = 4.5
+                    elif sum <= 113 :
+                        VSG = 7.1
+                    elif sum <= 178 :
+                        VSG = 11
+                    elif sum <= 283:
+                        VSG = 18
+                    elif sum <= 448:
+                        VSG = 28
+                    elif sum <= 710:
+                        VSG = 45
+                    elif sum <= 1125:
+                        VSG = 71
+                    elif sum <= 1784:
+                        VSG = 112
+                    else:
+                        VSG = 180
+                if str(type) == 'Vel':
+                    if sum <= 1.12:
+                        VSG = 1.1
+                    elif sum <= 1.78:
+                        VSG = 1.8
+                    elif sum <= 2.82 :
+                        VSG = 2.8
+                    elif sum <= 4.46 :
+                        VSG = 4.5
+                    elif sum <= 7.07 :
+                        VSG = 7.1
+                    elif sum <= 11.2 :
+                        VSG = 11
+                    elif sum <= 17.8:
+                        VSG = 18
+                    elif sum <= 28.2:
+                        VSG = 28
+                    elif sum <= 44.6:
+                        VSG = 45
+                    elif sum <= 70.7:
+                        VSG = 71
+                    elif sum <= 112:
+                        VSG = 112
+                    else:
+                        VSG = 180
+                if str(type) == 'Acc':
+                    if sum <= 1.76:
+                        VSG = 1.1
+                    elif sum <= 2.79 :
+                        VSG = 1.8
+                    elif sum <= 4.42 :
+                        VSG = 2.8
+                    elif sum <= 7.01 :
+                        VSG = 4.5
+                    elif sum <= 11.1 :
+                        VSG = 7.1
+                    elif sum <= 17.6 :
+                        VSG = 11
+                    elif sum <= 27.9:
+                        VSG = 18
+                    elif sum <= 44.2:
+                        VSG = 28
+                    elif sum <= 70.1:
+                        VSG = 45
+                    elif sum <= 111:
+                        VSG = 71
+                    elif sum <= 176:
+                        VSG = 112
+                    else:
+                        VSG = 180
+                return VSG
+
+
+
+
+
+            def getvsg(meas,chartstr):
+                return countVSG(chartstr,meas.type)
+
+            VSGidslist = checkvsg()
 
             checkreminder()
+
+
+
             pbar = tk.Tk()
             pbar.title("Uploading Measurements")
             progress_bar = ttk.Progressbar(pbar, orient='horizontal', lengt=286, mode='determinate')
@@ -813,7 +937,18 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                         parent) + "," + str(i.id) + ",'" + str(i.point) + "','" + str(rnumber) + "','" + str(
                         i.date) + "','" + str(i.domain) + "','" + str(i.type) + "','" + str(i.unit) + "','" + str(
                         chartstr) + "')"
-
+                    if i.id in VSGidslist:
+                        VSG = getvsg(i,chartstr)
+                        #print (i.id, i.point, 'VSG :', i.type , VSG)
+                        if str(i.type) == 'Dis': VT = 'VSGD'
+                        elif str(i.type) == 'Vel': VT = 'VSGV'
+                        elif str(i.type) == 'Acc': VT = 'VSGA'
+                        VSGquerry = "INSERT INTO measurements_low(parent,id,point,raport_number, date, type, unit, value)" \
+                                    " VALUES ({},{},'{}','{}','{}','{}','{}','{}')".format(str(parent),str(i.id),str(i.point),
+                                                               str(rnumber),str(i.date),
+                                                               VT,'VSG',VSG)
+                        print(VSGquerry)
+                        q_run(connD, VSGquerry)
                 if i.mode == 'Overall':
                     OveCount += 1
 
@@ -940,8 +1075,10 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
         crosstablelist.pack(side=LEFT, fill=BOTH)
         okbutton.config(command=reload_lists)
         checkflag = True
+
         for i in measlist:
             if i.checked == False: checkflag = False
+
         if checkflag == True:
             if not measlist:
                 x = 1
@@ -955,18 +1092,7 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
         else:
             Window.mainloop()
 
-    # username = ''
-    # password = ''
-    # host = ''
-    # connD = [username, password, host]
-    # parent = 103  # aurora
 
-    # parent = 73 # hafnia america
-    # parent = 55 #neptuno platform
-    # parent = 35 #norddolphin
-    # parent = 61 #nordpenguin
-    # parent = 46 #Elizabeth russ
-    # rnumber = '2008-2019'
 
     measlist = list()
     get_meas()
@@ -976,4 +1102,4 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 # 'Vibscanner'
 # 'Marvib'
 # 'ezThomas'
-read_measurement_file('Marvib','testuser','info','192.168.10.243','FIFCZAKTEST', '71')
+read_measurement_file('Marvib','testuser','info','localhost','FIFCZAKTESTVSG', '71')
