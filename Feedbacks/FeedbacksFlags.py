@@ -22,7 +22,7 @@ pd.set_option('display.max_columns', None)
 pd.set_option('display.expand_frame_repr', False)
 pd.set_option('max_colwidth', -1)
 
-#connD=['testuser','info','localhost']
+
 def q_run(connD, querry):
     username = connD[0]
     password = connD[1]
@@ -87,7 +87,7 @@ class LogApplication:
                 filewriter = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
                 filewriter.writerow([user_get])
                 filewriter.writerow([pass_get])
-        connD = [user_get, pass_get, 'localhost']
+        connD = [user_get, pass_get, '192.168.10.243']
 
 
         querry = "SELECT current_user"
@@ -134,20 +134,22 @@ class feedbackswindow:
         for item in (list(q_run(self.connD, querry))):
             self.costflagz.append(item)
     def fillfdblist(self, fdbdfr):
-        self.feedbacklist.delete(0, 'end')
-        #dflisted = fdbdfr.values.tolist()
+        self.feedbacklist.delete(*self.feedbacklist.get_children())
         for row in fdbdfr.values:
-            #print(row)
             ship = row[1]
             devname = row[2]
             raportno = row[3]
             liststring = "SHIP:{} DEVICE:{} REPORT_NUMBER:{}".format(ship,devname,raportno)
 
+            self.feedbacklist.insert('', 'end', text=row[14], values=(ship,devname,raportno))
 
-            self.feedbacklist.insert(END, liststring)
+
+
     def updatedateinlabels(self):
-        index = self.feedbacklist.curselection()[0]
-        _id_ = self.presentfeedbacks.iloc[index].loc['fdbid']
+
+
+        item = self.feedbacklist.selection()[0]
+        _id_ = self.presentfeedbacks[self.presentfeedbacks['fdbid'] == self.feedbacklist.item(item, "text")]['fdbid']
         rdate = self.fdbdFrame.loc[self.fdbdFrame.fdbid == int(_id_)]['remdate']
         fdate = self.fdbdFrame.loc[self.fdbdFrame.fdbid == int(_id_)]['fdbdate']
         self.remlabel.config(text='Remark {}'.format(np.array(rdate.values, dtype='datetime64[D]')[0]))
@@ -173,9 +175,18 @@ class feedbackswindow:
             self.measurementsaftertab.delete(*self.measurementsaftertab.get_children())
     def generatetrendvalues(self):
         def getmeasquerry():
-            index = self.feedbacklist.curselection()[0]
-            rn = self.presentfeedbacks.iloc[index].loc['raport_number']
-            did = self.presentfeedbacks.iloc[index].loc['id']
+            item = self.feedbacklist.selection()[0]
+            rn = (self.presentfeedbacks[self.presentfeedbacks['fdbid'] == self.feedbacklist.item(item, "text")][
+                'raport_number'])
+            rn = rn.values[0]
+
+            did = (self.presentfeedbacks[self.presentfeedbacks['fdbid'] == self.feedbacklist.item(item, "text")][
+                'id'])
+            did = did.values[0]
+
+            #index = self.feedbacklist.curselection()[0]
+            # rn = self.presentfeedbacks.iloc[index].loc['raport_number']
+            # did = self.presentfeedbacks.iloc[index].loc['id']
             querry = """select mlrms.point, mlrms.raport_number as reportbefore ,round( cast(mlrms.value as numeric),3) as rmsbefore,round( cast(mlpk.value as numeric),3) as pkbefore,
              max(mlrms.date) as datebefore,
             mlrms2.raport_number as reportafter ,round( cast(mlrms2.value as numeric),3) as rmsafter ,round( cast(mlpk2.value as numeric),3) as pkafter, max(mlrms2.date) as dateafter
@@ -318,10 +329,15 @@ class feedbackswindow:
 
     def drawwindow(self):
         def changefeedbackwindow(evt):
-            dflisted = self.presentfeedbacks.values.tolist()
-            self.updatefeedbackwindows(dflisted[self.feedbacklist.curselection()[0]])
+
+            item = self.feedbacklist.selection()[0]
+            # print("you clicked on", self.feedbacklist.item(item, "text"))
+            # print(self.presentfeedbacks[self.presentfeedbacks['id'] == self.feedbacklist.item(item, "text")])
+
+            self.updatefeedbackwindows(self.presentfeedbacks[self.presentfeedbacks['fdbid'] == self.feedbacklist.item(item, "text")])
             self.updatedateinlabels()
             self.updatefdbmeas()
+
         self.root = tk.Tk()
         self.root.title('Feedbacker')
 
@@ -329,8 +345,15 @@ class feedbackswindow:
         self.fdbframe = tk.Frame(self.root)
 
         self.listfilterframe = tk.Frame(self.listframe)
-        self.feedbacklist = tk.Listbox(self.listframe, width=0, exportselection=False)
-        self.feedbacklist.bind('<<ListboxSelect>>', changefeedbackwindow)
+
+        # self.feedbacklist = tk.Listbox(self.listframe, width=0, exportselection=False)
+
+        self.feedbacklist = ttk.Treeview(self.listframe)
+        self.feedbacklist["columns"] = ("Ship", "Report","Device")
+        self.feedbacklist.bind('<<TreeviewSelect>>', changefeedbackwindow)
+
+
+
         self.makefilterwindow(self.listfilterframe)
         self.fillfdblist(self.presentfeedbacks)
 
@@ -454,6 +477,7 @@ class feedbackswindow:
         self.label2.grid(row=1, column=0)
         self.sortlist.grid(row=1, column=1)
     def updatefeedbackwindows(self, fdbstrip):
+        fdbstrip = fdbstrip.values.tolist()[0]
         def updateheadlabel(fdbstrip):
             headtext = """
     Ship: {}
@@ -501,8 +525,15 @@ class feedbackswindow:
         def setflags():
             def loadcost():#devid):
 
-                devid = (list(self.fdbdFrame.loc[self.fdbdFrame.fdbid == _id_, 'id'])[0])
+                #devid = (list(self.fdbdFrame.loc[self.fdbdFrame.fdbid == _id_, 'id'])[0])
+
+                item = self.feedbacklist.selection()[0]
+                devid = (self.presentfeedbacks[self.presentfeedbacks['fdbid'] == self.feedbacklist.item(item, "text")][
+                    'id'])
+                devid = devid.values[0]
+
                 querry = 'select kw,type from devices where id = {}'.format(devid)
+                print(querry)
                 devkw, devtype = list(q_run(self.connD, querry))[0]
 
                 querry = "select costflag,typ, kwrange[1],kwrange[2], price[1],price[2], low[1],low[2] , high[1],high[2]from costcases"
@@ -569,17 +600,38 @@ class feedbackswindow:
 
                 q_run(self.connD, querry)
                 self.getquerry()
+
+                child_id = self.feedbacklist.selection()[-1]
+
                 self.filterdframe(self.filterlisboxtype.get(), self.filterlisboxdet.get())
                 self.fillfdblist(self.presentfeedbacks)
-                dflisted = self.presentfeedbacks.values.tolist()
-                self.updatefeedbackwindows(dflisted[index])
-                self.feedbacklist.select_set(index)
-                self.feedbacklist.see(index)
 
-            index = self.feedbacklist.curselection()[0]
+                print(child_id)
+
+
+                self.feedbacklist.focus(child_id)
+                self.feedbacklist.selection_set(child_id)
+
+
+                #dflisted = self.presentfeedbacks.values.tolist()
+                item = self.feedbacklist.selection()[0]
+                self.updatefeedbackwindows(self.presentfeedbacks[self.presentfeedbacks['fdbid'] == self.feedbacklist.item(item, "text")])
+
+
+                # self.feedbacklist.select_set(index)
+                # self.feedbacklist.see(index)
+
+
+
+            item = self.feedbacklist.selection()[0]
+            _id_ = (self.presentfeedbacks[self.presentfeedbacks['fdbid'] == self.feedbacklist.item(item, "text")][
+                'fdbid'])
+            _id_ = _id_.values[0]
+
+
             fdbflag = self.fdbflagstring.current()
             costflag = self.costflagstring.current()
-            _id_ = self.presentfeedbacks.iloc[index].loc['fdbid']
+
             if fdbflag == 0: fdbflag = 'Null'
             if costflag == 0: costflag = 'Null'
             querry = """UPDATE feedbacks set fdbflag = {},costflag = {}
@@ -613,7 +665,6 @@ class feedbackswindow:
                                                 _id_)
 
             q_run(self.connD, querry)
-            #print(querry)
             self.getquerry()
             self.filterdframe(self.filterlisboxtype.get(), self.filterlisboxdet.get())
             self.fillfdblist(self.presentfeedbacks)
@@ -643,7 +694,7 @@ class feedbackswindow:
 
 
             self.measurementsbeforetab = ttk.Treeview(self.measframe)
-            self.measurementsbeforetab["columns"] = ("rms", "pk",)
+            self.measurementsbeforetab["columns"] = ("rms", "pk")
 
             self.measurementsaftertab = ttk.Treeview(self.measframe)
             self.measurementsaftertab["columns"] = ("rms", "pk",)
