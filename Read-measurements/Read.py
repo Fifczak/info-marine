@@ -235,12 +235,15 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 
                 return measdomain
 
-            Tk().withdraw()
+            root = Tk()
+            root.withdraw()
             a = filedialog.askopenfilename()
+
             f = open(a, "r")
             lines = f.read().split("\n")  # "\r\n" if needed
             xcord = 0
             meason = False
+
             for line in lines:
 
                 xcord += 1
@@ -283,7 +286,10 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                                     continue
 
         def readmarvib():
+            root = Tk()
+            root.withdraw()
             a = filedialog.askopenfilename()
+
             # a = 'C:\Overmind\data\hara.csv'
             f = open(a, "r")
             lines = f.read().split("\n")  # "\r\n" if needed
@@ -600,6 +606,8 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                     y.type = 'RMS'
                 return y
 
+            root = Tk()
+            root.withdraw()
             file = filedialog.askopenfilename()
             workbook = xlrd.open_workbook(file)
             worksheet = workbook.sheet_by_index(0)
@@ -811,11 +819,9 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                     if f >= range[0] and f <= range[1] :
 
                         sum += math.pow( float(mm), 2 )
-                        if str(type) == 'Acc':
-                            print(f,'+',mm,sum)
+
                     f += df
                 sum = math.sqrt(sum)
-                print('SUM :', sum)
                 if str(type) == 'Dis':
                     if sum <= 17.8:
                         VSG = 1.1
@@ -893,10 +899,6 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                         VSG = 180
                 return VSG
 
-
-
-
-
             def getvsg(meas,chartstr):
                 return countVSG(chartstr,meas.type)
 
@@ -904,7 +906,7 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 
             checkreminder()
 
-
+            Window.withdraw()
 
             pbar = tk.Tk()
             pbar.title("Uploading Measurements")
@@ -939,7 +941,6 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                         chartstr) + "')"
                     if i.id in VSGidslist:
                         VSG = getvsg(i,chartstr)
-                        #print (i.id, i.point, 'VSG :', i.type , VSG)
                         if str(i.type) == 'Dis': VT = 'VSGD'
                         elif str(i.type) == 'Vel': VT = 'VSGV'
                         elif str(i.type) == 'Acc': VT = 'VSGA'
@@ -947,15 +948,17 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                                     " VALUES ({},{},'{}','{}','{}','{}','{}','{}')".format(str(parent),str(i.id),str(i.point),
                                                                str(rnumber),str(i.date),
                                                                VT,'VSG',VSG)
-                        print(VSGquerry)
                         q_run(connD, VSGquerry)
                 if i.mode == 'Overall':
                     OveCount += 1
 
+                    if str(parent) == '150' and str(i.type) == 'envelope P-K':
+                        i.unit = '[gE]'
+                        i.overall = round(i.overall / 10,3)
+
                     querry = "INSERT INTO measurements_low(parent,id, point, raport_number, date, type, unit, value) VALUES (" + str(
                         parent) + "," + str(i.id) + ",'" + str(i.point) + "','" + str(rnumber) + "','" + str(
                         i.date) + "','" + str(i.type) + "','" + str(i.unit) + "','" + str(i.overall) + "')"
-
                 q_run(connD, querry)
                 try:
                     chartstrlist.clear
@@ -1102,4 +1105,4 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 # 'Vibscanner'
 # 'Marvib'
 # 'ezThomas'
-read_measurement_file('Marvib','testuser','info','localhost','FIFCZAKTESTVSG', '71')
+#read_measurement_file('Marvib','testuser','info','localhost','FIFCZAKTESTVSG', '150')
