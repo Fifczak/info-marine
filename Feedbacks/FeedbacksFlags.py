@@ -427,8 +427,11 @@ class feedbackswindow:
             filterby = 'costflag'
         else:
             filterby = None
-        if filterby != None:
-            pass
+
+        if str(filterby) == 'raport_number':
+            print(filterby)
+            self.presentfeedbacks = self.presentfeedbacks.sort_values(by=[filterby, 'sort'])
+        elif filterby != None:
             self.presentfeedbacks = self.presentfeedbacks.sort_values(by=[filterby])
 
         self.fillfdblist(self.presentfeedbacks)
