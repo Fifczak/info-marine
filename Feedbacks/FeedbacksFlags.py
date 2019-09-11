@@ -29,7 +29,6 @@ def q_run(connD, querry):
     host = connD[2]
     kport = "5432"
     kdb = "postgres"
-    # cs = ' host="localhost",database="postgres", user= "postgres" , password="info" '
     cs = "dbname=%s user=%s password=%s host=%s port=%s" % (kdb, username, password, host, kport)
     conn = None
     conn = psycopg2.connect(str(cs))
@@ -144,6 +143,24 @@ class feedbackswindow:
             self.feedbacklist.insert('', 'end', text=row[14], values=(ship,devname,raportno))
 
 
+
+        self.feedbacklist.heading("#0", text = 'FDBID',anchor=tk.W)
+        self.feedbacklist.column("#0", width=50, minwidth=50, stretch=tk.NO)
+
+        self.feedbacklist.heading("Ship", text = 'Ship',anchor=tk.W)
+        self.feedbacklist.column("Ship", width=100, minwidth=50, stretch=tk.NO)
+
+        self.feedbacklist.heading("Device", text = 'Device' ,anchor=tk.W)
+        self.feedbacklist.column("Device", width=200, minwidth=50, stretch=tk.NO)
+
+        self.feedbacklist.heading("Report", text = 'Repoort number',anchor=tk.W)
+        self.feedbacklist.column("Report", width=100, minwidth=50, stretch=tk.NO)
+
+
+
+
+            # self.measurementsbeforetab.heading("rms", text='RMS', anchor=tk.W)
+            # self.measurementsbeforetab.heading("pk", text='env P-K', anchor=tk.W)
 
     def updatedateinlabels(self):
 
@@ -331,8 +348,6 @@ class feedbackswindow:
         def changefeedbackwindow(evt):
 
             item = self.feedbacklist.selection()[0]
-            # print("you clicked on", self.feedbacklist.item(item, "text"))
-            # print(self.presentfeedbacks[self.presentfeedbacks['id'] == self.feedbacklist.item(item, "text")])
 
             self.updatefeedbackwindows(self.presentfeedbacks[self.presentfeedbacks['fdbid'] == self.feedbacklist.item(item, "text")])
             self.updatedateinlabels()
@@ -346,12 +361,10 @@ class feedbackswindow:
 
         self.listfilterframe = tk.Frame(self.listframe)
 
-        # self.feedbacklist = tk.Listbox(self.listframe, width=0, exportselection=False)
 
         self.feedbacklist = ttk.Treeview(self.listframe)
-        self.feedbacklist["columns"] = ("Ship", "Report","Device")
+        self.feedbacklist["columns"] = ("Ship", "Device", "Report")
         self.feedbacklist.bind('<<TreeviewSelect>>', changefeedbackwindow)
-
 
 
         self.makefilterwindow(self.listfilterframe)
@@ -366,6 +379,7 @@ class feedbackswindow:
         self.feedbacklist.pack(side=TOP, fill=Y, expand=1)
 
         self.root.mainloop()
+
     def filterdframe(self,filtertype, filterdet):
         if str(filtertype) == 'None':
             self.presentfeedbacks = self.fdbdFrame
@@ -395,6 +409,7 @@ class feedbackswindow:
                 self.fdbdFrame['price'].astype(str).str.contains(filterdet) == True]
 
         self.sortby(self.sortlist.get())
+
         self.fillfdblist(self.presentfeedbacks)
 
     def sortby(self,filterby):
@@ -413,6 +428,7 @@ class feedbackswindow:
         else:
             filterby = None
         if filterby != None:
+            pass
             self.presentfeedbacks = self.presentfeedbacks.sort_values(by=[filterby])
 
         self.fillfdblist(self.presentfeedbacks)
@@ -441,7 +457,7 @@ class feedbackswindow:
                 detlist.append("(0)None")
                 for item in list(q_run(self.connD, querry)):
                     detlist.append('({}){}'.format(item[1], item[0]))
-            elif str(filtertype) == 'Missing':
+            elif str(filtertype) == 'Cost calc. missing':
                 detlist = ['no kW', 'no TYPE', 'NO COST CASE']
             self.filterlisboxdet.config(values=detlist)
             self.filterlisboxdet.current(0)
@@ -453,7 +469,7 @@ class feedbackswindow:
 
         self.label1 = tk.Label(frame, text='Filter by: ')
         self.filterlisboxtype = ttk.Combobox(frame, text="",
-                                             values=["None", "Ship", "Report", "Fdb flag", "Cost flag", "Missing"],
+                                             values=["None", "Ship", "Report", "Fdb flag", "Cost flag", "Cost calc. missing"],
                                              state="readonly")
         self.filterlisboxtype.bind('<<ComboboxSelected>>', boxtypechange)
 
@@ -524,18 +540,12 @@ class feedbackswindow:
     def makefeedbackwindow(self, frame):
         def setflags():
             def loadcost():#devid):
-
-                #devid = (list(self.fdbdFrame.loc[self.fdbdFrame.fdbid == _id_, 'id'])[0])
-
                 item = self.feedbacklist.selection()[0]
                 devid = (self.presentfeedbacks[self.presentfeedbacks['fdbid'] == self.feedbacklist.item(item, "text")][
                     'id'])
                 devid = devid.values[0]
-
                 querry = 'select kw,type from devices where id = {}'.format(devid)
-                print(querry)
                 devkw, devtype = list(q_run(self.connD, querry))[0]
-
                 querry = "select costflag,typ, kwrange[1],kwrange[2], price[1],price[2], low[1],low[2] , high[1],high[2]from costcases"
                 costcases = list(q_run(self.connD, querry))
                 for case in costcases: #iteracja po costcase
@@ -600,27 +610,9 @@ class feedbackswindow:
 
                 q_run(self.connD, querry)
                 self.getquerry()
-
                 child_id = self.feedbacklist.selection()[-1]
-
-                self.filterdframe(self.filterlisboxtype.get(), self.filterlisboxdet.get())
-                self.fillfdblist(self.presentfeedbacks)
-
-                print(child_id)
-
-
-                self.feedbacklist.focus(child_id)
-                self.feedbacklist.selection_set(child_id)
-
-
-                #dflisted = self.presentfeedbacks.values.tolist()
                 item = self.feedbacklist.selection()[0]
                 self.updatefeedbackwindows(self.presentfeedbacks[self.presentfeedbacks['fdbid'] == self.feedbacklist.item(item, "text")])
-
-
-                # self.feedbacklist.select_set(index)
-                # self.feedbacklist.see(index)
-
 
 
             item = self.feedbacklist.selection()[0]
@@ -643,8 +635,10 @@ class feedbackswindow:
             loadcost()
 
         def updatecosts():
-            index = self.feedbacklist.curselection()[0]
-            _id_ = self.presentfeedbacks.iloc[index].loc['fdbid']
+            item = self.feedbacklist.selection()[-1]
+            _id_ = (self.presentfeedbacks[self.presentfeedbacks['fdbid'] == self.feedbacklist.item(item, "text")][
+                'fdbid'])
+            _id_ = _id_.values[0]
 
             price0 = self.pricetext.get("1.0",END).strip()
             price1 = self.priceval.get("1.0",END).strip()
@@ -666,10 +660,7 @@ class feedbackswindow:
 
             q_run(self.connD, querry)
             self.getquerry()
-            self.filterdframe(self.filterlisboxtype.get(), self.filterlisboxdet.get())
-            self.fillfdblist(self.presentfeedbacks)
-            self.feedbacklist.select_set(index)
-            self.feedbacklist.see(index)
+
         def fillmeasframe():
             def updatecolorevt(evt):
                 self.generatetrendvalues()
@@ -710,9 +701,6 @@ class feedbackswindow:
             self.measurementsaftertab.column("#0",width = 100,minwidth =50, stretch = tk.NO)
             self.measurementsaftertab.column("rms",width = 40,minwidth =40, stretch = tk.NO)
             self.measurementsaftertab.column("pk", width=40, minwidth=40, stretch=tk.NO)
-
-
-
 
 
             self.measurementsbeforetab.heading("#0", text = 'Point',anchor=tk.W)
