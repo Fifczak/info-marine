@@ -94,7 +94,6 @@ class trendchart:
 
 
             if  max(y) > ylim:
-
                 ylim = max(y)*1.2
 
 

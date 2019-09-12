@@ -285,7 +285,15 @@ def prepare_IM( connD ,report_number):  # RETURN MEASLIST
 					y.Dlimit = drivline[10]
 					measlist.append(y)
 				except:
-					print('driven by error(Driving side) :',x.id, '/' , y.id)
+					y.limit = '-'
+					y.drivenby = x.id
+					for item in reportresults:
+						if str(item[0]) == str(y.id):
+							y.name = str(item[2])
+							break
+
+					measlist.append(y)
+
 
 	loadData( connD )
 
@@ -662,7 +670,7 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 						if col_trend != None:
 
 
-							if str( xx.limit ) == 'Cl. D':  # TEGO DLA CZYTELNOSCI LEPIEJ ZROBIC FUNKCJE
+							if str( xx.limit ) == 'Cl. D' or str( xx.limit ) == 'Out of limit' or str( xx.limit ) == 'V. III':  # TEGO DLA CZYTELNOSCI LEPIEJ ZROBIC FUNKCJE
 								ht = resulttable.cell(xcord + 1, col_trend).add_paragraph()
 								ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 								resulttable.cell(xcord + 1, col_trend).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
@@ -820,6 +828,7 @@ def trendresults ( document ) :
 	trendpar.runs[ 0 ].font.size = Pt ( 8 )
 	trendpar.runs[ 0 ].font.name = 'Arial'
 	trendpar.add_run()
+	document.add_paragraph()
 	trendsres = document.add_table ( rows=3 ,cols=2 )
 	up = trendsres.cell ( 0 ,0 ).paragraphs[ 0 ].add_run ()
 	up.add_picture ( 'C:\\overmind\\Data\\up.gif' )

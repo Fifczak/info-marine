@@ -669,6 +669,10 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                 querry = "UPDATE points set point = '" + str(
                     changepointEntry.get()) + "' where point = '" + point + "' and id = " + str(id_)
                 q_run(connD, querry)
+                querry = "UPDATE measurements_low set point = '{}' where id = {} and point = '{}' ".format(changepointEntry.get(),id_,point)
+                q_run(connD, querry)
+                querry = "UPDATE meascharts set point = '{}' where id = {} and point = '{}' ".format(changepointEntry.get(),id_,point)
+                q_run(connD, querry)
                 changepointWindow.destroy()
             else:
                 messagebox.showinfo("Error", ("Point " + str(changepointEntry.get()) + " exists"))
@@ -1105,4 +1109,4 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 # 'Vibscanner'
 # 'Marvib'
 # 'ezThomas'
-#read_measurement_file('Marvib','testuser','info','localhost','FIFCZAKTESTVSG', '150')
+#read_measurement_file('Marvib','testuser','info','localhost','FIFCZAKTESTVSG', '68')
