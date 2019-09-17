@@ -438,7 +438,6 @@ def grabremarks():
                 if (str(rem.name)).strip() != (str(rem.remark)).strip():
                     if 'up to week' in rem.remark:
                         rem.reminder = True
-
                         s = str(rem.remark)
                         result = re.search('done up to week (.*).', s)
                         week = int(''.join(filter(str.isdigit, result.group(1))))

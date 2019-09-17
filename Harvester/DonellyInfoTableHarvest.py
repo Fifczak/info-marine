@@ -493,7 +493,7 @@ def crosstablebyid():
 	for item in tqdm(dframelist):
 		querry = "select id from crosstable where id = {}".format(item.id)
 		if len(q_run(connD, querry)) == 0:
-			querry = "INSERT into devices(parent,nameindevice,id) VALUES ((select parent from devices where id = {} limit 1),'{}',{})".format(\
+			querry = "INSERT into crosstable(parent,nameindevice,id) VALUES ((select parent from devices where id = {} limit 1),'{}',{})".format(\
 				item.id,item.nameindevice,item.id)
 		else:
 			querry = "update crosstable set nameindevice = '{}' where id = {}".format(\

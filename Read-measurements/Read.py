@@ -219,7 +219,6 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                         measdomain.append('UNKNOWN'), measdomain.append('UNKNOWN'), measdomain.append('UNKNOWN')
 
 
-
                 if str(parent) == '234': #FSRU
                     if measno == '1007' :
                         measdomain.append('FFT'), measdomain.append('Vel'), measdomain.append('[mm/s]')
