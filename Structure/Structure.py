@@ -823,7 +823,76 @@ class StructWindow:
             #self.deviceslistbox.event_generate('<Double-Button>')
         def showmodelframe(self):
             ModelMakerWindow(self.connD,self)
+
+        def fillstandarddetailsframe(self,id):
+            querry = """select standard,informations,envflag
+                limit_1_name, round(limit_1_value,1),
+                limit_2_name, round(limit_2_value,1),
+                limit_3_name, round(limit_3_value,1),
+                limit_4_name, round(limit_4_value,1)
+                from standards where id = 
+                (select standard_fkey from devices where id = {} limit 1) limit 1""".format(id)
+            try:
+                standard = list(q_run(self.connD,querry))[0]
+            except:
+                standard = ['None','None','None','None','None','None','None','None','None','None']
+            workframe = self.standarddetailsframe
+
+            workframe.n1 = tk.Label(workframe, text = standard[2])
+            workframe.n1.grid(row = 0, column = 0)
+            workframe.n2 = tk.Label(workframe, text = standard[4])
+            workframe.n2.grid(row = 1, column = 0)
+            workframe.n3 = tk.Label(workframe, text = standard[6])
+            workframe.n3.grid(row = 2, column = 0)
+            workframe.n4 = tk.Label(workframe, text = standard[8])
+            workframe.n4.grid(row = 3, column = 0)
+
+
+            workframe.v1 = tk.Label(workframe, text = standard[3])
+            workframe.v1.grid(row = 0, column = 1)
+            workframe.v2 = tk.Label(workframe, text = standard[5])
+            workframe.v2.grid(row = 1, column = 1)
+            workframe.v3 = tk.Label(workframe, text = standard[7])
+            workframe.v3.grid(row = 2, column = 1)
+            workframe.v4 = tk.Label(workframe, text = standard[9])
+            workframe.v4.grid(row = 3, column = 1)
+
+            workframe.standardinfo = tk.Text(workframe,height = 10, width = 35)
+            workframe.standardinfo.insert('1.0', standard[1])
+            workframe.standardinfo.config(state=DISABLED)
+            workframe.standardinfo.grid(row=0, column=3,rowspan = 4)
+
+
+        def changestandardetail(self,standardname):
+            querry = """select standard,informations,envflag
+                limit_1_name, round(limit_1_value,1),
+                limit_2_name, round(limit_2_value,1),
+                limit_3_name, round(limit_3_value,1),
+                limit_4_name, round(limit_4_value,1)
+                from standards where standard =  '{}' limit 1""".format(standardname)
+            standard = list(q_run(self.connD,querry))[0]
+            print(standard)
+
+            self.standarddetailsframe.n1.config(text=standard[2])
+            self.standarddetailsframe.n2.config(text=standard[4])
+            self.standarddetailsframe.n3.config(text=standard[6])
+            self.standarddetailsframe.n4.config(text=standard[8])
+
+            self.standarddetailsframe.v1.config(text=standard[3])
+            self.standarddetailsframe.v2.config(text=standard[5])
+            self.standarddetailsframe.v3.config(text=standard[7])
+            self.standarddetailsframe.v4.config(text=standard[9])
+
+            self.standarddetailsframe.standardinfo.config(state=NORMAL)
+            self.standarddetailsframe.standardinfo.delete('1.0', END)
+            self.standarddetailsframe.standardinfo.insert('1.0', standard[1])
+            self.standarddetailsframe.standardinfo.config(state=DISABLED)
+
+
+
         def makedeviceswindow(self, line, id,connD):
+            def changestandardetail(evt):
+                self.changestandardetail(self.lab_norm_e.get())
             if str(line.id).strip() == str(id).strip():
                 querry = "select point, sort, visible from points where id = {} order by sort".format(line.id)
                 self.pointlist = (q_run(connD, querry))
@@ -867,12 +936,13 @@ class StructWindow:
                 self.lab_info_e = tk.Text(self.detailframe, width=38, height=10)
                 self.lab_info_e.grid(row=9, column=2)
                 self.lab_info_e.insert('1.0', str(line.info))
-                self.lab_norm_l = tk.Label(self.detailframe, text="Norm").grid(row=10, column=1)
+                self.lab_norm_l = tk.Label(self.detailframe, text="Standard").grid(row=10, column=1)
 
                 self.standardlist = list(q_run(connD, "select standard,id from standards order by standard"))
                 standards = column(self.standardlist, 0)
 
                 self.lab_norm_e = ttk.Combobox(self.detailframe, text="", values=standards, width=45, state="readonly")
+                self.lab_norm_e.bind('<<ComboboxSelected>>',changestandardetail)
                 self.lab_norm_e.grid(row=10, column=2)
                 try:
                     sidx = standards.index(str(line.norm))
@@ -880,51 +950,60 @@ class StructWindow:
                 except:
                     self.lab_norm_e.insert(0, 'Chose standard')
 
-                self.lab_drivenby_l = tk.Label(self.detailframe, text="Drivenby").grid(row=11, column=1)
+                # try:
+                self.standarddetailsframe = tk.Frame(self.detailframe, height=2, bd=1, relief=SUNKEN)
+                self.fillstandarddetailsframe(line.id)
+                self.standarddetailsframe.grid(row = 11,column =1, columnspan = 2)
+                # except:
+                #     print('No standard')
+
+
+                self.lab_drivenby_l = tk.Label(self.detailframe, text="Drivenby").grid(row=12, column=1)
                 self.lab_drivenby_e = tk.Entry(self.detailframe, text="", width=50)
-                self.lab_drivenby_e.grid(row=11, column=2)
+                self.lab_drivenby_e.grid(row=12, column=2)
                 self.lab_drivenby_e.insert(0, str(line.drivenby))
-                self.lab_meas_condition_l = tk.Label(self.detailframe, text="Meas condition").grid(row=12, column=1)
+                self.lab_meas_condition_l = tk.Label(self.detailframe, text="Meas condition").grid(row=13, column=1)
                 self.lab_meas_condition_e = tk.Entry(self.detailframe, text="", width=50)
-                self.lab_meas_condition_e.grid(row=12, column=2)
+                self.lab_meas_condition_e.grid(row=13, column=2)
                 self.lab_meas_condition_e.insert(0, str(line.meas_condition))
-                self.lab_cm_l = tk.Label(self.detailframe, text="CM").grid(row=13, column=1)
+                self.lab_cm_l = tk.Label(self.detailframe, text="CM").grid(row=14, column=1)
                 self.lab_cm_e = ttk.Combobox(self.detailframe, text="", values=["True", "False"], width=45,
                                              state="readonly")
-                self.lab_cm_e.grid(row=13, column=2)
+                self.lab_cm_e.grid(row=14, column=2)
 
                 sidx = ["True", "False"].index(str(line.cm))
                 self.lab_cm_e.current(sidx)
 
-                self.lab_interval_type_l = tk.Label(self.detailframe, text="Interval type").grid(row=14, column=1)
+                self.lab_interval_type_l = tk.Label(self.detailframe, text="Interval type").grid(row=15, column=1)
                 self.lab_interval_type_e = ttk.Combobox(self.detailframe, text="",
                                                         values=["Day", "Week", "Month", "Year"], width=45,
                                                         state="readonly")
-                self.lab_interval_type_e.grid(row=14, column=2)
+                self.lab_interval_type_e.grid(row=15, column=2)
 
                 sidx = ["Day", "Week", "Month", "Year"].index(str(line.interval_type))
                 self.lab_interval_type_e.current(sidx)
 
-                self.lab_interval_length_l = tk.Label(self.detailframe, text="Interval_length").grid(row=15, column=1)
+                self.lab_interval_length_l = tk.Label(self.detailframe, text="Interval_length").grid(row=16, column=1)
                 self.lab_interval_length_e = tk.Entry(self.detailframe, text="", width=50)
-                self.lab_interval_length_e.grid(row=15, column=2)
+                self.lab_interval_length_e.grid(row=16, column=2)
                 self.lab_interval_length_e.insert(0, str(line.interval_length))
 
-                self.ig_rem = tk.Label(self.detailframe, text="Ignore reminder always").grid(row=16, column=1)
+                self.ig_rem = tk.Label(self.detailframe, text="Ignore reminder always").grid(row=17, column=1)
                 self.ig_rem_e = ttk.Combobox(self.detailframe, text="", values=["True", "False"], width=45,
                                              state="readonly")
-                self.ig_rem_e.grid(row=16, column=2)
+                self.ig_rem_e.grid(row=17, column=2)
                 if str(line.ignore_reminder).strip() == 'None': line.ignore_reminder = 'False'
                 sidx = ["True", "False"].index(str(line.ignore_reminder))
                 self.ig_rem_e.current(sidx)
 
-                self.ig_rem_to = tk.Label(self.detailframe, text="Ignore reminder to").grid(row=17, column=1)
+                self.ig_rem_to = tk.Label(self.detailframe, text="Ignore reminder to").grid(row=18, column=1)
                 self.ig_rem_to_e = tk.Entry(self.detailframe, text="", width=50)
-                self.ig_rem_to_e.grid(row=17, column=2)
+                self.ig_rem_to_e.grid(row=18, column=2)
                 self.ig_rem_to_e.insert(0, str(line.ignore_reminder_to))
 
                 self.updatebut = tk.Button(self.detailframe, text="Update device data", command=self.updatedevice)
-                self.updatebut.grid(row=18, column=2)
+                self.updatebut.grid(row=19, column=2)
+
         def updatedevice(self):
             if str(self.lab_model_e.cget("text")) == 'None':
                 model = ''
@@ -953,16 +1032,16 @@ class StructWindow:
                   self.lab_info_e.get("1.0",END), self.lab_norm_e.get(), self.lab_norm_e.get(), drivenby,
                   self.lab_meas_condition_e.get(), \
                   self.lab_cm_e.get(), interval,self.ig_rem_e.get(),ignorerminderto,self.id)
-            q_run(connD,querry)
+            q_run(self.connD,querry)
 
             querry = """select id from crosstable where id = {}""".format(self.id)
-            if len(q_run(connD,querry)) == 0:
-                querry = """INSERT INTO crosstable(parent,nameindevice,id) VALUES({},'{}',{})""".format(shipid,self.lab_ct.get(),self.id)
+            if len(q_run(self.connD,querry)) == 0:
+                querry = """INSERT INTO crosstable(parent,nameindevice,id) VALUES({},'{}',{})""".format(self.shipid,self.lab_ct.get(),self.id)
             else:
                 querry = """UPDATE crosstable SET nameindevice = '{}' where id = {}""".format(self.lab_ct.get(),
                                                                                                 self.id)
-            q_run(connD, querry)
-            self.reloadquerry(self.structuresort, shipid, connD,False)
+            q_run(self.connD, querry)
+            self.reloadquerry(self.structuresort, self.shipid, self.connD,False)
         def __init__(self,parent,shipid,connD,selid,master):
             def getdetails(evt):
                 w = evt.widget
@@ -976,7 +1055,6 @@ class StructWindow:
 
                 try:
                     master.selid = id.strip()
-                    print('change saved id:', master.selid)
                 except:
                     master.selid = None
             self.master = master
@@ -1253,7 +1331,6 @@ class StructWindow:
                 self.makecontrols(id,connD)
                 try:
                     master.selid = (tempdevname.split('@'))[1].strip()
-                    print('change saved id:', master.selid)
                 except:
                     master.selid = None
             self.master = master
