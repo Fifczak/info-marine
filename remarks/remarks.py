@@ -17,7 +17,7 @@ import docx
 from docx.enum.table import WD_ALIGN_VERTICAL
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.text import WD_COLOR_INDEX
-from docx.shared import Pt
+from docx.shared import Pt, Cm
 from docx import Document
 import re
 class Scrollable(ttk.Frame):
@@ -140,6 +140,23 @@ fedblist = list()
 fedblistIN = list()
 
 def createfeedback(rn_,connD):
+    def getdatestr():
+        querry = """select min(ml.date), max(ml.date)
+    	from remarks as rem
+    	left join devices as dev on rem.id = dev.id
+    	left join (select id,raport_number,date,max(value)
+    			   from measurements_low
+    			   where type = 'RMS'
+    			   group by id,raport_number,date) as ml on rem.id = ml.id and rem.raport_number = ml.raport_number
+    	where rem.raport_number = '{}' and rem.sended = True""".format(rn_)
+        datemin, datemax = list(q_run(connD, querry))[0]
+        if datemin == datemax:
+            datestr = str(datemin)
+        else:
+            datestr = '{} - {}'.format(datemin,datemax)
+        return datestr
+
+
     document = Document('C:\\overmind\\Data\\base.docx')
     querry = "select main.name, shd.imo, main2.name from main right join shipsdata as shd on main.id = shd.shipid right join main as main2 on main.parent = main2.id where main.id = (select shipid from reports where raport_number = '" + str(
         rn_) + "')"
@@ -161,7 +178,9 @@ def createfeedback(rn_,connD):
 
         headtable = document.add_table(rows=2, cols=3)  # trzeba usunąć enter przed
         headtable.style = 'Table Grid'
-
+        for row in headtable.rows:
+            for cell in row.cells:
+                cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
         headtable.cell(0, 0).merge(headtable.cell(0, 1).merge(headtable.cell(0, 2)))
         ht = headtable.cell(0, 0).paragraphs[0]
         ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -200,7 +219,6 @@ def createfeedback(rn_,connD):
         ht = headtable.cell(1, 1).paragraphs[0]
         r0 = ht.add_run('Date of measurement: ')
         r0.font.name = 'Calibri'
-        headtable.cell(1, 1).add_paragraph()
 
         ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
         ht.vertical_alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -208,7 +226,7 @@ def createfeedback(rn_,connD):
 
         ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
         ht.vertical_alignment = WD_ALIGN_PARAGRAPH.CENTER
-        r0 = ht.add_run('XXXX-XX-XX')
+        r0 = ht.add_run(getdatestr())
         r0.bold = True
         r0.font.name = 'Calibri'
         ht = headtable.cell(1, 2).paragraphs[0]
@@ -216,7 +234,6 @@ def createfeedback(rn_,connD):
         r0 = ht.add_run('Place of measurement:')
         r0.font.name = 'Calibri'
 
-        headtable.cell(1, 2).add_paragraph()
         ht = headtable.cell(1, 2).add_paragraph()
         ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
         r0 = ht.add_run('During normal operation')
@@ -272,8 +289,16 @@ def createfeedback(rn_,connD):
         feedbacktable = document.add_table(rows=rws, cols=7)  # trzeba usunąć enter przed
         feedbacktable.style = 'Table Grid'
 
+        for row in feedbacktable.rows:
+            widths = (Cm(2.5 ) ,Cm(1.5) ,Cm(2) ,Cm(5) ,Cm( 2),Cm(2.5) ,Cm(2.5))
+            for idx, width in enumerate(widths):
+                row.cells[idx].width = width
+            for cell in row.cells:
+                cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+
         ht = feedbacktable.cell(0, 0).paragraphs[0]
         ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
         r0 = ht.add_run('Machine name')
         r0.font.name = 'Calibri'
         r0.font.size = Pt(8)
@@ -331,16 +356,19 @@ def createfeedback(rn_,connD):
             for element in line:
                 c += 1
 
-                if c == 0:
+                if c == 0: # machine name
                     P = feedbacktable.cell(r, c).paragraphs[0]
                     R = P.add_run(element)
 
 
-                elif c == 1:
+                elif c == 1:#remarks n sugesstions
                     P = feedbacktable.cell(r, 3).paragraphs[0]
+                    P.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
                     R = P.add_run(element)
-                elif c == 2:
+
+                elif c == 2:#ISO
                     P = feedbacktable.cell(r, 1).paragraphs[0]
+                    P.alignment = WD_ALIGN_PARAGRAPH.CENTER
                     for limitline in limits:
                         if str(line[4]) == str(limitline[0]):
                             limitstr = (countLimit(line[4], line[2]))
@@ -354,9 +382,10 @@ def createfeedback(rn_,connD):
                     if limitstr == 'Cl. D':
                         R.font.highlight_color = WD_COLOR_INDEX.RED
 
-                elif c == 3:
+                elif c == 3: #meas date
 
                     P = feedbacktable.cell(r, 2).paragraphs[0]
+                    P.alignment = WD_ALIGN_PARAGRAPH.CENTER
                     R = P.add_run(str(element))
                 else:
                     pass
@@ -382,7 +411,8 @@ def createfeedback(rn_,connD):
     R.font.name = 'Times New Roman'
     R.font.size = Pt(10)
     E.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    document.save('C:\overmind\Reports\\' + str(result[0][0]) + ' - feedback for vibration report ' + str(rn_) + '.docx' )
+    f = filedialog.askdirectory()
+    document.save( f +'/'+ str(result[0][0]) + ' - feedback for vibration report ' + str(rn_) + '.docx' )
 
 def grabremarks():
     remlistIN.clear()
@@ -443,7 +473,7 @@ def grabremarks():
                         week = int(''.join(filter(str.isdigit, result.group(1))))
                         year = datetime.datetime.now().year
                         atime = time.asctime(time.strptime('{} {} 1'.format(year, week), '%Y %W %w'))
-                        atime = datetime.datetime.strptime(atime, '%a %b %d %X %Y').date()
+                        atime = datetime.datetime.strptime(atime, '%a %b %d %X %Y').date() - datetime.timedelta(days=1)
                         rem.nextdate = atime
                     remlistIN.append(rem)
 
