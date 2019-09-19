@@ -86,7 +86,8 @@ def standard_info_table ( connD ,document ,rn_ ):
     r0.bold = True
     r0.font.name = 'Calibri'
     r0.font.size=Pt(11)
-    headtable.cell ( 1 ,1 ).add_paragraph ()
+
+
     ht = headtable.cell( 1 ,2 ).paragraphs[ 0 ]
     ht.alignment = WD_ALIGN_PARAGRAPH.CENTER
     r0 = ht.add_run( 'Place of measurement:' )

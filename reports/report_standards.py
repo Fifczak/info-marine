@@ -161,8 +161,9 @@ def standards(document):
 
     #makers recommedation
     t_std.cell(6,0).merge(t_std.cell(6,1))
-    t_std.cell(6,0).text='And makers recommendations'
 
+    t_std.cell(6,0).text='And makers recommendations'
+    t_std.cell(6, 0).paragraphs[0].runs[0].font.name = 'Calibri'
     set_col_width_std ( t_std )
 
     t_std

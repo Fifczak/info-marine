@@ -23,14 +23,14 @@ def loadstyles(document):
     obj_charstyle = obj_styles.add_style('IM HEAD', WD_STYLE_TYPE.PARAGRAPH)
     style = document.styles['IM HEAD']
     font = style.font
-    font.name = 'Cambria'
+    font.name = 'Calibri'
     font.size = Pt(16)
     font.color.rgb = RGBColor(54, 95, 145)
     #tekst do akapitów
     obj_charstyle = obj_styles.add_style('IM TEXT', WD_STYLE_TYPE.PARAGRAPH)
     style = document.styles['IM TEXT']
     font = style.font
-    font.name = 'Times New Roman'
+    font.name = 'Calibri'
     font.size = Pt(12)
     font.color.rgb = RGBColor(0, 0, 0)
 
@@ -51,7 +51,7 @@ def loadstyles(document):
     obj_charstyle = obj_styles.add_style('listlvl1', WD_STYLE_TYPE.PARAGRAPH)
     style = document.styles['listlvl1']
     font = style.font
-    font.name = 'Calibri Light'
+    font.name = 'Calibri'
     font.size = Pt(16)
     font.bold = True
     font.color.rgb = RGBColor(47, 84, 150)
@@ -59,7 +59,7 @@ def loadstyles(document):
     obj_charstyle = obj_styles.add_style('listlvl2', WD_STYLE_TYPE.PARAGRAPH)
     style = document.styles['listlvl2']
     font = style.font
-    font.name = 'Calibri Light'
+    font.name = 'Calibri'
     font.size = Pt(13)
     font.bold = True
     font.color.rgb = RGBColor(47, 84, 150)
@@ -67,14 +67,14 @@ def loadstyles(document):
     obj_charstyle = obj_styles.add_style('texthead', WD_STYLE_TYPE.PARAGRAPH)
     style = document.styles['texthead']
     font = style.font
-    font.name = 'Calibri Light'
+    font.name = 'Calibri'
     font.size = Pt(11)
     font.bold = True
 
     obj_charstyle = obj_styles.add_style('textheadU', WD_STYLE_TYPE.PARAGRAPH)
     style = document.styles['textheadU']
     font2 = style.font
-    font2.name = 'Calibri Light'
+    font2.name = 'Calibri'
     font2.size = Pt(11)
     font2.bold = True
     font2.underline = True
@@ -95,7 +95,7 @@ def loadstyles(document):
     obj_charstyle = obj_styles.add_style('warning', WD_STYLE_TYPE.PARAGRAPH)
     style = document.styles['warning']
     font = style.font
-    font.name = 'Calibri Light'
+    font.name = 'Calibri'
     font.size = Pt(13)
 
     obj_charstyle = obj_styles.add_style('description', WD_STYLE_TYPE.PARAGRAPH)

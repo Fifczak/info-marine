@@ -33,12 +33,20 @@ def signatureENG(document,connD):
 
 
 	H0=document.add_paragraph()
-	H0L=H0.add_run("Prepared by:").alignment=WD_PARAGRAPH_ALIGNMENT.LEFT
+	H0L=H0.add_run("Prepared by:                                                                                                                          Approved by:")
+	H0L.alignment=WD_PARAGRAPH_ALIGNMENT.LEFT
+
+	H0L.font.name = 'Calibri'
 	signpar = document.add_paragraph ()
 	seCAP = signpar.add_run (
-		'Service Engineer                                                                                             Approved by' )
+		'Service Engineer' )
 	seCAP.alignment = WD_ALIGN_PARAGRAPH.LEFT
+	seCAP.font.name = 'Calibri'
+
 	name = str ( getname (connD) )
-	signpar = document.add_paragraph ( str ( name ))
+	signpar = document.add_paragraph ()
+	nn = signpar.add_run( str ( name ))
+	nn.font.name = 'Calibri'
+
 
 

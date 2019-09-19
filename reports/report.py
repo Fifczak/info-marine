@@ -251,7 +251,7 @@ def makereport ( connD ,rn_ ):
 	section = document.sections [ 0 ]
 	footer = section.footer.paragraphs [ 0 ]
 	footer_=footer.add_run ( shipname + ' ' + rn_)
-	footer_.font.name = 'Times New Roman'
+	footer_.font.name = 'Calibri'
 	footer_.font.size = Pt ( 12 )
 	footer_.alignment = WD_ALIGN_PARAGRAPH.LEFT
 	footer_.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
@@ -269,11 +269,11 @@ def makereport ( connD ,rn_ ):
 					+ str(rn_) + '_' + str(getini(connD)) + '_' + str(strftime("%Y-%m-%d", gmtime())) + '.docx')
 
 #
-# username = 'testuser '
-# password = 'info'
-# host = '192.168.10.243'
-# rn_ = '2173-2019'
+username = 'testuser'
+password = 'info'
+host = 'localhost'
+rn_ = '2078U-2019'
+
+connD = [ username ,password ,host ]
 #
-# connD = [ username ,password ,host ]
-# #
-# #makereport(connD,rn_)
+makereport(connD,rn_)

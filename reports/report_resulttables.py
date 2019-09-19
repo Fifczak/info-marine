@@ -401,7 +401,7 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 		col_env = 3
 		col_trend = 4
 		col_remark = 5
-		widths = (Cm( 6.5 ) ,Cm( 1.3) ,Cm( 1.3) ,Cm( 1.3 ),Cm( 1.8 ) ,Cm( 7.8 ))
+		widths = (Cm( 6.5 ) ,Cm( 1.3) ,Cm( 1) ,Cm( 1.3 ),Cm( 1.6 ) ,Cm( 6.1 ))
 
 	if reporttype == 3:
 		col_BID = None
@@ -509,19 +509,19 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 		ht = resulttable.cell( 0 ,col_limit ).paragraphs[ 0 ]
 		ht.paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
 		resulttable.cell(0,col_limit).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
-		r0 = ht.add_run( 'ISO limit' ).bold=True
+		r0 = ht.add_run( 'ISO' +chr(10) +'limit' ).bold=True
 
 	if col_class != None:
 		ht = resulttable.cell(0, col_class).paragraphs[0]
 		ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		resulttable.cell(0, col_class).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-		r0 = ht.add_run('ISO standard').bold = True
+		r0 = ht.add_run('ISO' +chr(10) +'standard').bold = True
 
 	if col_env != None:
 		ht = resulttable.cell(0, col_env).paragraphs[0]
 		ht.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 		resulttable.cell(0, col_env).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-		resulttable.cell(0, col_env).paragraphs[0].add_run().add_break()
+
 		if str(parent) == '150':
 			unit = '(gE)'
 			envtype = '0-Peak'
@@ -538,7 +538,7 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 		ht = resulttable.cell( 0 ,col_trend ).paragraphs[ 0 ]
 		ht.paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
 		resulttable.cell(0,col_trend).vertical_alignment=WD_ALIGN_VERTICAL.CENTER
-		r0 = ht.add_run( 'Trend Velocity RMS (mm/s) Max' ).bold=True
+		r0 = ht.add_run( 'Trend ' +chr(10) +'Velocity ' +chr(10) +'RMS ' +chr(10) +'(mm/s) ' +chr(10) +'Max' ).bold=True
 
 	if col_remark != None:
 		ht = resulttable.cell(0, col_remark).paragraphs[0]
@@ -546,7 +546,7 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 		resulttable.cell(0, col_remark).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 		r0 = ht.add_run('Remarks and suggestions').bold = True
 
-	set_cols_width(resulttable,widths)
+
 
 	xcord = 0
 	i = -1
@@ -573,6 +573,9 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 						r0 = ht.add_run(measStrip[1])
 						r0.font.color.rgb = RGBColor(0, 0, 255)
 						r0.bold = True
+						font = r0.font
+						font.size = Pt(8)
+						font.name = 'Arial'
 						resulttable.cell(xcord, 0).merge(resulttable.cell(xcord, len(widths)-1))
 						resulttable.rows[xcord].height = WD_ROW_HEIGHT.EXACTLY
 						resulttable.rows[xcord].height = Cm(0.5)
@@ -589,6 +592,9 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 						r0 = ht.add_run(measStrip[1])
 						r0.font.color.rgb = RGBColor(128, 0, 128)
 						r0.bold = True
+						font = r0.font
+						font.size = Pt(8)
+						font.name = 'Arial'
 						resulttable.cell(xcord, 0).merge(resulttable.cell(xcord, len(widths)-1))
 						resulttable.rows[xcord].height = WD_ROW_HEIGHT.EXACTLY
 						resulttable.rows[xcord].height = Cm(0.5)
@@ -778,7 +784,7 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 	r = 0
 
 	for row in tqdm(resulttable.rows):
-
+		row.height = Cm(0.5)
 		c = 0
 		for cell in row.cells:
 
@@ -794,8 +800,8 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 							#if cl._tc.right - cl._tc.left == 1:
 								#print('no merge')
 								font = run.font
-								font.size = Pt(9)
-								font.name = 'Times New Roman'
+								font.size = Pt(8)
+								font.name = 'Arial'
 
 						elif cl._tc.right - cl._tc.left == len(row.cells) and font.bold != True :
 
@@ -806,8 +812,8 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 							pass
 						elif cl._tc.right - cl._tc.left > 1:
 							font  = run.font
-							font.size = Pt(9)
-							font.name = 'Calibri'
+							font.size = Pt(8)
+							font.name = 'Arial'
 						else:
 							font = run.font
 							font.size = Pt(8)
@@ -821,12 +827,15 @@ def drawtable_IM(document, measlist, connD, report_number,reporttype):
 	else:
 		trendresults(document)
 
+	set_cols_width(resulttable, widths)
+
+
 def trendresults ( document ) :
 	trendpar = document.add_paragraph ( 'Trend results:' )
 	trendpar.runs[ 0 ].bold = True
 	trendpar.runs[ 0 ].underline = True
-	trendpar.runs[ 0 ].font.size = Pt ( 8 )
-	trendpar.runs[ 0 ].font.name = 'Arial'
+	trendpar.runs[ 0 ].font.size = Pt ( 11 )
+	trendpar.runs[ 0 ].font.name = 'Calibri'
 	trendpar.add_run()
 	document.add_paragraph()
 	trendsres = document.add_table ( rows=3 ,cols=2 )
@@ -842,12 +851,12 @@ def trendresults ( document ) :
 	trendsres.cell(0,1).paragraphs[0].paragraph_format.alignment=WD_ALIGN_PARAGRAPH.LEFT
 	trendsres.cell ( 2 ,1 ).text = 'Whenever new results are reduced more than 5% of previous measurements'
 	trendsres.cell(0,1).paragraphs[0].paragraph_format.alignment=WD_ALIGN_PARAGRAPH.LEFT
-	trendsres.cell ( 0 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt ( 8 )
-	trendsres.cell ( 0 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-	trendsres.cell ( 1 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt ( 8 )
-	trendsres.cell ( 1 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
-	trendsres.cell ( 2 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt ( 8 )
-	trendsres.cell ( 2 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Arial'
+	trendsres.cell ( 0 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt ( 11 )
+	trendsres.cell ( 0 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Calibri'
+	trendsres.cell ( 1 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt ( 11 )
+	trendsres.cell ( 1 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Calibri'
+	trendsres.cell ( 2 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.size = Pt ( 11 )
+	trendsres.cell ( 2 ,1 ).paragraphs[ 0 ].runs[ 0 ].font.name = 'Calibri'
 	trendsres.cell(0, 1).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 	trendsres.cell(0, 0).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 	trendsres.cell(1, 1).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
