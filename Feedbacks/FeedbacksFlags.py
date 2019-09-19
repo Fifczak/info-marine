@@ -161,7 +161,6 @@ class feedbackswindow:
 
             # self.measurementsbeforetab.heading("rms", text='RMS', anchor=tk.W)
             # self.measurementsbeforetab.heading("pk", text='env P-K', anchor=tk.W)
-
     def updatedateinlabels(self):
 
 
@@ -257,44 +256,71 @@ class feedbackswindow:
             self.standardlimits = sqlio.read_sql_query(querry, self.conn)
 
             cc = -1
-            for item in self.measresults.values:
-                cc += 1
-                if self.measresults['rmsbefore'].iloc[cc] > self.standardlimits['limit_1_value'].iloc[0]:
-                    self.measresults.at[cc,'blrms'] = self.standardlimits['limit_1_name'].values[0]
-                if self.measresults['rmsbefore'].iloc[cc] > self.standardlimits['limit_2_value'].iloc[0]:
-                    self.measresults.at[cc,'blrms'] = self.standardlimits['limit_2_name'].values[0]
-                if self.measresults['rmsbefore'].iloc[cc] > self.standardlimits['limit_3_value'].iloc[0]:
-                    self.measresults.at[cc, 'blrms'] = self.standardlimits['limit_3_name'].values[0]
-                if self.measresults['rmsbefore'].iloc[cc] > self.standardlimits['limit_4_value'].iloc[0]:
-                    self.measresults.at[cc,'blrms']= self.standardlimits['limit_4_name'].values[0]
+            try:
+                for item in self.measresults.values:
+                    cc += 1
+                    if self.measresults['rmsbefore'].iloc[cc] > self.standardlimits['limit_1_value'].iloc[0]:
+                        self.measresults.at[cc,'blrms'] = self.standardlimits['limit_1_name'].values[0]
+                    if self.measresults['rmsbefore'].iloc[cc] > self.standardlimits['limit_2_value'].iloc[0]:
+                        self.measresults.at[cc,'blrms'] = self.standardlimits['limit_2_name'].values[0]
+                    if self.measresults['rmsbefore'].iloc[cc] > self.standardlimits['limit_3_value'].iloc[0]:
+                        self.measresults.at[cc, 'blrms'] = self.standardlimits['limit_3_name'].values[0]
+                    if self.measresults['rmsbefore'].iloc[cc] > self.standardlimits['limit_4_value'].iloc[0]:
+                        self.measresults.at[cc,'blrms']= self.standardlimits['limit_4_name'].values[0]
 
-                if self.measresults['rmsafter'].iloc[cc] > self.standardlimits['limit_1_value'].iloc[0]:
-                    self.measresults.at[cc,'alrms'] = self.standardlimits['limit_1_name'].values[0]
-                if self.measresults['rmsafter'].iloc[cc] > self.standardlimits['limit_2_value'].iloc[0]:
-                    self.measresults.at[cc,'alrms'] = self.standardlimits['limit_2_name'].values[0]
-                if self.measresults['rmsafter'].iloc[cc] > self.standardlimits['limit_3_value'].iloc[0]:
-                    self.measresults.at[cc, 'alrms'] = self.standardlimits['limit_3_name'].values[0]
-                if self.measresults['rmsafter'].iloc[cc] > self.standardlimits['limit_4_value'].iloc[0]:
-                    self.measresults.at[cc,'alrms']= self.standardlimits['limit_4_name'].values[0]
+                    if self.measresults['rmsafter'].iloc[cc] > self.standardlimits['limit_1_value'].iloc[0]:
+                        self.measresults.at[cc,'alrms'] = self.standardlimits['limit_1_name'].values[0]
+                    if self.measresults['rmsafter'].iloc[cc] > self.standardlimits['limit_2_value'].iloc[0]:
+                        self.measresults.at[cc,'alrms'] = self.standardlimits['limit_2_name'].values[0]
+                    if self.measresults['rmsafter'].iloc[cc] > self.standardlimits['limit_3_value'].iloc[0]:
+                        self.measresults.at[cc, 'alrms'] = self.standardlimits['limit_3_name'].values[0]
+                    if self.measresults['rmsafter'].iloc[cc] > self.standardlimits['limit_4_value'].iloc[0]:
+                        self.measresults.at[cc,'alrms']= self.standardlimits['limit_4_name'].values[0]
 
-                if self.measresults['rmsafter'].iloc[cc] > self.measresults['rmsbefore'].iloc[cc]:
-                    self.measresults.at[cc, 'rmstrend'] = 'UP'
-                else:
-                    self.measresults.at[cc, 'rmstrend'] = 'DOWN'
+                    if self.measresults['rmsafter'].iloc[cc] > self.measresults['rmsbefore'].iloc[cc]:
+                        self.measresults.at[cc, 'rmstrend'] = 'UP'
+                    else:
+                        self.measresults.at[cc, 'rmstrend'] = 'DOWN'
 
-                if self.measresults['pkafter'].iloc[cc] > self.measresults['pkbefore'].iloc[cc]:
-                    self.measresults.at[cc, 'pktrend'] = 'UP'
-                else:
-                    self.measresults.at[cc, 'pktrend'] = 'DOWN'
+                    if self.measresults['pkafter'].iloc[cc] > self.measresults['pkbefore'].iloc[cc]:
+                        self.measresults.at[cc, 'pktrend'] = 'UP'
+                    else:
+                        self.measresults.at[cc, 'pktrend'] = 'DOWN'
+            except:
+                print('Limit count error')
+
+            # print('maxbefore')
+            # self.measresults['maxrmsbefore'] = self.measresults['rmsbefore'].max()
+            # self.measresults['maxrmsafter'] = self.measresults['rmsafter'].max()
+            if self.measresults['rmsbefore'].max() < self.measresults['rmsafter'].max():
+                self.measresults['maxrmstrend'] = 'UP'
+            else:
+                self.measresults['maxrmstrend'] = 'DOWN'
+            if self.measresults['pkbefore'].max() < self.measresults['pkafter'].max():
+                self.measresults['maxenvtrend'] = 'UP'
+            else:
+                self.measresults['maxenvtrend'] = 'DOWN'
+
+
         getmeasquerry()
+
+        self.measurementsbeforetab.delete(*self.measurementsbeforetab.get_children())
+        self.measurementsaftertab.delete(*self.measurementsaftertab.get_children())
+
+
+        self.beforereportlabel.config(text='None')
+        self.beforedatelabel.config(text='None')
+        self.afterreportlabel.config(text='None')
+        self.afterdatelabel.config(text='None')
+
 
         self.beforereportlabel.config(text=self.measresults['reportbefore'][0])
         self.beforedatelabel.config(text=self.measresults['datebefore'][0])
         self.afterreportlabel.config(text=self.measresults['reportafter'][0])
         self.afterdatelabel.config(text=self.measresults['dateafter'][0])
 
-        self.measurementsbeforetab.delete(*self.measurementsbeforetab.get_children())
-        self.measurementsaftertab.delete(*self.measurementsaftertab.get_children())
+
+
         for item in self.measresults.values:
             if self.chosecolortype.current() == 0:
                 self.measurementsbeforetab.insert('', 'end', text=item[0], values=(item[2], item[3]),tags =('white'))
@@ -342,8 +368,23 @@ class feedbackswindow:
                     self.measurementsaftertab.insert('', 'end', text=item[0], values=(item[6], item[7]),
                                                       tags=('grey'))
 
-        self.updatecolor()
+            elif self.chosecolortype.current() == 4:
+                if str(item[13]) == 'UP':
+                    self.measurementsbeforetab.insert('', 'end', text=item[0], values=(item[2], item[3]),tags =('red'))
+                    self.measurementsaftertab.insert('', 'end', text=item[0], values=(item[6], item[7]), tags=('red'))
+                else:
+                    self.measurementsbeforetab.insert('', 'end', text=item[0], values=(item[2], item[3]), tags=('green'))
+                    self.measurementsaftertab.insert('', 'end', text=item[0], values=(item[6], item[7]), tags=('green'))
 
+            elif self.chosecolortype.current() == 5:
+                if str(item[14]) == 'UP':
+                    self.measurementsbeforetab.insert('', 'end', text=item[0], values=(item[2], item[3]),tags =('red'))
+                    self.measurementsaftertab.insert('', 'end', text=item[0], values=(item[6], item[7]), tags=('red'))
+                else:
+                    self.measurementsbeforetab.insert('', 'end', text=item[0], values=(item[2], item[3]), tags=('green'))
+                    self.measurementsaftertab.insert('', 'end', text=item[0], values=(item[6], item[7]), tags=('green'))
+
+        self.updatecolor()
     def drawwindow(self):
         def changefeedbackwindow(evt):
 
@@ -379,7 +420,6 @@ class feedbackswindow:
         self.feedbacklist.pack(side=TOP, fill=Y, expand=1)
 
         self.root.mainloop()
-
     def filterdframe(self,filtertype, filterdet):
         if str(filtertype) == 'None':
             self.presentfeedbacks = self.fdbdFrame
@@ -411,7 +451,6 @@ class feedbackswindow:
         self.sortby(self.sortlist.get())
 
         self.fillfdblist(self.presentfeedbacks)
-
     def sortby(self,filterby):
         if filterby == 'Ship':
             filterby = 'shipname'
@@ -435,7 +474,6 @@ class feedbackswindow:
             self.presentfeedbacks = self.presentfeedbacks.sort_values(by=[filterby])
 
         self.fillfdblist(self.presentfeedbacks)
-
     def makefilterwindow(self, frame):
         def boxtypechange(evt):
             getdetvalues(self.filterlisboxtype.get())
@@ -470,6 +508,8 @@ class feedbackswindow:
             self.sortby(self.sortlist.get())
 
 
+        self.refreshbutton = tk.Button(frame, text = "Reload", command = self.getquerry)
+
         self.label1 = tk.Label(frame, text='Filter by: ')
         self.filterlisboxtype = ttk.Combobox(frame, text="",
                                              values=["None", "Ship", "Report", "Fdb flag", "Cost flag", "Cost calc. missing"],
@@ -490,11 +530,12 @@ class feedbackswindow:
                                      state="readonly")
         self.sortlist.bind('<<ComboboxSelected>>', sortchange)
 
-        self.label1.grid(row=0, column=0)
-        self.filterlisboxtype.grid(row=0, column=1)
-        self.filterlisboxdet.grid(row=0, column=2)
-        self.label2.grid(row=1, column=0)
-        self.sortlist.grid(row=1, column=1)
+        self.refreshbutton.grid(row=0, column=0, rowspan = 2)
+        self.label1.grid(row=0, column=1)
+        self.filterlisboxtype.grid(row=0, column=2)
+        self.filterlisboxdet.grid(row=0, column=3)
+        self.label2.grid(row=1, column=1)
+        self.sortlist.grid(row=1, column=2)
     def updatefeedbackwindows(self, fdbstrip):
         fdbstrip = fdbstrip.values.tolist()[0]
         def updateheadlabel(fdbstrip):
@@ -676,7 +717,7 @@ class feedbackswindow:
 
 
             self.chosecolortype = ttk.Combobox(self.measframe, text="",
-                                                 values=["None", "RMS trend", "ENV trend", "Limits"],
+                                                 values=["None", "RMS trend", "ENV trend", "Limits","Max RMS", "Max Envelope"],
                                                  state="readonly")
             self.chosecolortype.current(0)
             self.chosecolortype.bind('<<ComboboxSelected>>',  updatecolorevt)
