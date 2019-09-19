@@ -269,11 +269,11 @@ def makereport ( connD ,rn_ ):
 					+ str(rn_) + '_' + str(getini(connD)) + '_' + str(strftime("%Y-%m-%d", gmtime())) + '.docx')
 
 #
-username = 'testuser'
-password = 'info'
-host = 'localhost'
-rn_ = '2078U-2019'
-
-connD = [ username ,password ,host ]
+# username = 'testuser'
+# password = 'info'
+# host = 'localhost'
+# rn_ = '2078U-2019'
 #
-makereport(connD,rn_)
+# connD = [ username ,password ,host ]
+# #
+# makereport(connD,rn_)
