@@ -86,7 +86,7 @@ class LogApplication:
                 filewriter = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
                 filewriter.writerow([user_get])
                 filewriter.writerow([pass_get])
-        connD = [user_get, pass_get, '192.168.10.243']
+        connD = [user_get, pass_get, 'localhost']
 
 
         querry = "SELECT current_user"
@@ -108,12 +108,14 @@ class feedbackswindow:
         querry = """
         select dev.id,main.name as shipname, dev.name as devname,fdb.raport_number, rem.remark, rem.sended,
         fdb.feedback, fdb.fdbflag, fdb.costflag, fdb.price, fdb.low, fdb.high, dss.sort,
-         rem._id_ as remid, fdb._id_ as fdbid,rem.documentdate as remdate,fdb.documentdate as fdbdate
-        from feedbacks fdb
+         rem._id_ as remid, fdb._id_ as fdbid,rem.documentdate as remdate,fdb.documentdate as fdbdate,
+		 dev.kw, mm.type as typenew ,dev.type as typeold
+		from feedbacks fdb
         left join remarks rem on fdb.id = rem.id and fdb.raport_number = rem.raport_number
         left join devices dev on fdb.id = dev.id
         left join ds_structure dss on cast(dev.id as text) = dss.id
         left join main on dev.parent = main.id
+		left join main_models mm on dev.model_fkey = mm.id
         order by fdb.raport_number
         """
         self.fdbdFrame = sqlio.read_sql_query(querry, self.conn)
@@ -542,8 +544,9 @@ class feedbackswindow:
             headtext = """
     Ship: {}
     Device: {}
+    kW: {},type: {}(old: {})
     Report: {}
-            """.format(fdbstrip[1], fdbstrip[2], fdbstrip[3])
+            """.format(fdbstrip[1], fdbstrip[2], fdbstrip[17], fdbstrip[18], fdbstrip[19], fdbstrip[3])
             self.labelhead.config(text=headtext)
 
             self.remarktext.configure(state='normal')
@@ -589,6 +592,7 @@ class feedbackswindow:
                     'id'])
                 devid = devid.values[0]
                 querry = 'select kw,type from devices where id = {}'.format(devid)
+                #TODO: trzeba bedzie w koncu przejsc na typ z main_models
                 devkw, devtype = list(q_run(self.connD, querry))[0]
                 querry = "select costflag,typ, kwrange[1],kwrange[2], price[1],price[2], low[1],low[2] , high[1],high[2]from costcases"
                 costcases = list(q_run(self.connD, querry))
@@ -773,8 +777,9 @@ class feedbackswindow:
         headtext = """
     Ship: {}
     Device: {}
+    kW: {},type: {}(old: {})
     Report: {}
-            """.format('SHIPNAME', 'DEVICENAME', 'REPORTNO')
+            """.format('SHIPNAME', 'DEVICENAME','kW','NEWTYPE','OLDTYPE', 'REPORTNO')
         self.labelhead = tk.Label(frame, text=headtext)
         self.remarktext = tk.Text(frame, height=10, width=50, wrap=WORD)
         self.fdbtext = tk.Text(frame, height=10, width=50, wrap=WORD)
