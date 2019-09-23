@@ -1584,7 +1584,6 @@ class StructWindow:
             self.aMenu = Menu(master, tearoff=0)
             self.aMenu.add_command(label='Load struct from file', command=self.loadstruct)
             self.tree_item = ''
-
         def loadstructfromfile(self,shipid,connD,new):
             if new == True:
                 lvl = '01'
@@ -1674,9 +1673,36 @@ class StructWindow:
                 messagebox.showinfo("Done", 'Upload done')
             except:
                 messagebox.showinfo("Error", 'Upload error')
-
         def popup(self, event):
             self.aMenu.post(event.x_root, event.y_root)
+
+    class RightClick_Ships:
+        def __init__(self, master, mframe):
+            self.mframe = mframe
+            self.master = master
+            self.index = '0'
+            self.aMenu = Menu(master, tearoff=0)
+            self.aMenu.add_command(label='Set CBM on', command=lambda: self.cmbon(self.index))
+            self.aMenu.add_command(label='Set CBM off', command=lambda: self.cbmoff(self.index))
+            self.tree_item = ''
+
+        def cmbon(self,_id):
+            query = """UPDATE main set cbm = True where id = {}""".format(self.mframe.ships[_id][1])
+            self.mframe.Shiplistbox.itemconfig(_id, bg='green')
+            q_run(self.mframe.connD, query)
+
+        def cbmoff(self,_id):
+            query = """UPDATE main set cbm = False where id = {}""".format(self.mframe.ships[_id][1])
+            self.mframe.Shiplistbox.itemconfig(_id, bg='white')
+            q_run(self.mframe.connD, query)
+
+
+        def popup(self, event):
+            w = event.widget
+            self.index = int(w.curselection()[0])
+
+            self.aMenu.post(event.x_root, event.y_root)
+
     def putowners(self,owlbox):
         owlbox.delete(0, END)
         querry = "select name,id from main where parent = 1 order by name"
@@ -1684,13 +1710,15 @@ class StructWindow:
         for line in resultrr:
             owlbox.insert(END, line[0])
     def makeships(self,shipname):
-        querry = "select name,id from main where parent =(select id from main where name = '" + str(
+        querry = "select name,id,cbm from main where parent =(select id from main where name = '" + str(
             shipname) + "' limit 1) order by name"
 
-        ships = q_run(self.connD, querry)
+        self.ships = q_run(self.connD, querry)
         self.Shiplistbox.delete(0, 'end')
-        for line in ships:
+        for line in self.ships:
             self.Shiplistbox.insert(END, '{}(ID:{})'.format(line[0],line[1]))
+            if str(line[2]) == 'True':
+                self.Shiplistbox.itemconfig(END, bg='green')
     def __init__(self,connD,selid):
         def getships(evt):
             w = evt.widget
@@ -1747,6 +1775,7 @@ class StructWindow:
         self.Shiplistbox.config(width=0)
         self.shipid = ''
         self.Shiplistbox.bind('<Double-Button>', getaps)
+        self.Shiplistbox.bind('<Button-3>', self.RightClick_Ships(self.Shiplistbox, self).popup)
         self.Applistbox = Listbox(self.stWindow, exportselection=False)
         self.Applistbox.config(width=0)
         self.Applistbox.bind('<Double-Button>',makeframe)
