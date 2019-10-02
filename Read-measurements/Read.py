@@ -424,7 +424,90 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                                 #############END PK ENV
 
                             if cols[1] == 'eMeaTiming':
-                                # iter += 1
+                                iter += 1
+                                x.mode = 'TIM'
+                                x.domain = 'TIM'
+                                measflag = 1
+                                iterb = lines_line
+                                while measflag == 1:
+                                    iterb -= 1
+                                    cols2 = lines[iterb].split("\t")
+                                    if cols2[0] == 'eDataIdLocation' and cols2[1] == 'eTypePoint':
+                                        x.point = cols2[2]
+                                        pointflag = 1
+                                        iterc = iterb
+                                        while pointflag == 1:
+                                            iterc -= 1
+                                            cols3 = lines[iterc].split("\t")
+                                            if cols3[0] == 'eDataIdLocation' and cols3[1] == 'eTypeMachine':
+                                                x.routename = cols3[2]
+                                                iterc = 0
+                                                break
+                                        if iterc == 0:
+                                            measflag = 0
+                                    if iterb == 0:
+                                        measflag = 0
+                                measflag = 2
+                                iterb = lines_line
+                                while measflag == 2:
+                                    try:
+                                        iterb += 1
+                                        cols2 = lines[iterb].split("\t")
+                                        if cols2[0] == 'Year':
+                                            if len(cols2[3]) == 1:
+                                                x.date = str(cols2[1] + '-0' + cols2[3] + '-' + cols2[5])
+                                            else:
+                                                x.date = str(cols2[1] + '-' + cols2[3] + '-' + cols2[5])
+
+                                        if cols2[0] == 'eTableOfSamplesValues':
+                                            iter = 0
+                                            for item in cols2:
+                                                if iter != 0: x.chart.append(round(float(item), 3))
+                                                iter += 1
+                                            break
+                                        if cols2[0] == 'fs':
+                                            if cols2[1] == '0':
+                                                x.increment = 1 / 256
+                                            elif cols2[1] == '1':
+                                                x.increment = 1 / 512
+                                            elif cols2[1] == '2':
+                                                x.increment = 1 / 1024
+                                            elif cols2[1] == '3':
+                                                x.increment = 1 / 2048
+                                            elif cols2[1] == '4':
+                                                x.increment = 1 / 4096
+                                            elif cols2[1] == '5':
+                                                x.increment = 1 / 8192
+                                            elif cols2[1] == '6':
+                                                x.increment = 1 / 16384
+                                            elif cols2[7] == '3':
+                                                x.increment = 1 / 32768
+                                            elif cols2[8] == '4':
+                                                x.increment = 1 / 65536
+                                            x.start = 0
+                                            x.end = x.increment * 4096
+
+                                        if cols2[0] == 'avx':
+                                            if cols2[1] == '0':
+                                                x.type = 'Acc'
+                                                x.unit = '[m/s2]'
+                                            elif cols2[1] == '1':
+                                                x.type = 'Vel'
+                                                x.unit = '[mm/s]'
+                                            elif cols2[1] == '2':
+                                                x.type = 'Dis'
+                                                x.unit = '[m]'
+                                            elif cols2[1] == '3':
+                                                x.type = 'Env'
+                                                x.unit = '[m/s2]'
+                                            measlist.append(x)
+
+                                            #break
+                                        if iterb == iter + 1000:
+                                            measflag = 0
+                                    except:
+                                        measflag = 0
+
                                 continue
                             if cols[1] == 'eMeaBearingKurtosis':
                                 # iter += 1
@@ -507,7 +590,10 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                                             measflag = 0
                                     except:
                                         measflag = 0
+
             pbar.destroy()
+
+
 
         def readezthomas():
             def decodedate(inputstring):
@@ -962,7 +1048,33 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
                     querry = "INSERT INTO measurements_low(parent,id, point, raport_number, date, type, unit, value) VALUES (" + str(
                         parent) + "," + str(i.id) + ",'" + str(i.point) + "','" + str(rnumber) + "','" + str(
                         i.date) + "','" + str(i.type) + "','" + str(i.unit) + "','" + str(i.overall) + "')"
+                if i.mode == 'TIM':
+                    try:
+                        progress_bar['value'] = p
+                    except:
+                        progress_bar['value'] = progress_bar['value']
+                    progress_bar.update()
+                    chartstrlist = list();
+                    chartstrlist.append(str(i.increment))
+                    chartstrlist.append(str(i.end))
+                    for j in i.chart:
+                        strj = str(j)
+                        chartstrlist.append(strj)
+                    chartstr = (";".join(chartstrlist))
+
+                    if i.type == 'Vel': taskid = 4
+                    tasksetup =  ((i.unit).replace('[', '')).replace(']', '')
+
+                    # taskid = 4
+                    # tasksetup = m/s2
+                    querry = """
+                    INSERT INTO meascharts(shipid,id,point,report_number,date,domain,type,unit,chart,m_tasks_chart_fkey, m_tasks_setup[0])
+                    VALUES ({},{},'{}','{}','{}','{}','{}','{}','{}','{}','{}')
+                    """.format(parent,i.id,i.point,rnumber,i.date,i.domain,i.type,i.unit,chartstr,taskid,tasksetup)
+
+
                 q_run(connD, querry)
+
                 try:
                     chartstrlist.clear
                     del chartstr
@@ -1108,4 +1220,4 @@ def read_measurement_file(device, username, password, host, rnumber, parent):
 # 'Vibscanner'
 # 'Marvib'
 # 'ezThomas'
-#read_measurement_file('Marvib','testuser','info','localhost','FIFCZAKTESTVSG', '68')
+read_measurement_file('Marvib','testuser','info','192.168.10.243','TIMINGTEST', '299')

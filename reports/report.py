@@ -268,12 +268,14 @@ def makereport ( connD ,rn_ ):
 	document.save ( f +'/'+ str(shipname) + ' - vibration report '
 					+ str(rn_) + '_' + str(getini(connD)) + '_' + str(strftime("%Y-%m-%d", gmtime())) + '.docx')
 
+
+username = 'testuser'
+password = 'info'
+host = '192.168.10.243'
+rn_ = '2176-2019'
+
+
+
+connD = [ username ,password ,host ]
 #
-# username = 'testuser'
-# password = 'info'
-# host = 'localhost'
-# rn_ = '2078U-2019'
-#
-# connD = [ username ,password ,host ]
-# #
-# makereport(connD,rn_)
+makereport(connD,rn_)

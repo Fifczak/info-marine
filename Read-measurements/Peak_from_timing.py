@@ -1,5 +1,5 @@
 import psycopg2
-from math import sqrt
+from math import sqrt, fabs
 connD = ['testuser','info','192.168.10.243']
 
 def q_run(connD, querry):
@@ -24,10 +24,10 @@ def q_run(connD, querry):
 
 
 
-def recountoverall(id,RN,FROM,TO):
+def recountoverall(id,RN):
     querry = """
     SELECT point from meascharts where report_number = '{}'
-     and id ={} and type = 'Vel' and domain = 'FFT' group by point
+     and id ={} and type = 'Vel' and domain = 'TIM' group by point
     """.format(RN,id)
 
     pointslist = q_run(connD, querry)
@@ -35,7 +35,7 @@ def recountoverall(id,RN,FROM,TO):
     for point in pointslist:
         x = []
         querry = """SELECT chart from meascharts where report_number = '{}' 
-        and id = {} and type = 'Vel'  and domain = 'FFT' and point = '{}' limit 1 """.format(RN,id,point[0])
+        and id = {} and domain = 'TIM' and point = '{}' limit 1 """.format(RN, id, point[0])
         chartstr = q_run(connD, querry)[0][0]
         chartstrlist = chartstr.split(";")
         for line in chartstrlist:
@@ -45,27 +45,21 @@ def recountoverall(id,RN,FROM,TO):
         tp = x[0]
         dt = (x[1] / xlen)
         x = x[2:]
+        xbz = [fabs(xc) for xc in x]
 
-        sumVal = 0
 
-        freq = float(tp)
-        for m in x:
-            if freq > FROM and freq < TO:  ## TUTAJ BEDZIE TRZEBA ZROVBC ZMIENNE ZAKRESY W ZALEZNOSCI OD STATKU / URZADZENIA / NORMY
-                sumVal += pow(m, 2)
-            freq += float(dt)
-        overall = round(sqrt(sumVal), 3)
-        print(point[0], overall)
+        # sumVal = 0
+        #
+        # freq = float(tp)
+        # for m in x:
+        #     if freq > FROM and freq < TO:  ## TUTAJ BEDZIE TRZEBA ZROVBC ZMIENNE ZAKRESY W ZALEZNOSCI OD STATKU / URZADZENIA / NORMY
+        #         sumVal += pow(m, 2)
+        #     freq += float(dt)
+        # overall = round(sqrt(sumVal), 3)
+        print(point[0], max(xbz))
 
 
 id = input("Device id:")
-FROM = input("Range from:")
-TO = input("Range to:")
-if str(FROM).strip() == '' : FROM = 5
-if str(TO).strip() == '' : TO = 100
 
-print("""
-DEVICE ID: {}
-Range {} - {}
-""".format(id,FROM,TO))
 
-recountoverall(id,'2176-2019',float(FROM),float(TO))
+recountoverall(id,'TIMINGTEST')
