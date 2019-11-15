@@ -17,8 +17,8 @@ import xlrd
 from tkinter import messagebox
 from tkinter import simpledialog
 
-host = '192.168.10.243'
-#host = 'localhost'
+#host = '192.168.10.243'
+host = 'localhost'
 devlist = list()
 def q_run(connD, querry):
     username = connD[0]
@@ -1661,18 +1661,18 @@ class StructWindow:
                     q_run(connD, querry)
         def loadstruct(self):
             querry = "select * from ds_structure where parent = {}".format(self.mframe.shipid)
-            try:
-                if (len(list(q_run(self.mframe.connD,querry)))) == 0 :
-                    self.loadstructfromfile(self.mframe.shipid,self.mframe.connD,True)
-                else:
-                    MsgBox = tk.messagebox.askquestion('Crosstable',
-                                                       'Structure for that ship exists. Do you want to add new devices?',
-                                                       icon='warning')
-                    if MsgBox == 'yes':
-                        self.loadstructfromfile(self.mframe.shipid, self.mframe.connD,False)
-                messagebox.showinfo("Done", 'Upload done')
-            except:
-                messagebox.showinfo("Error", 'Upload error')
+            # try:
+            if (len(list(q_run(self.mframe.connD,querry)))) == 0 :
+                self.loadstructfromfile(self.mframe.shipid,self.mframe.connD,True)
+            else:
+                MsgBox = tk.messagebox.askquestion('Crosstable',
+                                                   'Structure for that ship exists. Do you want to add new devices?',
+                                                   icon='warning')
+                if MsgBox == 'yes':
+                    self.loadstructfromfile(self.mframe.shipid, self.mframe.connD,False)
+                # messagebox.showinfo("Done", 'Upload done')
+            # except:
+            #     messagebox.showinfo("Error", 'Upload error')
         def popup(self, event):
             self.aMenu.post(event.x_root, event.y_root)
 

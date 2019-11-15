@@ -543,15 +543,18 @@ def mccard():
 		querry = "INSERT INTO mcdata (id, raport_number, mcremark, documentdate) values ({},'2166-2019','{}','2019-08-30')".format(item.id,"RHs: {}{}RPM: {}".format(item.rhs,chr(10),item.rpm))
 		q_run(connD,querry)
 
-# while 0 == 0:
-# 	t = input("[1]Update bearings via point"+chr(10)+ "[2]Load Makers/Models" + chr(10) + "[3]Update devices data"+ chr(10) + "[4]Update crosstable nameindevice by id"+ chr(10))
-# 	if str(t) == '1':
-# 		update_bearings_via_point()
-# 	if str(t) == '2':
-# 		LoadMakersModels()
-# 	if str (t) == '3':
-# 		updatedevicesdata()
-# 	if str(t) == '4':
-# 		crosstablebyid()
-# 	if str(t) == '5':
-mccard()
+
+while 0 == 0:
+	t = input(
+		"[1]Update bearings via point" + chr(10) + "[2]Load Makers/Models" + chr(10) + "[3]Update devices data" + chr(
+			10) + "[4]Update crosstable nameindevice by id" + chr(10))
+	if str(t) == '1':
+		update_bearings_via_point()
+	if str(t) == '2':
+		LoadMakersModels()
+	if str(t) == '3':
+		updatedevicesdata()
+	if str(t) == '4':
+		crosstablebyid()
+	if str(t) == '5':
+		mccard()

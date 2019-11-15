@@ -422,15 +422,15 @@ order by deta.id, mlrn.raport_number, deta.sort
 
 			self.window = tk.Tk()
 			self.window.title("CHANGE RMS")
-			self.Val = tk.Text(self.window, height=1, width=12)
+			self.Val = tk.Text(self.window, height=1, width=30)
 			self.Val.insert(END, value)
 
-			self.ValDate = tk.Text(self.window, height=1, width=12)
+			self.ValDate = tk.Text(self.window, height=1, width=30)
 			querry = "select date from measurements_low where raport_number = '"+str(rn)+ \
 						 "' and id = "+str(id)+" and type = 'RMS' and point = '"+str(point)+"' limit 1"
 			dat = q_run(connD,querry)
 			self.ValDate.insert(END, dat)
-			self.okbut = tk.Button(self.window,text = 'Change',command=updateRMS, width=12)
+			self.okbut = tk.Button(self.window,text = 'Change',command=updateRMS, width=30)
 			self.Val.pack(side=TOP)
 			self.ValDate.pack(side=TOP)
 			self.okbut.pack(side=TOP)
@@ -462,15 +462,15 @@ order by deta.id, mlrn.raport_number, deta.sort
 
 			self.window = tk.Tk()
 			self.window.title("CHANGE ENVELOPE")
-			self.Val = tk.Text(self.window, height=1, width=12)
+			self.Val = tk.Text(self.window, height=1, width=30)
 			self.Val.insert(END, value)
 
-			self.ValDate = tk.Text(self.window, height=1, width=12)
+			self.ValDate = tk.Text(self.window, height=1, width=30)
 			querry = "select date from measurements_low where raport_number = '"+str(rn)+ \
 						 "' and id = "+str(id)+" and type = 'envelope P-K' and point = '"+str(point)+"' limit 1"
 			dat = q_run(connD,querry)
 			self.ValDate.insert(END, dat)
-			self.okbut = tk.Button(self.window,text = 'Change',command=updateENV, width=12)
+			self.okbut = tk.Button(self.window,text = 'Change',command=updateENV, width=30)
 			self.Val.pack(side=TOP)
 			self.ValDate.pack(side=TOP)
 			self.okbut.pack(side=TOP)

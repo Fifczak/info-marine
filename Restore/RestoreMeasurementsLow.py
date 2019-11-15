@@ -34,7 +34,13 @@ pd.set_option('display.max_columns', None)
 pd.set_option('display.expand_frame_repr', False)
 pd.set_option('max_colwidth', -1)
 
-querry = "select old_val from logging.t_history where who = 'michalinan' and tstamp > '2019-10-02 08:32:00' and tstamp < '2019-10-02 08:33:00' order by tstamp"
+querry = """select old_val
+	from logging.t_history 
+	where who = 'krystiank' 
+	and tstamp > '2019-10-22 09:05:00' 
+	and tstamp < '2019-10-22 09:06:00' 
+	order by tstamp desc
+	"""
 tobackuplist =(q_run(connD,querry))
 
 for item in tqdm(tobackuplist):
@@ -47,6 +53,8 @@ for item in tqdm(tobackuplist):
                                                                   row['unit'][0],row['date'][0],row['value'][0],
                                                                   row['raport_number'][0],row['id'][0],row['m_tasks_fkey'][0],
                                                                   row['m_tasks_setup'][0][0], row['m_tasks_setup'][0][1])
+
+    #print(querry)
     q_run(connD,querry)
     # if id not in backupedidlist:
     #     querry = "update measurements_low set value = {} where _id_ = {}".format(val,id)
